@@ -14,7 +14,7 @@ func TestBag(t *testing.T) {
 		return
 	}
 
-	t.Run("BagFromDistribution()", func(t *testing.T) {
+	t.Run("BagWithDistribution()", func(t *testing.T) {
 
 		t.Run("creates bag with correct distribution of tiles", func(t *testing.T) {
 			dist := []TileDistribution{
@@ -23,7 +23,7 @@ func TestBag(t *testing.T) {
 				{Tile{'C', 3}, 2},
 				{Tile{'D', 2}, 4},
 			}
-			bag := BagFromDistribution(dist)
+			bag := BagWithDistribution(dist)
 
 			if actual, expected := len(bag), 17; actual != expected {
 				t.Fatalf("Expected bag of %d tiles but got %d", expected, actual)
@@ -41,7 +41,7 @@ func TestBag(t *testing.T) {
 				{Tile{'A', 1}, 100},
 				{Tile{'B', 3}, 100},
 			}
-			bag := BagFromDistribution(dist)
+			bag := BagWithDistribution(dist)
 
 			consecutive := 0
 			for _, t := range bag {
