@@ -1,5 +1,7 @@
 package scrubble
 
+import "math/rand"
+
 // Bag represents a bag of Tiles to be used during a game.
 type Bag []Tile
 
@@ -55,4 +57,13 @@ func BagWithStandardEnglishTiles() Bag {
 		{Tile{'Q', 10}, 1},
 		{Tile{'Z', 10}, 1},
 	})
+}
+
+// DrawTile picks a tile from the bag using the specified random number
+// generator and removes it, returning the tile.
+func (b *Bag) DrawTile(r *rand.Rand) Tile {
+	index := r.Intn(len(*b))
+	tile := (*b)[index]
+	*b = append((*b)[:index], (*b)[index+1:]...)
+	return tile
 }

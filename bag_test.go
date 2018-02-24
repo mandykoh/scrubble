@@ -1,6 +1,7 @@
 package scrubble
 
 import (
+	"math/rand"
 	"testing"
 )
 
@@ -104,6 +105,53 @@ func TestBag(t *testing.T) {
 					t.Errorf("Expected %d of tile %c(%d) but found %d", expected, d.Tile.Letter, d.Tile.Points, actual)
 				}
 			}
+		})
+	})
+
+	t.Run(".DrawTile()", func(t *testing.T) {
+
+		t.Run("removes and returns a tile using the provided random number generator", func(t *testing.T) {
+			dist := []TileDistribution{
+				{Tile{'A', 1}, 1},
+				{Tile{'B', 2}, 1},
+				{Tile{'C', 3}, 1},
+			}
+			bag := BagWithDistribution(dist)
+
+			r := rand.New(rand.NewSource(1))
+
+			if actual, expected := bag.DrawTile(r), dist[2].Tile; actual != expected {
+				t.Errorf("Expected first tile drawn to be %c(%d) but got %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+			}
+			if actual, expected := len(bag), 2; actual != expected {
+				t.Errorf("Expected %d tiles remaining in bag but found %d", expected, actual)
+			}
+			if actual, expected := bag.DrawTile(r), dist[1].Tile; actual != expected {
+				t.Errorf("Expected second tile drawn to be %c(%d) but got %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+			}
+			if actual, expected := len(bag), 1; actual != expected {
+				t.Errorf("Expected %d tiles remaining in bag but found %d", expected, actual)
+			}
+			if actual, expected := bag.DrawTile(r), dist[0].Tile; actual != expected {
+				t.Errorf("Expected third tile drawn to be %c(%d) but got %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+			}
+			if actual, expected := len(bag), 0; actual != expected {
+				t.Errorf("Expected no tiles remaining in bag but found %d", actual)
+			}
+		})
+
+		t.Run("panics when no tiles are left, leaving the bag unchanged", func(t *testing.T) {
+			var bag Bag
+
+			r := rand.New(rand.NewSource(1))
+
+			defer func() {
+				if recovered := recover(); recovered == nil {
+					t.Errorf("Expected a panic but nothing happened")
+				}
+			}()
+
+			bag.DrawTile(r)
 		})
 	})
 }
