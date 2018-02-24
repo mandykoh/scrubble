@@ -22,3 +22,37 @@ func BagWithDistribution(dist []TileDistribution) (bag Bag) {
 
 	return
 }
+
+// BagWithStandardEnglishTiles returns a Bag containing tiles corresponding to
+// a standard English tile and letter distribution.
+func BagWithStandardEnglishTiles() Bag {
+	return BagWithDistribution([]TileDistribution{
+		{Tile{' ', 0}, 2},
+		{Tile{'E', 1}, 12},
+		{Tile{'A', 1}, 9},
+		{Tile{'I', 1}, 9},
+		{Tile{'O', 1}, 8},
+		{Tile{'N', 1}, 6},
+		{Tile{'R', 1}, 6},
+		{Tile{'T', 1}, 6},
+		{Tile{'L', 1}, 4},
+		{Tile{'S', 1}, 4},
+		{Tile{'U', 1}, 4},
+		{Tile{'D', 2}, 4},
+		{Tile{'G', 2}, 3},
+		{Tile{'B', 3}, 2},
+		{Tile{'C', 3}, 2},
+		{Tile{'M', 3}, 2},
+		{Tile{'P', 3}, 2},
+		{Tile{'F', 4}, 2},
+		{Tile{'H', 4}, 2},
+		{Tile{'V', 4}, 2},
+		{Tile{'W', 4}, 2},
+		{Tile{'Y', 4}, 2},
+		{Tile{'K', 5}, 1},
+		{Tile{'J', 8}, 1},
+		{Tile{'X', 8}, 1},
+		{Tile{'Q', 10}, 1},
+		{Tile{'Z', 10}, 1},
+	})
+}
