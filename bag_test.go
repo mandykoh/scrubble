@@ -36,23 +36,24 @@ func TestBag(t *testing.T) {
 			}
 		})
 
-		t.Run("creates bag with tiles shuffled", func(t *testing.T) {
+		t.Run("creates bag with deterministic ordering", func(t *testing.T) {
 			dist := []TileDistribution{
-				{Tile{'A', 1}, 100},
-				{Tile{'B', 3}, 100},
+				{Tile{'A', 1}, 2},
+				{Tile{'B', 3}, 2},
+				{Tile{'C', 3}, 2},
+				{Tile{'D', 2}, 2},
 			}
 			bag := BagWithDistribution(dist)
 
-			consecutive := 0
-			for _, t := range bag {
-				if t != dist[0].Tile {
-					break
-				}
-				consecutive++
-			}
+			tileNum := 0
 
-			if consecutive == dist[0].Count {
-				t.Errorf("Got %d consecutive %c(%d) tiles but expected tiles to be shuffled", consecutive, dist[0].Tile.Letter, dist[0].Tile.Points)
+			for _, d := range dist {
+				for i := 0; i < d.Count; i++ {
+					if actual, expected := bag[tileNum], d.Tile; actual != expected {
+						t.Errorf("Expected tile %c(%d) in position %d but found %c(%d) instead", expected.Letter, expected.Points, tileNum, actual.Letter, actual.Points)
+					}
+					tileNum++
+				}
 			}
 		})
 	})

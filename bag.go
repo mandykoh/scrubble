@@ -1,7 +1,5 @@
 package scrubble
 
-import "math/rand"
-
 // Bag represents a bag of Tiles to be used during a game.
 type Bag []Tile
 
@@ -21,10 +19,6 @@ func BagWithDistribution(dist []TileDistribution) (bag Bag) {
 			bag = append(bag, d.Tile)
 		}
 	}
-
-	rand.Shuffle(len(bag), func(i, j int) {
-		bag[i], bag[j] = bag[j], bag[i]
-	})
 
 	return
 }
