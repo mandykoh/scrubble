@@ -67,3 +67,11 @@ func (b *Bag) DrawTile(r *rand.Rand) Tile {
 	*b = append((*b)[:index], (*b)[index+1:]...)
 	return tile
 }
+
+// Shuffle randomises the order of the tiles in the bag using the specified
+// random number generator.
+func (b *Bag) Shuffle(r *rand.Rand) {
+	r.Shuffle(len(*b), func(i, j int) {
+		(*b)[i], (*b)[j] = (*b)[j], (*b)[i]
+	})
+}
