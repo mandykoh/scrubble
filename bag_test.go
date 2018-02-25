@@ -167,28 +167,31 @@ func TestBag(t *testing.T) {
 	t.Run(".Shuffle()", func(t *testing.T) {
 
 		t.Run("randomises the order of the tiles using the specified random generator", func(t *testing.T) {
-			bag := Bag{
+
+			tiles := []Tile{
 				{'A', 1},
 				{'B', 2},
 				{'C', 3},
 				{'D', 4},
 			}
 
-			r := rand.New(rand.NewSource(2))
+			bag := make(Bag, len(tiles))
+			copy(bag, tiles)
 
-			bag.Shuffle(r)
+			seed := rand.Int63()
 
-			if actual, expected := bag[0], (Tile{'B', 2}); actual != expected {
-				t.Errorf("Expected tile %c(%d) to be shuffled into position 0 but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-			}
-			if actual, expected := bag[1], (Tile{'C', 3}); actual != expected {
-				t.Errorf("Expected tile %c(%d) to be shuffled into position 1 but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-			}
-			if actual, expected := bag[2], (Tile{'D', 4}); actual != expected {
-				t.Errorf("Expected tile %c(%d) to be shuffled into position 2 but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-			}
-			if actual, expected := bag[3], (Tile{'A', 1}); actual != expected {
-				t.Errorf("Expected tile %c(%d) to be shuffled into position 3 but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+			r1 := rand.New(rand.NewSource(seed))
+			bag.Shuffle(r1)
+
+			r2 := rand.New(rand.NewSource(seed))
+			r2.Shuffle(len(tiles), func(i, j int) {
+				tiles[i], tiles[j] = tiles[j], tiles[i]
+			})
+
+			for i := 0; i < len(tiles); i++ {
+				if actual, expected := bag[i], tiles[i]; actual != expected {
+					t.Errorf("Expected tile %c(%d) to be shuffled into position %d but found %c(%d)", expected.Letter, expected.Points, i, actual.Letter, actual.Points)
+				}
 			}
 		})
 	})
