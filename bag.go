@@ -5,16 +5,20 @@ import "math/rand"
 // Bag represents a bag of Tiles to be used during a game.
 type Bag []Tile
 
-// TileDistribution is a count of how many of a particular Tile should appear.
-// This is used to create a Bag containing a particular distribution of tiles.
-type TileDistribution struct {
+// TileFrequency is a count of how many of a particular Tile should appear.
+// This is used to specify how frequently a tile should appear in a bag.
+type TileFrequency struct {
 	Tile  Tile
 	Count int
 }
 
+// TileDistribution is a collection of tile frequencies. This is used to create
+// a Bag containing a particular distribution of tiles.
+type TileDistribution []TileFrequency
+
 // BagWithDistribution returns a Bag containing tiles according to the specified
-// distribution.
-func BagWithDistribution(dist []TileDistribution) Bag {
+// tile distribution.
+func BagWithDistribution(dist TileDistribution) Bag {
 
 	totalTiles := 0
 	for _, d := range dist {
@@ -35,7 +39,7 @@ func BagWithDistribution(dist []TileDistribution) Bag {
 // BagWithStandardEnglishTiles returns a Bag containing tiles corresponding to
 // a standard English tile and letter distribution.
 func BagWithStandardEnglishTiles() Bag {
-	return BagWithDistribution([]TileDistribution{
+	return BagWithDistribution(TileDistribution{
 		{Tile{' ', 0}, 2},
 		{Tile{'E', 1}, 12},
 		{Tile{'A', 1}, 9},
