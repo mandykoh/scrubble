@@ -14,7 +14,14 @@ type TileDistribution struct {
 
 // BagWithDistribution returns a Bag containing tiles according to the specified
 // distribution.
-func BagWithDistribution(dist []TileDistribution) (bag Bag) {
+func BagWithDistribution(dist []TileDistribution) Bag {
+
+	totalTiles := 0
+	for _, d := range dist {
+		totalTiles += d.Count
+	}
+
+	bag := make(Bag, 0, totalTiles)
 
 	for _, d := range dist {
 		for i := 0; i < d.Count; i++ {
@@ -22,7 +29,7 @@ func BagWithDistribution(dist []TileDistribution) (bag Bag) {
 		}
 	}
 
-	return
+	return bag
 }
 
 // BagWithStandardEnglishTiles returns a Bag containing tiles corresponding to
@@ -59,12 +66,11 @@ func BagWithStandardEnglishTiles() Bag {
 	})
 }
 
-// DrawTile picks a tile from the bag using the specified random number
-// generator and removes it, returning the tile.
-func (b *Bag) DrawTile(r *rand.Rand) Tile {
-	index := r.Intn(len(*b))
-	tile := (*b)[index]
-	*b = append((*b)[:index], (*b)[index+1:]...)
+// DrawTile picks the next tile from the bag and removes it, returning the tile.
+func (b *Bag) DrawTile() Tile {
+	last := len(*b) - 1
+	tile := (*b)[last]
+	*b = (*b)[:last]
 	return tile
 }
 
