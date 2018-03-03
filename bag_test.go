@@ -1,9 +1,24 @@
 package scrubble
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 )
+
+func ExampleBagWithDistribution() {
+
+	// Creates a Bag with 9 x A tiles, 2 x B tiles, 2 x C tiles, and 4 x D tiles
+	bag := BagWithDistribution(TileDistribution{
+		{Tile{'A', 1}, 9},
+		{Tile{'B', 3}, 2},
+		{Tile{'C', 3}, 2},
+		{Tile{'D', 2}, 4},
+	})
+
+	// Output: Number of tiles in bag: 17
+	fmt.Println("Number of tiles in bag:", len(bag))
+}
 
 func TestBag(t *testing.T) {
 
