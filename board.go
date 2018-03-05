@@ -28,7 +28,7 @@ func BoardWithLayout(layout BoardLayout) Board {
 
 		// Fill in any unspecified remainder of the row with Normal positions
 		for col := len(lRow); col < columns; col++ {
-			b.Position(row, col).Type = NormalPositionType
+			b.Position(row, col).Type = normalPositionTypeInstance
 		}
 	}
 

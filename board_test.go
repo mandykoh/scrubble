@@ -131,8 +131,8 @@ func TestBoard(t *testing.T) {
 				Rows:    2,
 				Columns: 2,
 				Positions: []BoardPosition{
-					{NormalPositionType, nil}, {StartPositionType, nil},
-					{DoubleLetterScorePositionType, nil}, {TripleWordScorePositionType, nil},
+					{__, nil}, {st, nil},
+					{dl, nil}, {tw, nil},
 				},
 			}
 

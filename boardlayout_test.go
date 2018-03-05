@@ -14,12 +14,12 @@ func TestBoardLayout(t *testing.T) {
 			cases := []struct {
 				actual, expected PositionType
 			}{
-				{__, NormalPositionType},
-				{st, StartPositionType},
-				{dl, DoubleLetterScorePositionType},
-				{dw, DoubleWordScorePositionType},
-				{tl, TripleLetterScorePositionType},
-				{tw, TripleWordScorePositionType},
+				{__, normalPositionTypeInstance},
+				{st, startPositionTypeInstance},
+				{dl, doubleLetterScorePositionTypeInstance},
+				{dw, doubleWordScorePositionTypeInstance},
+				{tl, tripleLetterScorePositionTypeInstance},
+				{tw, tripleWordScorePositionTypeInstance},
 			}
 
 			for _, c := range cases {

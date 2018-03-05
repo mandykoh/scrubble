@@ -1,9 +1,5 @@
 package scrubble
 
-// DoubleWordScorePositionType is the board position type indicating a double
-// word score bonus.
-var DoubleWordScorePositionType PositionType = &doubleWordScorePositionType{}
-
 type doubleWordScorePositionType struct {
 }
 
