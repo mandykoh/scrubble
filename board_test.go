@@ -1,10 +1,37 @@
 package scrubble
 
 import (
+	"fmt"
 	"testing"
 )
 
+func ExampleBoardWithLayout() {
+	__, st, dl, dw, tl, tw := LayoutPositionTypes()
+
+	board := BoardWithLayout(BoardLayout{
+		{tw, __, __, dl, __, __, __, tw, __, __, __, dl, __, __, tw},
+		{__, dw, __, __, __, tl, __, __, __, tl, __, __, __, dw, __},
+		{__, __, dw, __, __, __, dl, __, dl, __, __, __, dw, __, __},
+		{dl, __, __, dw, __, __, __, dl, __, __, __, dw, __, __, dl},
+		{__, __, __, __, dw, __, __, __, __, __, dw, __, __, __, __},
+		{__, tl, __, __, __, tl, __, __, __, tl, __, __, __, tl, __},
+		{__, __, dl, __, __, __, dl, __, dl, __, __, __, dl, __, __},
+		{tw, __, __, dl, __, __, __, st, __, __, __, dl, __, __, tw},
+		{__, __, dl, __, __, __, dl, __, dl, __, __, __, dl, __, __},
+		{__, tl, __, __, __, tl, __, __, __, tl, __, __, __, tl, __},
+		{__, __, __, __, dw, __, __, __, __, __, dw, __, __, __, __},
+		{dl, __, __, dw, __, __, __, dl, __, __, __, dw, __, __, dl},
+		{__, __, dw, __, __, __, dl, __, dl, __, __, __, dw, __, __},
+		{__, dw, __, __, __, tl, __, __, __, tl, __, __, __, dw, __},
+		{tw, __, __, dl, __, __, __, tw, __, __, __, dl, __, __, tw},
+	})
+
+	fmt.Printf("The board: %v", board)
+}
+
 func TestBoard(t *testing.T) {
+
+	__, st, dl, dw, tl, tw := LayoutPositionTypes()
 
 	expectEmptyBoardWithLayout := func(t *testing.T, b Board, layout BoardLayout) {
 		rows := len(layout)
@@ -45,10 +72,11 @@ func TestBoard(t *testing.T) {
 	t.Run("BoardWithLayout()", func(t *testing.T) {
 
 		t.Run("creates an empty board with the specified layout", func(t *testing.T) {
-			layout := BoardLayout{}.
-				BeginRow().Em().Em().Em().Em().Em().Em().Em().
-				BeginRow().Em().Em().Em().St().Em().Em().Em().
-				BeginRow().Em().Em().Em().Em().Em().Em().Em()
+			layout := BoardLayout{
+				{__, __, __, __, __, __, __},
+				{__, __, __, st, __, __, __},
+				{__, __, __, __, __, __, __},
+			}
 
 			board := BoardWithLayout(layout)
 
@@ -56,15 +84,17 @@ func TestBoard(t *testing.T) {
 		})
 
 		t.Run("always creates a rectangular board by filling out with empties to match the longest column", func(t *testing.T) {
-			board := BoardWithLayout(BoardLayout{}.
-				BeginRow().Em().Em().Em().Em().Em().Em().Em().
-				BeginRow().Em().Em().Em().St().
-				BeginRow())
+			board := BoardWithLayout(BoardLayout{
+				{__, __, __, __, __, __, __},
+				{__, __, __, st},
+				{},
+			})
 
-			expectEmptyBoardWithLayout(t, board, BoardLayout{}.
-				BeginRow().Em().Em().Em().Em().Em().Em().Em().
-				BeginRow().Em().Em().Em().St().Em().Em().Em().
-				BeginRow().Em().Em().Em().Em().Em().Em().Em())
+			expectEmptyBoardWithLayout(t, board, BoardLayout{
+				{__, __, __, __, __, __, __},
+				{__, __, __, st, __, __, __},
+				{__, __, __, __, __, __, __},
+			})
 		})
 	})
 
@@ -73,22 +103,23 @@ func TestBoard(t *testing.T) {
 		t.Run("creates an empty board with a standardised layout", func(t *testing.T) {
 			board := BoardWithStandardLayout()
 
-			expectEmptyBoardWithLayout(t, board, BoardLayout{}.
-				BeginRow().TW().Em().Em().DL().Em().Em().Em().TW().Em().Em().Em().DL().Em().Em().TW().
-				BeginRow().Em().DW().Em().Em().Em().TL().Em().Em().Em().TL().Em().Em().Em().DW().Em().
-				BeginRow().Em().Em().DW().Em().Em().Em().DL().Em().DL().Em().Em().Em().DW().Em().Em().
-				BeginRow().DL().Em().Em().DW().Em().Em().Em().DL().Em().Em().Em().DW().Em().Em().DL().
-				BeginRow().Em().Em().Em().Em().DW().Em().Em().Em().Em().Em().DW().Em().Em().Em().Em().
-				BeginRow().Em().TL().Em().Em().Em().TL().Em().Em().Em().TL().Em().Em().Em().TL().Em().
-				BeginRow().Em().Em().DL().Em().Em().Em().DL().Em().DL().Em().Em().Em().DL().Em().Em().
-				BeginRow().TW().Em().Em().DL().Em().Em().Em().St().Em().Em().Em().DL().Em().Em().TW().
-				BeginRow().Em().Em().DL().Em().Em().Em().DL().Em().DL().Em().Em().Em().DL().Em().Em().
-				BeginRow().Em().TL().Em().Em().Em().TL().Em().Em().Em().TL().Em().Em().Em().TL().Em().
-				BeginRow().Em().Em().Em().Em().DW().Em().Em().Em().Em().Em().DW().Em().Em().Em().Em().
-				BeginRow().DL().Em().Em().DW().Em().Em().Em().DL().Em().Em().Em().DW().Em().Em().DL().
-				BeginRow().Em().Em().DW().Em().Em().Em().DL().Em().DL().Em().Em().Em().DW().Em().Em().
-				BeginRow().Em().DW().Em().Em().Em().TL().Em().Em().Em().TL().Em().Em().Em().DW().Em().
-				BeginRow().TW().Em().Em().DL().Em().Em().Em().TW().Em().Em().Em().DL().Em().Em().TW())
+			expectEmptyBoardWithLayout(t, board, BoardLayout{
+				{tw, __, __, dl, __, __, __, tw, __, __, __, dl, __, __, tw},
+				{__, dw, __, __, __, tl, __, __, __, tl, __, __, __, dw, __},
+				{__, __, dw, __, __, __, dl, __, dl, __, __, __, dw, __, __},
+				{dl, __, __, dw, __, __, __, dl, __, __, __, dw, __, __, dl},
+				{__, __, __, __, dw, __, __, __, __, __, dw, __, __, __, __},
+				{__, tl, __, __, __, tl, __, __, __, tl, __, __, __, tl, __},
+				{__, __, dl, __, __, __, dl, __, dl, __, __, __, dl, __, __},
+				{tw, __, __, dl, __, __, __, st, __, __, __, dl, __, __, tw},
+				{__, __, dl, __, __, __, dl, __, dl, __, __, __, dl, __, __},
+				{__, tl, __, __, __, tl, __, __, __, tl, __, __, __, tl, __},
+				{__, __, __, __, dw, __, __, __, __, __, dw, __, __, __, __},
+				{dl, __, __, dw, __, __, __, dl, __, __, __, dw, __, __, dl},
+				{__, __, dw, __, __, __, dl, __, dl, __, __, __, dw, __, __},
+				{__, dw, __, __, __, tl, __, __, __, tl, __, __, __, dw, __},
+				{tw, __, __, dl, __, __, __, tw, __, __, __, dl, __, __, tw},
+			})
 		})
 	})
 

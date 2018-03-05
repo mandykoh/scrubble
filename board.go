@@ -37,22 +37,25 @@ func BoardWithLayout(layout BoardLayout) Board {
 
 // BoardWithStandardLayout returns an empty Board with a standardised layout.
 func BoardWithStandardLayout() Board {
-	return BoardWithLayout(BoardLayout{}.
-		BeginRow().TW().Em().Em().DL().Em().Em().Em().TW().Em().Em().Em().DL().Em().Em().TW().
-		BeginRow().Em().DW().Em().Em().Em().TL().Em().Em().Em().TL().Em().Em().Em().DW().Em().
-		BeginRow().Em().Em().DW().Em().Em().Em().DL().Em().DL().Em().Em().Em().DW().Em().Em().
-		BeginRow().DL().Em().Em().DW().Em().Em().Em().DL().Em().Em().Em().DW().Em().Em().DL().
-		BeginRow().Em().Em().Em().Em().DW().Em().Em().Em().Em().Em().DW().Em().Em().Em().Em().
-		BeginRow().Em().TL().Em().Em().Em().TL().Em().Em().Em().TL().Em().Em().Em().TL().Em().
-		BeginRow().Em().Em().DL().Em().Em().Em().DL().Em().DL().Em().Em().Em().DL().Em().Em().
-		BeginRow().TW().Em().Em().DL().Em().Em().Em().St().Em().Em().Em().DL().Em().Em().TW().
-		BeginRow().Em().Em().DL().Em().Em().Em().DL().Em().DL().Em().Em().Em().DL().Em().Em().
-		BeginRow().Em().TL().Em().Em().Em().TL().Em().Em().Em().TL().Em().Em().Em().TL().Em().
-		BeginRow().Em().Em().Em().Em().DW().Em().Em().Em().Em().Em().DW().Em().Em().Em().Em().
-		BeginRow().DL().Em().Em().DW().Em().Em().Em().DL().Em().Em().Em().DW().Em().Em().DL().
-		BeginRow().Em().Em().DW().Em().Em().Em().DL().Em().DL().Em().Em().Em().DW().Em().Em().
-		BeginRow().Em().DW().Em().Em().Em().TL().Em().Em().Em().TL().Em().Em().Em().DW().Em().
-		BeginRow().TW().Em().Em().DL().Em().Em().Em().TW().Em().Em().Em().DL().Em().Em().TW())
+	__, st, dl, dw, tl, tw := LayoutPositionTypes()
+
+	return BoardWithLayout(BoardLayout{
+		{tw, __, __, dl, __, __, __, tw, __, __, __, dl, __, __, tw},
+		{__, dw, __, __, __, tl, __, __, __, tl, __, __, __, dw, __},
+		{__, __, dw, __, __, __, dl, __, dl, __, __, __, dw, __, __},
+		{dl, __, __, dw, __, __, __, dl, __, __, __, dw, __, __, dl},
+		{__, __, __, __, dw, __, __, __, __, __, dw, __, __, __, __},
+		{__, tl, __, __, __, tl, __, __, __, tl, __, __, __, tl, __},
+		{__, __, dl, __, __, __, dl, __, dl, __, __, __, dl, __, __},
+		{tw, __, __, dl, __, __, __, st, __, __, __, dl, __, __, tw},
+		{__, __, dl, __, __, __, dl, __, dl, __, __, __, dl, __, __},
+		{__, tl, __, __, __, tl, __, __, __, tl, __, __, __, tl, __},
+		{__, __, __, __, dw, __, __, __, __, __, dw, __, __, __, __},
+		{dl, __, __, dw, __, __, __, dl, __, __, __, dw, __, __, dl},
+		{__, __, dw, __, __, __, dl, __, dl, __, __, __, dw, __, __},
+		{__, dw, __, __, __, tl, __, __, __, tl, __, __, __, dw, __},
+		{tw, __, __, dl, __, __, __, tw, __, __, __, dl, __, __, tw},
+	})
 }
 
 // Position returns the board position related to the specified row and column.
