@@ -37,7 +37,7 @@ func BoardWithLayout(layout BoardLayout) Board {
 
 // BoardWithStandardLayout returns an empty Board with a standardised layout.
 func BoardWithStandardLayout() Board {
-	__, st, dl, dw, tl, tw := LayoutPositionTypes()
+	__, st, dl, dw, tl, tw := BoardPositionTypes()
 
 	return BoardWithLayout(BoardLayout{
 		{tw, __, __, dl, __, __, __, tw, __, __, __, dl, __, __, tw},

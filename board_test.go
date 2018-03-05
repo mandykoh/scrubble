@@ -6,7 +6,7 @@ import (
 )
 
 func ExampleBoardWithLayout() {
-	__, st, dl, dw, tl, tw := LayoutPositionTypes()
+	__, st, dl, dw, tl, tw := BoardPositionTypes()
 
 	board := BoardWithLayout(BoardLayout{
 		{tw, __, __, dl, __, __, __, tw, __, __, __, dl, __, __, tw},
@@ -31,7 +31,7 @@ func ExampleBoardWithLayout() {
 
 func TestBoard(t *testing.T) {
 
-	__, st, dl, dw, tl, tw := LayoutPositionTypes()
+	__, st, dl, dw, tl, tw := BoardPositionTypes()
 
 	expectEmptyBoardWithLayout := func(t *testing.T, b Board, layout BoardLayout) {
 		rows := len(layout)

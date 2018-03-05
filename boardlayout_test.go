@@ -6,11 +6,11 @@ import (
 
 func TestBoardLayout(t *testing.T) {
 
-	t.Run("LayoutPositionTypes()", func(t *testing.T) {
+	__, st, dl, dw, tl, tw := BoardPositionTypes()
+
+	t.Run("BoardPositionTypes()", func(t *testing.T) {
 
 		t.Run("returns the correct set of board position types", func(t *testing.T) {
-			__, st, dl, dw, tl, tw := LayoutPositionTypes()
-
 			cases := []struct {
 				actual, expected PositionType
 			}{
@@ -33,8 +33,6 @@ func TestBoardLayout(t *testing.T) {
 	t.Run(".widestRow()", func(t *testing.T) {
 
 		t.Run("returns the number of columns in the widest row", func(t *testing.T) {
-			__, st, _, _, _, _ := LayoutPositionTypes()
-
 			l := BoardLayout{}
 
 			if actual, expected := l.widestRow(), 0; actual != expected {
