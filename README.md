@@ -5,3 +5,5 @@
 [![Build Status](https://travis-ci.org/mandykoh/scrubble.svg?branch=master)](https://travis-ci.org/mandykoh/scrubble)
 
 Go library for modelling a letter/word board game.
+
+See the [API documentation](https://godoc.org/github.com/mandykoh/scrubble) for more information.
