@@ -35,8 +35,28 @@ func BoardWithLayout(layout BoardLayout) Board {
 	return b
 }
 
+// BoardWithStandardLayout returns an empty Board with a standardised layout.
+func BoardWithStandardLayout() Board {
+	return BoardWithLayout(BoardLayout{}.
+		BeginRow().TW().Em().Em().DL().Em().Em().Em().TW().Em().Em().Em().DL().Em().Em().TW().
+		BeginRow().Em().DW().Em().Em().Em().TL().Em().Em().Em().TL().Em().Em().Em().DW().Em().
+		BeginRow().Em().Em().DW().Em().Em().Em().DL().Em().DL().Em().Em().Em().DW().Em().Em().
+		BeginRow().DL().Em().Em().DW().Em().Em().Em().DL().Em().Em().Em().DW().Em().Em().DL().
+		BeginRow().Em().Em().Em().Em().DW().Em().Em().Em().Em().Em().DW().Em().Em().Em().Em().
+		BeginRow().Em().TL().Em().Em().Em().TL().Em().Em().Em().TL().Em().Em().Em().TL().Em().
+		BeginRow().Em().Em().DL().Em().Em().Em().DL().Em().DL().Em().Em().Em().DL().Em().Em().
+		BeginRow().TW().Em().Em().DL().Em().Em().Em().St().Em().Em().Em().DL().Em().Em().TW().
+		BeginRow().Em().Em().DL().Em().Em().Em().DL().Em().DL().Em().Em().Em().DL().Em().Em().
+		BeginRow().Em().TL().Em().Em().Em().TL().Em().Em().Em().TL().Em().Em().Em().TL().Em().
+		BeginRow().Em().Em().Em().Em().DW().Em().Em().Em().Em().Em().DW().Em().Em().Em().Em().
+		BeginRow().DL().Em().Em().DW().Em().Em().Em().DL().Em().Em().Em().DW().Em().Em().DL().
+		BeginRow().Em().Em().DW().Em().Em().Em().DL().Em().DL().Em().Em().Em().DW().Em().Em().
+		BeginRow().Em().DW().Em().Em().Em().TL().Em().Em().Em().TL().Em().Em().Em().DW().Em().
+		BeginRow().TW().Em().Em().DL().Em().Em().Em().TW().Em().Em().Em().DL().Em().Em().TW())
+}
+
 // Position returns the board position related to the specified row and column.
 // Rows and columns are zero-indexed.
 func (b *Board) Position(row, col int) *BoardPosition {
-	return &b.Positions[row * b.Columns+ col]
+	return &b.Positions[row*b.Columns+col]
 }

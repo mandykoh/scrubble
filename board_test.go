@@ -17,8 +17,8 @@ func TestBoard(t *testing.T) {
 			t.Errorf("Expected board to have %d columns but found %d instead", expected, actual)
 		}
 
-		if actual, expected := len(b.Positions), b.Rows*b.Columns; actual != expected {
-			t.Errorf("Expected a total of %d positions on the board but found %d instead", expected, actual)
+		if actual, expected := len(b.Positions), rows*columns; actual != expected {
+			t.Fatalf("Expected a total of %d positions on the board but found %d instead", expected, actual)
 		}
 
 		for row, lRow := range layout {
@@ -65,6 +65,30 @@ func TestBoard(t *testing.T) {
 				BeginRow().Em().Em().Em().Em().Em().Em().Em().
 				BeginRow().Em().Em().Em().St().Em().Em().Em().
 				BeginRow().Em().Em().Em().Em().Em().Em().Em())
+		})
+	})
+
+	t.Run("BoardWithStandardLayout()", func(t *testing.T) {
+
+		t.Run("creates an empty board with a standardised layout", func(t *testing.T) {
+			board := BoardWithStandardLayout()
+
+			expectEmptyBoardWithLayout(t, board, BoardLayout{}.
+				BeginRow().TW().Em().Em().DL().Em().Em().Em().TW().Em().Em().Em().DL().Em().Em().TW().
+				BeginRow().Em().DW().Em().Em().Em().TL().Em().Em().Em().TL().Em().Em().Em().DW().Em().
+				BeginRow().Em().Em().DW().Em().Em().Em().DL().Em().DL().Em().Em().Em().DW().Em().Em().
+				BeginRow().DL().Em().Em().DW().Em().Em().Em().DL().Em().Em().Em().DW().Em().Em().DL().
+				BeginRow().Em().Em().Em().Em().DW().Em().Em().Em().Em().Em().DW().Em().Em().Em().Em().
+				BeginRow().Em().TL().Em().Em().Em().TL().Em().Em().Em().TL().Em().Em().Em().TL().Em().
+				BeginRow().Em().Em().DL().Em().Em().Em().DL().Em().DL().Em().Em().Em().DL().Em().Em().
+				BeginRow().TW().Em().Em().DL().Em().Em().Em().St().Em().Em().Em().DL().Em().Em().TW().
+				BeginRow().Em().Em().DL().Em().Em().Em().DL().Em().DL().Em().Em().Em().DL().Em().Em().
+				BeginRow().Em().TL().Em().Em().Em().TL().Em().Em().Em().TL().Em().Em().Em().TL().Em().
+				BeginRow().Em().Em().Em().Em().DW().Em().Em().Em().Em().Em().DW().Em().Em().Em().Em().
+				BeginRow().DL().Em().Em().DW().Em().Em().Em().DL().Em().Em().Em().DW().Em().Em().DL().
+				BeginRow().Em().Em().DW().Em().Em().Em().DL().Em().DL().Em().Em().Em().DW().Em().Em().
+				BeginRow().Em().DW().Em().Em().Em().TL().Em().Em().Em().TL().Em().Em().Em().DW().Em().
+				BeginRow().TW().Em().Em().DL().Em().Em().Em().TW().Em().Em().Em().DL().Em().Em().TW())
 		})
 	})
 
