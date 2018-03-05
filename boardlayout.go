@@ -9,33 +9,33 @@ func (b BoardLayout) BeginRow() BoardLayout {
 	return append(b, []PositionType{})
 }
 
-// DLetter specifies that a double-letter score layout position should be added.
-func (b BoardLayout) DLetter() BoardLayout {
+// DL specifies that a double-letter score layout position should be added.
+func (b BoardLayout) DL() BoardLayout {
 	return b.appendToLastRow(DoubleLetterScorePositionType)
 }
 
-// DWord specifies that a double-word score layout position should be added.
-func (b BoardLayout) DWord() BoardLayout {
+// DW specifies that a double-word score layout position should be added.
+func (b BoardLayout) DW() BoardLayout {
 	return b.appendToLastRow(DoubleWordScorePositionType)
 }
 
-// Empty specifies that an empty layout position should be added.
-func (b BoardLayout) Empty() BoardLayout {
+// Em specifies that an empty layout position should be added.
+func (b BoardLayout) Em() BoardLayout {
 	return b.appendToLastRow(NormalPositionType)
 }
 
-// Start specifies that a starting position should be added.
-func (b BoardLayout) Start() BoardLayout {
+// St specifies that a starting position should be added.
+func (b BoardLayout) St() BoardLayout {
 	return b.appendToLastRow(StartPositionType)
 }
 
-// TLetter specifies that a triple-letter score layout position should be added.
-func (b BoardLayout) TLetter() BoardLayout {
+// TL specifies that a triple-letter score layout position should be added.
+func (b BoardLayout) TL() BoardLayout {
 	return b.appendToLastRow(TripleLetterScorePositionType)
 }
 
-// TWord specifies that a triple-word score layout position should be added.
-func (b BoardLayout) TWord() BoardLayout {
+// TW specifies that a triple-word score layout position should be added.
+func (b BoardLayout) TW() BoardLayout {
 	return b.appendToLastRow(TripleWordScorePositionType)
 }
 

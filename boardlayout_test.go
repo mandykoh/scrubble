@@ -18,7 +18,7 @@ func TestBoardLayout(t *testing.T) {
 				t.Errorf("Expected %d rows in the layout position but found %d", expected, actual)
 			}
 
-			l = l.Empty().BeginRow()
+			l = l.Em().BeginRow()
 
 			if actual, expected := len(l), 2; actual != expected {
 				t.Errorf("Expected %d rows in the layout position but found %d", expected, actual)
@@ -32,9 +32,9 @@ func TestBoardLayout(t *testing.T) {
 		})
 	})
 
-	t.Run(".DLetter()", func(t *testing.T) {
+	t.Run(".DL()", func(t *testing.T) {
 		t.Run("adds a double-letter score position to the layout", func(t *testing.T) {
-			l := BoardLayout{}.BeginRow().DLetter()
+			l := BoardLayout{}.BeginRow().DL()
 
 			if actual, expected := l[0][0], DoubleLetterScorePositionType; actual != expected {
 				t.Errorf("Expected a '%s' layout position but found '%s'", expected.Name(), actual.Name())
@@ -42,9 +42,9 @@ func TestBoardLayout(t *testing.T) {
 		})
 	})
 
-	t.Run(".DWord()", func(t *testing.T) {
+	t.Run(".DW()", func(t *testing.T) {
 		t.Run("adds a double-word score position to the layout", func(t *testing.T) {
-			l := BoardLayout{}.BeginRow().DWord()
+			l := BoardLayout{}.BeginRow().DW()
 
 			if actual, expected := l[0][0], DoubleWordScorePositionType; actual != expected {
 				t.Errorf("Expected a '%s' layout position but found '%s'", expected.Name(), actual.Name())
@@ -52,9 +52,9 @@ func TestBoardLayout(t *testing.T) {
 		})
 	})
 
-	t.Run(".Empty()", func(t *testing.T) {
+	t.Run(".Em()", func(t *testing.T) {
 		t.Run("adds a normal, non-special position to the layout", func(t *testing.T) {
-			l := BoardLayout{}.BeginRow().Empty()
+			l := BoardLayout{}.BeginRow().Em()
 
 			if actual, expected := l[0][0], NormalPositionType; actual != expected {
 				t.Errorf("Expected a '%s' layout position but found '%s'", expected.Name(), actual.Name())
@@ -62,9 +62,9 @@ func TestBoardLayout(t *testing.T) {
 		})
 	})
 
-	t.Run(".Start()", func(t *testing.T) {
+	t.Run(".St()", func(t *testing.T) {
 		t.Run("adds a starting position to the layout", func(t *testing.T) {
-			l := BoardLayout{}.BeginRow().Start()
+			l := BoardLayout{}.BeginRow().St()
 
 			if actual, expected := l[0][0], StartPositionType; actual != expected {
 				t.Errorf("Expected a '%s' layout position but found '%s'", expected.Name(), actual.Name())
@@ -72,9 +72,9 @@ func TestBoardLayout(t *testing.T) {
 		})
 	})
 
-	t.Run(".TLetter()", func(t *testing.T) {
+	t.Run(".TL()", func(t *testing.T) {
 		t.Run("adds a triple-letter score position to the layout", func(t *testing.T) {
-			l := BoardLayout{}.BeginRow().TLetter()
+			l := BoardLayout{}.BeginRow().TL()
 
 			if actual, expected := l[0][0], TripleLetterScorePositionType; actual != expected {
 				t.Errorf("Expected a '%s' layout position but found '%s'", expected.Name(), actual.Name())
@@ -82,9 +82,9 @@ func TestBoardLayout(t *testing.T) {
 		})
 	})
 
-	t.Run(".TWord()", func(t *testing.T) {
+	t.Run(".TW()", func(t *testing.T) {
 		t.Run("adds a triple-word score position to the layout", func(t *testing.T) {
-			l := BoardLayout{}.BeginRow().TWord()
+			l := BoardLayout{}.BeginRow().TW()
 
 			if actual, expected := l[0][0], TripleWordScorePositionType; actual != expected {
 				t.Errorf("Expected a '%s' layout position but found '%s'", expected.Name(), actual.Name())
@@ -107,7 +107,7 @@ func TestBoardLayout(t *testing.T) {
 				t.Errorf("Expected degenerate layout with one row to be %d columns wide but was %d", expected, actual)
 			}
 
-			l = l.Empty()
+			l = l.Em()
 
 			if actual, expected := l.widestRow(), 1; actual != expected {
 				t.Errorf("Expected layout to be %d columns wide but was %d", expected, actual)
@@ -119,13 +119,13 @@ func TestBoardLayout(t *testing.T) {
 				t.Errorf("Expected layout to be %d columns wide but was %d", expected, actual)
 			}
 
-			l = l.Empty().Empty().Start().Empty()
+			l = l.Em().Em().St().Em()
 
 			if actual, expected := l.widestRow(), 4; actual != expected {
 				t.Errorf("Expected layout to be %d columns wide but was %d", expected, actual)
 			}
 
-			l = l.BeginRow().Empty().Empty()
+			l = l.BeginRow().Em().Em()
 
 			if actual, expected := l.widestRow(), 4; actual != expected {
 				t.Errorf("Expected layout to be %d columns wide but was %d", expected, actual)

@@ -46,9 +46,9 @@ func TestBoard(t *testing.T) {
 
 		t.Run("creates an empty board with the specified layout", func(t *testing.T) {
 			layout := BoardLayout{}.
-				BeginRow().Empty().Empty().Empty().Empty().Empty().Empty().Empty().
-				BeginRow().Empty().Empty().Empty().Start().Empty().Empty().Empty().
-				BeginRow().Empty().Empty().Empty().Empty().Empty().Empty().Empty()
+				BeginRow().Em().Em().Em().Em().Em().Em().Em().
+				BeginRow().Em().Em().Em().St().Em().Em().Em().
+				BeginRow().Em().Em().Em().Em().Em().Em().Em()
 
 			board := BoardWithLayout(layout)
 
@@ -57,14 +57,14 @@ func TestBoard(t *testing.T) {
 
 		t.Run("always creates a rectangular board by filling out with empties to match the longest column", func(t *testing.T) {
 			board := BoardWithLayout(BoardLayout{}.
-				BeginRow().Empty().Empty().Empty().Empty().Empty().Empty().Empty().
-				BeginRow().Empty().Empty().Empty().Start().
+				BeginRow().Em().Em().Em().Em().Em().Em().Em().
+				BeginRow().Em().Em().Em().St().
 				BeginRow())
 
 			expectEmptyBoardWithLayout(t, board, BoardLayout{}.
-				BeginRow().Empty().Empty().Empty().Empty().Empty().Empty().Empty().
-				BeginRow().Empty().Empty().Empty().Start().Empty().Empty().Empty().
-				BeginRow().Empty().Empty().Empty().Empty().Empty().Empty().Empty())
+				BeginRow().Em().Em().Em().Em().Em().Em().Em().
+				BeginRow().Em().Em().Em().St().Em().Em().Em().
+				BeginRow().Em().Em().Em().Em().Em().Em().Em())
 		})
 	})
 
