@@ -1,7 +1,7 @@
 package scrubble
 
 // Board represents a game board, which is a grid of positions on which tiles
-// can be placed.
+// can be placed. The zero-value of a Board is a zero-sized board.
 type Board struct {
 	Rows      int
 	Columns   int

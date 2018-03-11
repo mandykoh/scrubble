@@ -2,7 +2,8 @@ package scrubble
 
 import "math/rand"
 
-// Bag represents a bag of Tiles to be used during a game.
+// Bag represents a bag of Tiles to be used during a game. The zero-value of a
+// Bag is an empty bag.
 type Bag []Tile
 
 // BagWithDistribution returns a Bag containing tiles according to the specified
