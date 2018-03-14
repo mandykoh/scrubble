@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"testing"
+	"time"
 )
 
 func ExampleBagWithDistribution() {
@@ -193,7 +194,7 @@ func TestBag(t *testing.T) {
 			bag := make(Bag, len(tiles))
 			copy(bag, tiles)
 
-			seed := rand.Int63()
+			seed := time.Now().UnixNano()
 
 			r1 := rand.New(rand.NewSource(seed))
 			bag.Shuffle(r1)
