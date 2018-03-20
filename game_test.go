@@ -262,9 +262,8 @@ func TestGame(t *testing.T) {
 			if actual, expected := err, (NotEnoughPlayersError{GameMinPlayers, 1}); actual != expected {
 				t.Errorf("Expected %v but got %v", expected, actual)
 			}
-
-			if actual, expected := len(game.Bag), len(BagWithStandardEnglishTiles()); actual != expected {
-				t.Errorf("Expected bag to still have %d tiles after error but found %d", expected, actual)
+			if actual, expected := game.Phase, SetupPhase; actual != expected {
+				t.Errorf("Expected game to still be in %s phase but was in %s instead", expected, actual)
 			}
 
 			game.AddPlayer(p2)
