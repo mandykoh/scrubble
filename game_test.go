@@ -8,11 +8,14 @@ import (
 
 func TestGame(t *testing.T) {
 
-	t.Run("zero-value is in SetupPhase", func(t *testing.T) {
+	t.Run("zero-value", func(t *testing.T) {
 		var game Game
 
 		if actual, expected := game.Phase, SetupPhase; actual != expected {
 			t.Errorf("Expected zero-value game to be in %s phase, but was %s", expected, actual)
+		}
+		if actual, expected := len(game.Seats), 0; actual != expected {
+			t.Errorf("Expected zero-value game to have no players/seats, but found %d", actual)
 		}
 	})
 

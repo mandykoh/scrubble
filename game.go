@@ -3,7 +3,7 @@ package scrubble
 import "math/rand"
 
 // Game represents the rules and simulation for a single game. The zero-value of
-// a Game is a game in the SetupPhase.
+// a Game is a game in the SetupPhase with no players.
 type Game struct {
 	Phase            GamePhase
 	Seats            []Seat
