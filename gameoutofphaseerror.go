@@ -10,5 +10,5 @@ type GameOutOfPhaseError struct {
 }
 
 func (e GameOutOfPhaseError) Error() string {
-	return fmt.Sprint("GameOutOfPhaseError{Required: ", e.Required, ", Current: ", e.Current, "}")
+	return fmt.Sprintf("%#v", e)
 }
