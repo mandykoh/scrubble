@@ -250,5 +250,29 @@ func TestGame(t *testing.T) {
 				t.Errorf("Expected bag to still have %d tiles after error but found %d", expected, actual)
 			}
 		})
+
+		t.Run("returns an error if there are not enough players", func(t *testing.T) {
+			game := Game{
+				Bag: BagWithStandardEnglishTiles(),
+			}
+
+			game.AddPlayer(p1)
+			err := game.Start(rand.New(rand.NewSource(seed)))
+
+			if actual, expected := err, (NotEnoughPlayersError{GameMinPlayers, 1}); actual != expected {
+				t.Errorf("Expected %v but got %v", expected, actual)
+			}
+
+			if actual, expected := len(game.Bag), len(BagWithStandardEnglishTiles()); actual != expected {
+				t.Errorf("Expected bag to still have %d tiles after error but found %d", expected, actual)
+			}
+
+			game.AddPlayer(p2)
+			err = game.Start(rand.New(rand.NewSource(seed)))
+
+			if actual, expected := err, error(nil); actual != expected {
+				t.Errorf("Expected %v but got %v", expected, actual)
+			}
+		})
 	})
 }
