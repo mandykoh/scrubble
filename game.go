@@ -13,19 +13,30 @@ type Game struct {
 }
 
 // AddPlayer adds a seat for a new player to the game.
-func (g *Game) AddPlayer(p *Player) {
+func (g *Game) AddPlayer(p *Player) error {
+	if g.Phase != SetupPhase {
+		return GameOutOfPhaseError{SetupPhase, g.Phase}
+	}
+
 	g.Seats = append(g.Seats, Seat{OccupiedBy: p})
+	return nil
 }
 
 // RemovePlayer removes the seat occupied by the specified player. If no such
 // seat exists, this has no effect.
-func (g *Game) RemovePlayer(p *Player) {
+func (g *Game) RemovePlayer(p *Player) error {
+	if g.Phase != SetupPhase {
+		return GameOutOfPhaseError{SetupPhase, g.Phase}
+	}
+
 	for i, s := range g.Seats {
 		if s.OccupiedBy == p {
 			g.Seats = append(g.Seats[:i], g.Seats[i+1:]...)
 			break
 		}
 	}
+
+	return nil
 }
 
 // Start begins the game by shuffling the bag, picking a random seat for the
@@ -34,7 +45,11 @@ func (g *Game) RemovePlayer(p *Player) {
 //
 // The supplied random number generator is used to determine the bag shuffling
 // and the starting player.
-func (g *Game) Start(r *rand.Rand) {
+func (g *Game) Start(r *rand.Rand) error {
+	if g.Phase != SetupPhase {
+		return GameOutOfPhaseError{SetupPhase, g.Phase}
+	}
+
 	g.CurrentSeatIndex = r.Intn(len(g.Seats))
 	g.Bag.Shuffle(r)
 
@@ -43,4 +58,5 @@ func (g *Game) Start(r *rand.Rand) {
 	}
 
 	g.Phase = MainPhase
+	return nil
 }
