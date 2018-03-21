@@ -7,3 +7,5 @@
 Go library for modelling a letter/word board game.
 
 See the [API documentation](https://godoc.org/github.com/mandykoh/scrubble) for more information.
+
+This software is made available under an [MIT license](LICENSE).
