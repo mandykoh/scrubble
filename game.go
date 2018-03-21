@@ -15,6 +15,8 @@ type Game struct {
 }
 
 // AddPlayer adds a seat for a new player to the game.
+//
+// If the game is not in the Setup phase, GameOutOfPhaseError is returned.
 func (g *Game) AddPlayer(p *Player) error {
 	return g.requirePhase(SetupPhase, func() error {
 		g.Seats = append(g.Seats, Seat{OccupiedBy: p})
@@ -24,6 +26,8 @@ func (g *Game) AddPlayer(p *Player) error {
 
 // RemovePlayer removes the seat occupied by the specified player. If no such
 // seat exists, this has no effect.
+//
+// If the game is not in the Setup phase, GameOutOfPhaseError is returned.
 func (g *Game) RemovePlayer(p *Player) error {
 	return g.requirePhase(SetupPhase, func() error {
 		for i, s := range g.Seats {
@@ -42,6 +46,10 @@ func (g *Game) RemovePlayer(p *Player) error {
 //
 // The supplied random number generator is used to determine the bag shuffling
 // and the starting player.
+//
+// If the game has no players, NotEnoughPlayersError is returned.
+//
+// If the game is not in the Setup phase, GameOutOfPhaseError is returned.
 func (g *Game) Start(r *rand.Rand) error {
 	return g.requirePhase(SetupPhase, func() error {
 
