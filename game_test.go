@@ -251,26 +251,25 @@ func TestGame(t *testing.T) {
 			}
 		})
 
-		t.Run("returns an error if there are not enough players", func(t *testing.T) {
+		t.Run("returns an error if there are no players", func(t *testing.T) {
 			game := Game{
 				Bag: BagWithStandardEnglishTiles(),
 			}
 
-			game.AddPlayer(p1)
 			err := game.Start(rand.New(rand.NewSource(seed)))
 
-			if actual, expected := err, (NotEnoughPlayersError{GameMinPlayers, 1}); actual != expected {
+			if actual, expected := err, (NotEnoughPlayersError{GameMinPlayers, 0}); actual != expected {
 				t.Errorf("Expected %v but got %v", expected, actual)
 			}
 			if actual, expected := game.Phase, SetupPhase; actual != expected {
 				t.Errorf("Expected game to still be in %s phase but was in %s instead", expected, actual)
 			}
 
-			game.AddPlayer(p2)
+			game.AddPlayer(p1)
 			err = game.Start(rand.New(rand.NewSource(seed)))
 
 			if actual, expected := err, error(nil); actual != expected {
-				t.Errorf("Expected %v but got %v", expected, actual)
+				t.Errorf("Expected no error but got %v", actual)
 			}
 		})
 	})

@@ -2,7 +2,7 @@ package scrubble
 
 import "math/rand"
 
-const GameMinPlayers = 2
+const GameMinPlayers = 1
 
 // Game represents the rules and simulation for a single game. The zero-value of
 // a Game is a game in the SetupPhase with no players.
