@@ -24,6 +24,11 @@ func (g *Game) AddPlayer(p *Player) error {
 	})
 }
 
+// Play attempts to place tiles from the current player's rack on the board.
+func (g *Game) Play(placements []TilePlacement) error {
+	return nil
+}
+
 // RemovePlayer removes the seat occupied by the specified player. If no such
 // seat exists, this has no effect.
 //

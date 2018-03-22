@@ -68,6 +68,10 @@ func TestGame(t *testing.T) {
 		})
 	})
 
+	t.Run(".Play()", func(t *testing.T) {
+
+	})
+
 	t.Run(".RemovePlayer()", func(t *testing.T) {
 
 		t.Run("removes the seat for the specified player", func(t *testing.T) {
