@@ -70,6 +70,17 @@ func TestGame(t *testing.T) {
 
 	t.Run(".Play()", func(t *testing.T) {
 
+		t.Run("returns an error when the game is not in the Main phase", func(t *testing.T) {
+			game := Game{
+				Phase: SetupPhase,
+			}
+
+			err := game.Play([]TilePlacement{})
+
+			if actual, expected := err, (GameOutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
+				t.Fatalf("Expected error %v but was %v", expected, err)
+			}
+		})
 	})
 
 	t.Run(".RemovePlayer()", func(t *testing.T) {

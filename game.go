@@ -25,8 +25,12 @@ func (g *Game) AddPlayer(p *Player) error {
 }
 
 // Play attempts to place tiles from the current player's rack on the board.
+//
+// If the game is not in the Main phase, GameOutOfPhaseError is returned.
 func (g *Game) Play(placements []TilePlacement) error {
-	return nil
+	return g.requirePhase(MainPhase, func() error {
+		return nil
+	})
 }
 
 // RemovePlayer removes the seat occupied by the specified player. If no such
