@@ -70,6 +70,31 @@ func TestGame(t *testing.T) {
 
 	t.Run(".Play()", func(t *testing.T) {
 
+		setupGame := func() (Game, *Player) {
+			p := &Player{Name: "Alice"}
+
+			rackTiles := []Tile{
+				{'A', 1},
+				{'B', 1},
+				{'D', 1},
+				{'E', 1},
+				{'O', 1},
+				{'M', 1},
+			}
+
+			game := Game{
+				Phase: MainPhase,
+				Seats: []Seat{
+					{
+						OccupiedBy: p,
+						Rack:       Rack(rackTiles),
+					},
+				},
+			}
+
+			return game, p
+		}
+
 		t.Run("returns an error when the game is not in the Main phase", func(t *testing.T) {
 			game := Game{
 				Phase: SetupPhase,
@@ -79,6 +104,58 @@ func TestGame(t *testing.T) {
 
 			if actual, expected := err, (GameOutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
+			}
+		})
+
+		t.Run("returns an error when the current player doesn't have the required tiles", func(t *testing.T) {
+			game, _ := setupGame()
+
+			playTiles := []Tile{
+				{'B', 1},
+				{'O', 1},
+				{'O', 1},
+				{'M', 1},
+				{'S', 1},
+			}
+
+			var placements []TilePlacement
+			for i, t := range playTiles {
+				placements = append(placements, TilePlacement{t, 0, i})
+			}
+
+			err := game.Play(placements)
+
+			if insufficientError, ok := err.(InsufficientTilesError); !ok {
+				t.Errorf("Expected InsufficientTilesError but got %v", err)
+			} else {
+				if actual, expected := len(insufficientError.Missing), 2; actual != expected {
+					t.Errorf("Expected error to indicate one missing tile but was %d", actual)
+				} else {
+					if actual, expected := insufficientError.Missing[0], (Tile{'O', 1}); actual != expected {
+						t.Errorf("Expected missing tile %c(%d) but was %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+					}
+					if actual, expected := insufficientError.Missing[1], (Tile{'S', 1}); actual != expected {
+						t.Errorf("Expected missing tile %c(%d) but was %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+					}
+				}
+			}
+
+			if actual, expected := len(game.Seats[0].Rack), 6; actual != expected {
+				t.Errorf("Expected player to still have %d tiles but found %d", expected, actual)
+			}
+		})
+
+		t.Run("places tiles on the board for a valid play", func(t *testing.T) {
+			game, _ := setupGame()
+
+			err := game.Play([]TilePlacement{
+				{Tile{'B', 1}, 0, 0},
+				{Tile{'A', 1}, 0, 1},
+				{Tile{'D', 1}, 0, 2},
+			})
+
+			if err != nil {
+				t.Errorf("Expected play to succeed but got error %v", err)
 			}
 		})
 	})
