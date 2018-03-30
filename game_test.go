@@ -76,9 +76,9 @@ func TestGame(t *testing.T) {
 			rackTiles := []Tile{
 				{'A', 1},
 				{'B', 1},
-				{'D', 1},
 				{'E', 1},
 				{'O', 1},
+				{'D', 1},
 				{'M', 1},
 			}
 
@@ -166,6 +166,22 @@ func TestGame(t *testing.T) {
 
 			if err != nil {
 				t.Errorf("Expected play to succeed but got error %v", err)
+			}
+
+			rack := game.currentSeat().Rack
+
+			if actual, expected := len(rack), 3; actual != expected {
+				t.Errorf("Expected %d tiles to remain in the player's rack but found %d", expected, actual)
+			} else {
+				if actual, expected := rack[0], (Tile{'E', 1}); actual != expected {
+					t.Errorf("Expected first remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+				}
+				if actual, expected := rack[1], (Tile{'O', 1}); actual != expected {
+					t.Errorf("Expected second remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+				}
+				if actual, expected := rack[2], (Tile{'M', 1}); actual != expected {
+					t.Errorf("Expected third remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+				}
 			}
 		})
 	})

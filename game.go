@@ -38,10 +38,12 @@ func (g *Game) Play(placements []TilePlacement) error {
 			return InvalidTilePlacementError{}
 		}
 
-		_, missing := tryPlayTilesFromRack(g.currentSeat().Rack, placements)
+		remaining, missing := tryPlayTilesFromRack(g.currentSeat().Rack, placements)
 		if len(missing) > 0 {
 			return InsufficientTilesError{Missing: missing}
 		}
+
+		g.currentSeat().Rack = remaining
 
 		return nil
 	})
