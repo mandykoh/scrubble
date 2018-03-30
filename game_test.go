@@ -107,6 +107,16 @@ func TestGame(t *testing.T) {
 			}
 		})
 
+		t.Run("returns an error when no tiles are being played", func(t *testing.T) {
+			game, _ := setupGame()
+
+			err := game.Play([]TilePlacement{})
+
+			if actual, expected := err, (InvalidTilePlacementError{}); actual != expected {
+				t.Errorf("Expected %v when attempting to play zero tiles but got %v", expected, actual)
+			}
+		})
+
 		t.Run("returns an error when the current player doesn't have the required tiles", func(t *testing.T) {
 			game, _ := setupGame()
 

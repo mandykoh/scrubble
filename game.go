@@ -30,8 +30,14 @@ func (g *Game) AddPlayer(p *Player) error {
 //
 // If the current player doesn't have the tiles required to make the play, an
 // InsufficientTilesError is returned.
+//
+// If the tile placement is illegal, an InvalidTilePlacementError is returned.
 func (g *Game) Play(placements []TilePlacement) error {
 	return g.requirePhase(MainPhase, func() error {
+		if len(placements) == 0 {
+			return InvalidTilePlacementError{}
+		}
+
 		_, missing := tryPlayTilesFromRack(g.currentSeat().Rack, placements)
 		if len(missing) > 0 {
 			return InsufficientTilesError{Missing: missing}
