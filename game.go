@@ -43,6 +43,10 @@ func (g *Game) Play(placements []TilePlacement) error {
 			return InsufficientTilesError{missing}
 		}
 
+		if !g.validateTilePositions(placements) {
+			return InvalidTilePlacementError{}
+		}
+
 		g.Board.placeTiles(placements)
 		g.currentSeat().Rack = remaining
 
@@ -105,4 +109,27 @@ func (g *Game) requirePhase(phase GamePhase, action func() error) error {
 	}
 
 	return action()
+}
+
+func (g *Game) validateConnected(placements []TilePlacement) bool {
+	return true
+}
+
+func (g *Game) validateNoGaps(placements []TilePlacement) bool {
+	return true
+}
+
+func (g *Game) validatePlacementsInLine(placements []TilePlacement) bool {
+	return true
+}
+
+func (g *Game) validatePositionsAvailable(placements []TilePlacement) bool {
+	return true
+}
+
+func (g *Game) validateTilePositions(placements []TilePlacement) bool {
+	return g.validatePositionsAvailable(placements) &&
+		g.validatePlacementsInLine(placements) &&
+		g.validateNoGaps(placements) &&
+		g.validateConnected(placements)
 }
