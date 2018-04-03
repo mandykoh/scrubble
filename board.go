@@ -63,3 +63,10 @@ func BoardWithStandardLayout() Board {
 func (b *Board) Position(row, col int) *BoardPosition {
 	return &b.Positions[row*b.Columns+col]
 }
+
+func (b *Board) placeTiles(placements []TilePlacement) {
+	for _, p := range placements {
+		tile := p.Tile
+		b.Position(p.Row, p.Column).Tile = &tile
+	}
+}

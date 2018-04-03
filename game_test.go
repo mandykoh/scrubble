@@ -84,6 +84,7 @@ func TestGame(t *testing.T) {
 
 			game := Game{
 				Phase: MainPhase,
+				Board: BoardWithStandardLayout(),
 				Seats: []Seat{
 					{
 						OccupiedBy: p,
@@ -158,11 +159,12 @@ func TestGame(t *testing.T) {
 		t.Run("places tiles on the board for a valid play", func(t *testing.T) {
 			game, _ := setupGame()
 
-			err := game.Play([]TilePlacement{
+			placements := []TilePlacement{
 				{Tile{'B', 1}, 0, 0},
 				{Tile{'A', 1}, 0, 1},
 				{Tile{'D', 1}, 0, 2},
-			})
+			}
+			err := game.Play(placements)
 
 			if err != nil {
 				t.Errorf("Expected play to succeed but got error %v", err)
@@ -181,6 +183,16 @@ func TestGame(t *testing.T) {
 				}
 				if actual, expected := rack[2], (Tile{'M', 1}); actual != expected {
 					t.Errorf("Expected third remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+				}
+			}
+
+			for _, p := range placements {
+				if actual := game.Board.Position(p.Row, p.Column).Tile; actual == nil || *actual != p.Tile {
+					if actual == nil {
+						t.Errorf("Expected tile %c(%d) to be in position %d,%d but got <nil>", p.Tile.Letter, p.Tile.Points, p.Row, p.Column)
+					} else {
+						t.Errorf("Expected tile %c(%d) to be in position %d,%d but got %c(%d)", p.Tile.Letter, p.Tile.Points, p.Row, p.Column, actual.Letter, actual.Points)
+					}
 				}
 			}
 		})

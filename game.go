@@ -43,6 +43,7 @@ func (g *Game) Play(placements []TilePlacement) error {
 			return InsufficientTilesError{missing}
 		}
 
+		g.Board.placeTiles(placements)
 		g.currentSeat().Rack = remaining
 
 		return nil
