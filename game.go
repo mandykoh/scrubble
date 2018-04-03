@@ -38,9 +38,9 @@ func (g *Game) Play(placements []TilePlacement) error {
 			return InvalidTilePlacementError{}
 		}
 
-		remaining, missing := tryPlayTilesFromRack(g.currentSeat().Rack, placements)
-		if len(missing) > 0 {
-			return InsufficientTilesError{Missing: missing}
+		remaining, missing := g.currentSeat().Rack.tryPlayTiles(placements)
+		if len(missing) != 0 {
+			return InsufficientTilesError{missing}
 		}
 
 		g.currentSeat().Rack = remaining
@@ -104,22 +104,4 @@ func (g *Game) requirePhase(phase GamePhase, action func() error) error {
 	}
 
 	return action()
-}
-
-func tryPlayTilesFromRack(rack Rack, placements []TilePlacement) (remaining, missing []Tile) {
-	remaining = rack
-
-Placements:
-	for _, p := range placements {
-		for i, t := range remaining {
-			if t == p.Tile {
-				remaining = append(remaining[:i], remaining[i+1:]...)
-				continue Placements
-			}
-		}
-
-		missing = append(missing, p.Tile)
-	}
-
-	return
 }

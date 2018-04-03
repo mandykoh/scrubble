@@ -14,3 +14,21 @@ func (r *Rack) FillFromBag(b *Bag) {
 		*r = append(*r, b.DrawTile())
 	}
 }
+
+func (r *Rack) tryPlayTiles(placements []TilePlacement) (remaining Rack, missing []Tile) {
+	remaining = append(remaining, *r...)
+
+Placements:
+	for _, p := range placements {
+		for i, t := range remaining {
+			if t == p.Tile {
+				remaining = append(remaining[:i], remaining[i+1:]...)
+				continue Placements
+			}
+		}
+
+		missing = append(missing, p.Tile)
+	}
+
+	return
+}
