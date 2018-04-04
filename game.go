@@ -32,7 +32,7 @@ func (g *Game) AddPlayer(p *Player) error {
 // InsufficientTilesError is returned.
 //
 // If the tile placement is illegal, an InvalidTilePlacementError is returned.
-func (g *Game) Play(placements []TilePlacement) error {
+func (g *Game) Play(placements TilePlacements) error {
 	return g.requirePhase(MainPhase, func() error {
 		if len(placements) == 0 {
 			return InvalidTilePlacementError{NoTilesPlacedReason}
@@ -112,19 +112,21 @@ func (g *Game) requirePhase(phase GamePhase, action func() error) error {
 	return action()
 }
 
-func (g *Game) validateConnected(placements []TilePlacement) error {
+func (g *Game) validateConnected(placements TilePlacements) error {
 	return nil
 }
 
-func (g *Game) validateNoGaps(placements []TilePlacement) error {
+func (g *Game) validateContiguous(placements TilePlacements) error {
+	minRow, minCol, maxRow, maxCol := placements.Bounds()
+
+	if minRow != maxRow && minCol != maxCol {
+		return InvalidTilePlacementError{PlacementNotLinearReason}
+	}
+
 	return nil
 }
 
-func (g *Game) validatePlacementsInLine(placements []TilePlacement) error {
-	return nil
-}
-
-func (g *Game) validatePositionsAvailable(placements []TilePlacement) error {
+func (g *Game) validatePositionsAvailable(placements TilePlacements) error {
 	for _, p := range placements {
 		pos := g.Board.Position(p.Row, p.Column)
 		if pos == nil {
@@ -137,16 +139,13 @@ func (g *Game) validatePositionsAvailable(placements []TilePlacement) error {
 	return nil
 }
 
-func (g *Game) validateTilePositions(placements []TilePlacement) error {
+func (g *Game) validateTilePositions(placements TilePlacements) error {
 	err := g.validatePositionsAvailable(placements)
 	if err == nil {
-		err = g.validatePlacementsInLine(placements)
+		err = g.validateContiguous(placements)
 	}
 	if err == nil {
-		err = g.validateNoGaps(placements)
-	}
-	if err == nil {
-		g.validateConnected(placements)
+		err = g.validateConnected(placements)
 	}
 	return err
 }
