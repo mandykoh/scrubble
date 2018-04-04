@@ -113,7 +113,7 @@ func TestGame(t *testing.T) {
 
 			err := game.Play([]TilePlacement{})
 
-			if actual, expected := err, (InvalidTilePlacementError{}); actual != expected {
+			if actual, expected := err, (InvalidTilePlacementError{NoTilesPlacedReason}); actual != expected {
 				t.Errorf("Expected %v when attempting to play zero tiles but got %v", expected, actual)
 			}
 		})

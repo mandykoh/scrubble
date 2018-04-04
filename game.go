@@ -35,7 +35,7 @@ func (g *Game) AddPlayer(p *Player) error {
 func (g *Game) Play(placements []TilePlacement) error {
 	return g.requirePhase(MainPhase, func() error {
 		if len(placements) == 0 {
-			return InvalidTilePlacementError{}
+			return InvalidTilePlacementError{NoTilesPlacedReason}
 		}
 
 		remaining, missing := g.currentSeat().Rack.tryPlayTiles(placements)
