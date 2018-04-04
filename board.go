@@ -59,8 +59,12 @@ func BoardWithStandardLayout() Board {
 }
 
 // Position returns the board position related to the specified row and column.
-// Rows and columns are zero-indexed.
+// Rows and columns are zero-indexed. If the requested position is out of
+// bounds, nil is returned.
 func (b *Board) Position(row, col int) *BoardPosition {
+	if row < 0 || row >= b.Rows || col < 0 || col >= b.Columns {
+		return nil
+	}
 	return &b.Positions[row*b.Columns+col]
 }
 

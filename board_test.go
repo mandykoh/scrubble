@@ -125,17 +125,16 @@ func TestBoard(t *testing.T) {
 
 	t.Run(".Position()", func(t *testing.T) {
 
+		b := Board{
+			Rows:    2,
+			Columns: 2,
+			Positions: []BoardPosition{
+				{__, nil}, {st, nil},
+				{dl, nil}, {tw, nil},
+			},
+		}
+
 		t.Run("returns the specified position", func(t *testing.T) {
-
-			b := Board{
-				Rows:    2,
-				Columns: 2,
-				Positions: []BoardPosition{
-					{__, nil}, {st, nil},
-					{dl, nil}, {tw, nil},
-				},
-			}
-
 			if actual, expected := b.Position(0, 0), &b.Positions[0]; actual != expected {
 				t.Errorf("Expected 0,0 to correspond to position with '%s' type, but found %+v", expected.Type.Name(), actual)
 			}
@@ -150,6 +149,21 @@ func TestBoard(t *testing.T) {
 
 			if actual, expected := b.Position(1, 1), &b.Positions[3]; actual != expected {
 				t.Errorf("Expected 1,1 to correspond to position with '%s' type, but found %+v", expected.Type.Name(), actual)
+			}
+		})
+
+		t.Run("returns nil when out of bounds", func(t *testing.T) {
+			if actual, expected := b.Position(-1, 0), (*BoardPosition)(nil); actual != expected {
+				t.Errorf("Expected -1,0 to be out of bounds but got position %+v", actual)
+			}
+			if actual, expected := b.Position(0, -1), (*BoardPosition)(nil); actual != expected {
+				t.Errorf("Expected 0,-1 to be out of bounds but got position %+v", actual)
+			}
+			if actual, expected := b.Position(2, 0), (*BoardPosition)(nil); actual != expected {
+				t.Errorf("Expected 2,0 to be out of bounds but got position %+v", actual)
+			}
+			if actual, expected := b.Position(0, 2), (*BoardPosition)(nil); actual != expected {
+				t.Errorf("Expected 0,2 to be out of bounds but got position %+v", actual)
 			}
 		})
 	})

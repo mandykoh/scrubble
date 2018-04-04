@@ -43,8 +43,9 @@ func (g *Game) Play(placements []TilePlacement) error {
 			return InsufficientTilesError{missing}
 		}
 
-		if !g.validateTilePositions(placements) {
-			return InvalidTilePlacementError{}
+		err := g.validateTilePositions(placements)
+		if err != nil {
+			return err
 		}
 
 		g.Board.placeTiles(placements)
@@ -111,25 +112,41 @@ func (g *Game) requirePhase(phase GamePhase, action func() error) error {
 	return action()
 }
 
-func (g *Game) validateConnected(placements []TilePlacement) bool {
-	return true
+func (g *Game) validateConnected(placements []TilePlacement) error {
+	return nil
 }
 
-func (g *Game) validateNoGaps(placements []TilePlacement) bool {
-	return true
+func (g *Game) validateNoGaps(placements []TilePlacement) error {
+	return nil
 }
 
-func (g *Game) validatePlacementsInLine(placements []TilePlacement) bool {
-	return true
+func (g *Game) validatePlacementsInLine(placements []TilePlacement) error {
+	return nil
 }
 
-func (g *Game) validatePositionsAvailable(placements []TilePlacement) bool {
-	return true
+func (g *Game) validatePositionsAvailable(placements []TilePlacement) error {
+	for _, p := range placements {
+		pos := g.Board.Position(p.Row, p.Column)
+		if pos == nil {
+			return InvalidTilePlacementError{PlacementOutOfBoundsReason}
+		}
+		if pos.Tile != nil {
+			return InvalidTilePlacementError{PositionOccupiedReason}
+		}
+	}
+	return nil
 }
 
-func (g *Game) validateTilePositions(placements []TilePlacement) bool {
-	return g.validatePositionsAvailable(placements) &&
-		g.validatePlacementsInLine(placements) &&
-		g.validateNoGaps(placements) &&
+func (g *Game) validateTilePositions(placements []TilePlacement) error {
+	err := g.validatePositionsAvailable(placements)
+	if err == nil {
+		err = g.validatePlacementsInLine(placements)
+	}
+	if err == nil {
+		err = g.validateNoGaps(placements)
+	}
+	if err == nil {
 		g.validateConnected(placements)
+	}
+	return err
 }

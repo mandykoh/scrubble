@@ -156,6 +156,40 @@ func TestGame(t *testing.T) {
 			}
 		})
 
+		t.Run("returns an error when any of the board positions is out of bounds", func(t *testing.T) {
+			game, _ := setupGame()
+
+			game.Board.Position(0, 0).Tile = &Tile{'A', 1}
+
+			err := game.Play([]TilePlacement{{Tile{'B', 1}, 0, -1}})
+
+			if actual, expected := err, (InvalidTilePlacementError{PlacementOutOfBoundsReason}); actual != expected {
+				t.Errorf("Expected %v when attempting to play tiles but got %v", expected, actual)
+			}
+
+			err = game.Play([]TilePlacement{{Tile{'B', 1}, game.Board.Rows, 0}})
+
+			if actual, expected := err, (InvalidTilePlacementError{PlacementOutOfBoundsReason}); actual != expected {
+				t.Errorf("Expected %v when attempting to play tiles but got %v", expected, actual)
+			}
+		})
+
+		t.Run("returns an error when any of the board positions is already occupied", func(t *testing.T) {
+			game, _ := setupGame()
+
+			game.Board.Position(0, 0).Tile = &Tile{'A', 1}
+
+			err := game.Play([]TilePlacement{
+				{Tile{'B', 1}, 0, 0},
+				{Tile{'A', 1}, 0, 1},
+				{Tile{'D', 1}, 0, 2},
+			})
+
+			if actual, expected := err, (InvalidTilePlacementError{PositionOccupiedReason}); actual != expected {
+				t.Errorf("Expected %v when attempting to play tiles but got %v", expected, actual)
+			}
+		})
+
 		t.Run("places tiles on the board for a valid play", func(t *testing.T) {
 			game, _ := setupGame()
 

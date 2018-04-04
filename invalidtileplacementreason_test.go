@@ -12,6 +12,8 @@ func TestInvalidTilePlacementReason(t *testing.T) {
 				ExpectedName string
 			}{
 				{NoTilesPlacedReason, "NoTilesPlacedReason"},
+				{PositionOccupiedReason, "PositionOccupiedReason"},
+				{PlacementOutOfBoundsReason, "PlacementOutOfBoundsReason"},
 				{UnknownInvalidTilePlacementReason, "UnknownInvalidTilePlacementReason"},
 			}
 
@@ -41,6 +43,8 @@ func TestInvalidTilePlacementReason(t *testing.T) {
 				ExpectedName string
 			}{
 				{NoTilesPlacedReason, "NoTilesPlaced"},
+				{PositionOccupiedReason, "PositionOccupied"},
+				{PlacementOutOfBoundsReason, "PlacementOutOfBounds"},
 			}
 
 			for _, c := range cases {
