@@ -232,6 +232,36 @@ func TestGame(t *testing.T) {
 			}
 		})
 
+		t.Run("returns an error when the placements aren't connected to at least one existing tile or on a starting position", func(t *testing.T) {
+			game, _ := setupGame()
+
+			game.Board.Position(0, 0).Tile = &Tile{'A', 1}
+
+			err := game.Play([]TilePlacement{
+				{Tile{'M', 1}, 2, 0},
+				{Tile{'A', 1}, 2, 1},
+				{Tile{'D', 1}, 2, 2},
+			})
+
+			if actual, expected := err, (InvalidTilePlacementError{PlacementNotConnectedReason}); actual != expected {
+				t.Errorf("Expected %v when attempting to play non-connected tiles but got %v", expected, actual)
+			}
+
+			if actual, expected := game.Board.Position(7, 7).Type, startPositionTypeInstance; actual != expected {
+				t.Fatalf("Expected starting position at 7,7 but found %v", actual)
+			}
+
+			err = game.Play([]TilePlacement{
+				{Tile{'M', 1}, 7, 6},
+				{Tile{'A', 1}, 7, 7},
+				{Tile{'D', 1}, 7, 8},
+			})
+
+			if actual := err; actual != nil {
+				t.Errorf("Expected success when playing tiles on a start position but got error %v", actual)
+			}
+		})
+
 		t.Run("places tiles on the board for a valid play", func(t *testing.T) {
 			game, _ := setupGame()
 

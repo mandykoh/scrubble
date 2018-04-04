@@ -58,6 +58,19 @@ func BoardWithStandardLayout() Board {
 	})
 }
 
+// Neighbours returns the cardinal neighbouring positions to the specified row
+// and column. Rows and columns are zero-indexed. If a neighbour would be out
+// of bounds, nil is returned in its place. Neighbours are always returned in
+// North, South, East, West order.
+func (b *Board) Neighbours(row, col int) [4]*BoardPosition {
+	return [4]*BoardPosition{
+		b.Position(row-1, col),
+		b.Position(row+1, col),
+		b.Position(row, col+1),
+		b.Position(row, col-1),
+	}
+}
+
 // Position returns the board position related to the specified row and column.
 // Rows and columns are zero-indexed. If the requested position is out of
 // bounds, nil is returned.

@@ -26,6 +26,11 @@ const (
 	// PlacementNotContiguousReason indicates that a play was attempted such
 	// that gaps would be created in the tiles.
 	PlacementNotContiguousReason
+
+	// PlacementNotConnectedReason indicates that a play attempted to set tiles
+	// down such that they were not on a starting position and not touching any
+	// existing tiles.
+	PlacementNotConnectedReason
 )
 
 // InvalidTilePlacementReason indicates the reason for an
@@ -48,6 +53,8 @@ func (r InvalidTilePlacementReason) GoString() string {
 		return "PlacementNotLinearReason"
 	case PlacementNotContiguousReason:
 		return "PlacementNotContiguousReason"
+	case PlacementNotConnectedReason:
+		return "PlacementNotConnectedReason"
 	default:
 		return "UnknownInvalidTilePlacementReason"
 	}
@@ -69,6 +76,8 @@ func (r InvalidTilePlacementReason) String() string {
 		return "PlacementNotLinear"
 	case PlacementNotContiguousReason:
 		return "PlacementNotContiguous"
+	case PlacementNotConnectedReason:
+		return "PlacementNotConnected"
 	default:
 		return "Unknown"
 	}

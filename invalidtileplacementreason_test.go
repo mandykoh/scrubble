@@ -17,6 +17,7 @@ func TestInvalidTilePlacementReason(t *testing.T) {
 				{PlacementOverlapReason, "PlacementOverlapReason"},
 				{PlacementNotLinearReason, "PlacementNotLinearReason"},
 				{PlacementNotContiguousReason, "PlacementNotContiguousReason"},
+				{PlacementNotConnectedReason, "PlacementNotConnectedReason"},
 				{UnknownInvalidTilePlacementReason, "UnknownInvalidTilePlacementReason"},
 			}
 
@@ -51,6 +52,7 @@ func TestInvalidTilePlacementReason(t *testing.T) {
 				{PlacementOverlapReason, "PlacementOverlap"},
 				{PlacementNotLinearReason, "PlacementNotLinear"},
 				{PlacementNotContiguousReason, "PlacementNotContiguous"},
+				{PlacementNotConnectedReason, "PlacementNotConnected"},
 			}
 
 			for _, c := range cases {

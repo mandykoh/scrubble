@@ -123,6 +123,80 @@ func TestBoard(t *testing.T) {
 		})
 	})
 
+	t.Run(".Neighbours()", func(t *testing.T) {
+
+		b := Board{
+			Rows:    3,
+			Columns: 3,
+			Positions: []BoardPosition{
+				{__, &Tile{'A', 1}}, {__, &Tile{'B', 1}}, {__, &Tile{'C', 1}},
+				{__, &Tile{'D', 1}}, {__, &Tile{'E', 1}}, {__, &Tile{'F', 1}},
+				{__, &Tile{'G', 1}}, {__, &Tile{'H', 1}}, {__, &Tile{'I', 1}},
+			},
+		}
+
+		t.Run("returns four cardinal neighbours of the specified position", func(t *testing.T) {
+			neighbours := b.Neighbours(1, 1)
+
+			if actual, expected := len(neighbours), 4; actual != expected {
+				t.Errorf("Expected %d neighbours but got %d instead", expected, actual)
+			} else {
+				if actual, expected := neighbours[0], b.Position(0, 1); actual != expected {
+					t.Errorf("Expected north position to be returned but got %v", actual)
+				}
+				if actual, expected := neighbours[1], b.Position(2, 1); actual != expected {
+					t.Errorf("Expected south position to be returned but got %v", actual)
+				}
+				if actual, expected := neighbours[2], b.Position(1, 2); actual != expected {
+					t.Errorf("Expected east position to be returned but got %v", actual)
+				}
+				if actual, expected := neighbours[3], b.Position(1, 0); actual != expected {
+					t.Errorf("Expected west position to be returned but got %v", actual)
+				}
+			}
+		})
+
+		t.Run("omits neighbours that would be out of bounds", func(t *testing.T) {
+			neighbours := b.Neighbours(0, 0)
+
+			if actual, expected := len(neighbours), 4; actual != expected {
+				t.Errorf("Expected %d neighbours but got %d instead", expected, actual)
+			} else {
+				if actual := neighbours[0]; actual != nil {
+					t.Errorf("Expected north position to be nil but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
+				}
+				if actual, expected := neighbours[1], b.Position(1, 0); actual != expected {
+					t.Errorf("Expected south position to be returned but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
+				}
+				if actual, expected := neighbours[2], b.Position(0, 1); actual != expected {
+					t.Errorf("Expected east position to be returned but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
+				}
+				if actual := neighbours[3]; actual != nil {
+					t.Errorf("Expected west position to be nil but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
+				}
+			}
+
+			neighbours = b.Neighbours(2, 2)
+
+			if actual, expected := len(neighbours), 4; actual != expected {
+				t.Errorf("Expected %d neighbours but got %d instead", expected, actual)
+			} else {
+				if actual, expected := neighbours[0], b.Position(1, 2); actual != expected {
+					t.Errorf("Expected north position to be returned but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
+				}
+				if actual := neighbours[1]; actual != nil {
+					t.Errorf("Expected south position to be nil but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
+				}
+				if actual := neighbours[2]; actual != nil {
+					t.Errorf("Expected east position to be nil but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
+				}
+				if actual, expected := neighbours[3], b.Position(2, 1); actual != expected {
+					t.Errorf("Expected west position to be returned but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
+				}
+			}
+		})
+	})
+
 	t.Run(".Position()", func(t *testing.T) {
 
 		b := Board{

@@ -104,6 +104,16 @@ func (g *Game) currentSeat() *Seat {
 	return &g.Seats[g.CurrentSeatIndex]
 }
 
+func (g *Game) neighbourHasTile(row, col int) bool {
+	neighbours := g.Board.Neighbours(row, col)
+	for _, n := range neighbours {
+		if n != nil && n.Tile != nil {
+			return true
+		}
+	}
+	return false
+}
+
 func (g *Game) requirePhase(phase GamePhase, action func() error) error {
 	if g.Phase != phase {
 		return GameOutOfPhaseError{phase, g.Phase}
@@ -112,7 +122,7 @@ func (g *Game) requirePhase(phase GamePhase, action func() error) error {
 	return action()
 }
 
-func (g *Game) validateAvailableAndContiguous(placements TilePlacements) error {
+func (g *Game) validateTilePositions(placements TilePlacements) error {
 	minRow, minCol, maxRow, maxCol := placements.Bounds()
 
 	if minRow != maxRow && minCol != maxCol {
@@ -120,6 +130,7 @@ func (g *Game) validateAvailableAndContiguous(placements TilePlacements) error {
 	}
 
 	placed := 0
+	connected := false
 
 	for r := minRow; r <= maxRow; r++ {
 		for c := minCol; c <= maxCol; c++ {
@@ -134,6 +145,13 @@ func (g *Game) validateAvailableAndContiguous(placements TilePlacements) error {
 				if position.Tile != nil {
 					return InvalidTilePlacementError{PositionOccupiedReason}
 				}
+
+				if !connected {
+					if position.Type == startPositionTypeInstance || g.neighbourHasTile(r, c) {
+						connected = true
+					}
+				}
+
 				placed++
 
 			} else if position.Tile == nil {
@@ -145,18 +163,9 @@ func (g *Game) validateAvailableAndContiguous(placements TilePlacements) error {
 	if placed != len(placements) {
 		return InvalidTilePlacementError{PlacementOverlapReason}
 	}
-
-	return nil
-}
-
-func (g *Game) validateConnected(placements TilePlacements) error {
-	return nil
-}
-
-func (g *Game) validateTilePositions(placements TilePlacements) error {
-	err := g.validateAvailableAndContiguous(placements)
-	if err == nil {
-		err = g.validateConnected(placements)
+	if !connected {
+		return InvalidTilePlacementError{PlacementNotConnectedReason}
 	}
-	return err
+
+	return nil
 }
