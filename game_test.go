@@ -164,13 +164,13 @@ func TestGame(t *testing.T) {
 			err := game.Play([]TilePlacement{{Tile{'B', 1}, 0, -1}})
 
 			if actual, expected := err, (InvalidTilePlacementError{PlacementOutOfBoundsReason}); actual != expected {
-				t.Errorf("Expected %v when attempting to play tiles but got %v", expected, actual)
+				t.Errorf("Expected %v when attempting to play tiles out of bounds but got %v", expected, actual)
 			}
 
 			err = game.Play([]TilePlacement{{Tile{'B', 1}, game.Board.Rows, 0}})
 
 			if actual, expected := err, (InvalidTilePlacementError{PlacementOutOfBoundsReason}); actual != expected {
-				t.Errorf("Expected %v when attempting to play tiles but got %v", expected, actual)
+				t.Errorf("Expected %v when attempting to play tiles out of bounds but got %v", expected, actual)
 			}
 		})
 
@@ -186,7 +186,7 @@ func TestGame(t *testing.T) {
 			})
 
 			if actual, expected := err, (InvalidTilePlacementError{PositionOccupiedReason}); actual != expected {
-				t.Errorf("Expected %v when attempting to play tiles but got %v", expected, actual)
+				t.Errorf("Expected %v when attempting to play tiles on an occupied position but got %v", expected, actual)
 			}
 		})
 
