@@ -218,12 +218,27 @@ func TestGame(t *testing.T) {
 			}
 		})
 
+		t.Run("returns an error when the placements aren't contiguous and would create gaps", func(t *testing.T) {
+			game, _ := setupGame()
+
+			err := game.Play([]TilePlacement{
+				{Tile{'B', 1}, 0, 0},
+				{Tile{'A', 1}, 0, 1},
+				{Tile{'D', 1}, 0, 3},
+			})
+
+			if actual, expected := err, (InvalidTilePlacementError{PlacementNotContiguousReason}); actual != expected {
+				t.Errorf("Expected %v when attempting to play non-contiguous tiles but got %v", expected, actual)
+			}
+		})
+
 		t.Run("places tiles on the board for a valid play", func(t *testing.T) {
 			game, _ := setupGame()
 
+			game.Board.Position(0, 1).Tile = &Tile{'A', 1}
+
 			placements := []TilePlacement{
 				{Tile{'B', 1}, 0, 0},
-				{Tile{'A', 1}, 0, 1},
 				{Tile{'D', 1}, 0, 2},
 			}
 			err := game.Play(placements)
@@ -234,17 +249,20 @@ func TestGame(t *testing.T) {
 
 			rack := game.currentSeat().Rack
 
-			if actual, expected := len(rack), 3; actual != expected {
+			if actual, expected := len(rack), 4; actual != expected {
 				t.Errorf("Expected %d tiles to remain in the player's rack but found %d", expected, actual)
 			} else {
-				if actual, expected := rack[0], (Tile{'E', 1}); actual != expected {
+				if actual, expected := rack[0], (Tile{'A', 1}); actual != expected {
 					t.Errorf("Expected first remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
 				}
-				if actual, expected := rack[1], (Tile{'O', 1}); actual != expected {
+				if actual, expected := rack[1], (Tile{'E', 1}); actual != expected {
 					t.Errorf("Expected second remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
 				}
-				if actual, expected := rack[2], (Tile{'M', 1}); actual != expected {
+				if actual, expected := rack[2], (Tile{'O', 1}); actual != expected {
 					t.Errorf("Expected third remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+				}
+				if actual, expected := rack[3], (Tile{'M', 1}); actual != expected {
+					t.Errorf("Expected fourth remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
 				}
 			}
 

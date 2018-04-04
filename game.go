@@ -126,13 +126,18 @@ func (g *Game) validateAvailableAndContiguous(placements TilePlacements) error {
 			placement := placements.Find(r, c)
 			position := g.Board.Position(r, c)
 
+			if position == nil {
+				return InvalidTilePlacementError{PlacementOutOfBoundsReason}
+			}
+
 			if placement != nil {
-				if position == nil {
-					return InvalidTilePlacementError{PlacementOutOfBoundsReason}
-				} else if position.Tile != nil {
+				if position.Tile != nil {
 					return InvalidTilePlacementError{PositionOccupiedReason}
 				}
 				placed++
+
+			} else if position.Tile == nil {
+				return InvalidTilePlacementError{PlacementNotContiguousReason}
 			}
 		}
 	}
