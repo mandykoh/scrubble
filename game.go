@@ -112,38 +112,44 @@ func (g *Game) requirePhase(phase GamePhase, action func() error) error {
 	return action()
 }
 
-func (g *Game) validateConnected(placements TilePlacements) error {
-	return nil
-}
-
-func (g *Game) validateContiguous(placements TilePlacements) error {
+func (g *Game) validateAvailableAndContiguous(placements TilePlacements) error {
 	minRow, minCol, maxRow, maxCol := placements.Bounds()
 
 	if minRow != maxRow && minCol != maxCol {
 		return InvalidTilePlacementError{PlacementNotLinearReason}
 	}
 
+	placed := 0
+
+	for r := minRow; r <= maxRow; r++ {
+		for c := minCol; c <= maxCol; c++ {
+			placement := placements.Find(r, c)
+			position := g.Board.Position(r, c)
+
+			if placement != nil {
+				if position == nil {
+					return InvalidTilePlacementError{PlacementOutOfBoundsReason}
+				} else if position.Tile != nil {
+					return InvalidTilePlacementError{PositionOccupiedReason}
+				}
+				placed++
+			}
+		}
+	}
+
+	if placed != len(placements) {
+		return InvalidTilePlacementError{PlacementOverlapReason}
+	}
+
 	return nil
 }
 
-func (g *Game) validatePositionsAvailable(placements TilePlacements) error {
-	for _, p := range placements {
-		pos := g.Board.Position(p.Row, p.Column)
-		if pos == nil {
-			return InvalidTilePlacementError{PlacementOutOfBoundsReason}
-		}
-		if pos.Tile != nil {
-			return InvalidTilePlacementError{PositionOccupiedReason}
-		}
-	}
+func (g *Game) validateConnected(placements TilePlacements) error {
 	return nil
 }
 
 func (g *Game) validateTilePositions(placements TilePlacements) error {
-	err := g.validatePositionsAvailable(placements)
-	if err == nil {
-		err = g.validateContiguous(placements)
-	}
+	err := g.validateAvailableAndContiguous(placements)
 	if err == nil {
 		err = g.validateConnected(placements)
 	}

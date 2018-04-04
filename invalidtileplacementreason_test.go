@@ -14,6 +14,7 @@ func TestInvalidTilePlacementReason(t *testing.T) {
 				{NoTilesPlacedReason, "NoTilesPlacedReason"},
 				{PositionOccupiedReason, "PositionOccupiedReason"},
 				{PlacementOutOfBoundsReason, "PlacementOutOfBoundsReason"},
+				{PlacementOverlapReason, "PlacementOverlapReason"},
 				{PlacementNotLinearReason, "PlacementNotLinearReason"},
 				{PlacementNotContiguousReason, "PlacementNotContiguousReason"},
 				{UnknownInvalidTilePlacementReason, "UnknownInvalidTilePlacementReason"},
@@ -47,6 +48,7 @@ func TestInvalidTilePlacementReason(t *testing.T) {
 				{NoTilesPlacedReason, "NoTilesPlaced"},
 				{PositionOccupiedReason, "PositionOccupied"},
 				{PlacementOutOfBoundsReason, "PlacementOutOfBounds"},
+				{PlacementOverlapReason, "PlacementOverlap"},
 				{PlacementNotLinearReason, "PlacementNotLinear"},
 				{PlacementNotContiguousReason, "PlacementNotContiguous"},
 			}

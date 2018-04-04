@@ -204,6 +204,20 @@ func TestGame(t *testing.T) {
 			}
 		})
 
+		t.Run("returns an error when the placements overlap", func(t *testing.T) {
+			game, _ := setupGame()
+
+			err := game.Play([]TilePlacement{
+				{Tile{'B', 1}, 0, 0},
+				{Tile{'A', 1}, 0, 1},
+				{Tile{'D', 1}, 0, 0},
+			})
+
+			if actual, expected := err, (InvalidTilePlacementError{PlacementOverlapReason}); actual != expected {
+				t.Errorf("Expected %v when attempting to play overlapping tiles but got %v", expected, actual)
+			}
+		})
+
 		t.Run("places tiles on the board for a valid play", func(t *testing.T) {
 			game, _ := setupGame()
 

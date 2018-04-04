@@ -30,4 +30,35 @@ func TestTilePlacements(t *testing.T) {
 			}
 		})
 	})
+
+	t.Run(".Find()", func(t *testing.T) {
+
+		placements := TilePlacements{
+			{Tile{'Z', 1}, 2, 5},
+			{Tile{'A', 1}, 3, 7},
+			{Tile{'B', 1}, 3, 2},
+			{Tile{'C', 1}, 3, 7},
+			{Tile{'D', 1}, 1, 7},
+		}
+
+		t.Run("returns the first matching placement", func(t *testing.T) {
+			p := placements.Find(3, 7)
+
+			if p == nil {
+				t.Errorf("Expected to find a placement but got nil")
+			} else {
+				if actual, expected := p.Tile, (Tile{'A', 1}); actual != expected {
+					t.Errorf("Expected to find tile %c(%d) but instead found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+				}
+			}
+		})
+
+		t.Run("returns nil if none match", func(t *testing.T) {
+			p := placements.Find(3, 99)
+
+			if p != nil {
+				t.Errorf("Expected not to find a placement but got one for tile %c(%d) at position %d,%d", p.Tile.Letter, p.Tile.Points, p.Row, p.Column)
+			}
+		})
+	})
 }

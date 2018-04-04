@@ -29,3 +29,14 @@ func (tp TilePlacements) Bounds() (minRow, minCol, maxRow, maxCol int) {
 
 	return
 }
+
+// Find returns the first placement corresponding to the given row and column,
+// or nil if no matching placement exists.
+func (tp TilePlacements) Find(row, col int) *TilePlacement {
+	for i := range tp {
+		if tp[i].Row == row && tp[i].Column == col {
+			return &tp[i]
+		}
+	}
+	return nil
+}
