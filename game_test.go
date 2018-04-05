@@ -70,8 +70,9 @@ func TestGame(t *testing.T) {
 
 	t.Run(".Play()", func(t *testing.T) {
 
-		setupGame := func() (Game, *Player) {
-			p := &Player{Name: "Alice"}
+		setupGame := func() Game {
+			p1 := &Player{Name: "Alice"}
+			p2 := &Player{Name: "Bob"}
 
 			rackTiles := []Tile{
 				{'A', 1},
@@ -87,14 +88,13 @@ func TestGame(t *testing.T) {
 				Bag:   BagWithStandardEnglishTiles(),
 				Board: BoardWithStandardLayout(),
 				Seats: []Seat{
-					{
-						OccupiedBy: p,
-						Rack:       Rack(rackTiles),
-					},
+					{OccupiedBy: p1, Rack: append(Rack{}, rackTiles...)},
+					{OccupiedBy: p2, Rack: append(Rack{}, rackTiles...)},
 				},
+				CurrentSeatIndex: 1,
 			}
 
-			return game, p
+			return game
 		}
 
 		t.Run("returns an error when the game is not in the Main phase", func(t *testing.T) {
@@ -112,7 +112,7 @@ func TestGame(t *testing.T) {
 		})
 
 		t.Run("returns an error when no tiles are being played", func(t *testing.T) {
-			game, _ := setupGame()
+			game := setupGame()
 
 			err := game.Play(TilePlacements{})
 
@@ -122,7 +122,7 @@ func TestGame(t *testing.T) {
 		})
 
 		t.Run("returns an error when the current player doesn't have the required tiles", func(t *testing.T) {
-			game, _ := setupGame()
+			game := setupGame()
 
 			playTiles := []Tile{
 				{'B', 1},
@@ -154,13 +154,13 @@ func TestGame(t *testing.T) {
 				}
 			}
 
-			if actual, expected := len(game.Seats[0].Rack), 6; actual != expected {
+			if actual, expected := len(game.Seats[1].Rack), 6; actual != expected {
 				t.Errorf("Expected player to still have %d tiles but found %d", expected, actual)
 			}
 		})
 
 		t.Run("returns an error when any of the board positions is out of bounds", func(t *testing.T) {
-			game, _ := setupGame()
+			game := setupGame()
 
 			game.Board.Position(0, 0).Tile = &Tile{'A', 1}
 
@@ -178,7 +178,7 @@ func TestGame(t *testing.T) {
 		})
 
 		t.Run("returns an error when any of the board positions is already occupied", func(t *testing.T) {
-			game, _ := setupGame()
+			game := setupGame()
 
 			game.Board.Position(0, 0).Tile = &Tile{'A', 1}
 
@@ -194,7 +194,7 @@ func TestGame(t *testing.T) {
 		})
 
 		t.Run("returns an error when the placements aren't in a straight line", func(t *testing.T) {
-			game, _ := setupGame()
+			game := setupGame()
 
 			err := game.Play(TilePlacements{
 				{Tile{'B', 1}, 0, 0},
@@ -208,7 +208,7 @@ func TestGame(t *testing.T) {
 		})
 
 		t.Run("returns an error when the placements overlap", func(t *testing.T) {
-			game, _ := setupGame()
+			game := setupGame()
 
 			err := game.Play(TilePlacements{
 				{Tile{'B', 1}, 0, 0},
@@ -222,7 +222,7 @@ func TestGame(t *testing.T) {
 		})
 
 		t.Run("returns an error when the placements aren't contiguous and would create gaps", func(t *testing.T) {
-			game, _ := setupGame()
+			game := setupGame()
 
 			err := game.Play(TilePlacements{
 				{Tile{'B', 1}, 0, 0},
@@ -236,7 +236,7 @@ func TestGame(t *testing.T) {
 		})
 
 		t.Run("returns an error when the placements aren't connected to at least one existing tile or on a starting position", func(t *testing.T) {
-			game, _ := setupGame()
+			game := setupGame()
 
 			game.Board.Position(0, 0).Tile = &Tile{'A', 1}
 
@@ -266,7 +266,7 @@ func TestGame(t *testing.T) {
 		})
 
 		t.Run("with a valid play", func(t *testing.T) {
-			game, _ := setupGame()
+			game := setupGame()
 			game.Board.Position(0, 1).Tile = &Tile{'A', 1}
 
 			nextBagTiles := []Tile{
@@ -300,7 +300,7 @@ func TestGame(t *testing.T) {
 			})
 
 			t.Run("replenishes the player's rack from the bag", func(t *testing.T) {
-				rack := game.Seats[0].Rack
+				rack := game.Seats[1].Rack
 
 				if actual, expected := len(rack), MaxRackTiles; actual != expected {
 					t.Errorf("Expected player's rack to have been replenished to %d tiles but found %d", expected, actual)
@@ -326,6 +326,12 @@ func TestGame(t *testing.T) {
 					if actual, expected := rack[6], nextBagTiles[2]; actual != expected {
 						t.Errorf("Expected seventh remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
 					}
+				}
+			})
+
+			t.Run("moves to next player's turn", func(t *testing.T) {
+				if actual, expected := game.CurrentSeatIndex, 0; actual != expected {
+					t.Errorf("Expected turn to move to next player but current seat is %d", game.CurrentSeatIndex)
 				}
 			})
 		})
