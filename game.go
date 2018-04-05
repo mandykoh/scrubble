@@ -134,24 +134,19 @@ func (g *Game) validateTilePositions(placements TilePlacements) error {
 
 	for r := minRow; r <= maxRow; r++ {
 		for c := minCol; c <= maxCol; c++ {
-			placement := placements.Find(r, c)
-			position := g.Board.Position(r, c)
 
+			position := g.Board.Position(r, c)
 			if position == nil {
 				return InvalidTilePlacementError{PlacementOutOfBoundsReason}
 			}
 
+			placement := placements.Find(r, c)
 			if placement != nil {
 				if position.Tile != nil {
 					return InvalidTilePlacementError{PositionOccupiedReason}
 				}
 
-				if !connected {
-					if position.Type == startPositionTypeInstance || g.neighbourHasTile(r, c) {
-						connected = true
-					}
-				}
-
+				connected = connected || position.Type == startPositionTypeInstance || g.neighbourHasTile(r, c)
 				placed++
 
 			} else if position.Tile == nil {
