@@ -91,7 +91,7 @@ func (b *Board) neighbourHasTile(row, col int) bool {
 	return false
 }
 
-func (b *Board) placeTiles(placements []TilePlacement) {
+func (b *Board) placeTiles(placements TilePlacements) {
 	for _, p := range placements {
 		tile := p.Tile
 		b.Position(p.Row, p.Column).Tile = &tile

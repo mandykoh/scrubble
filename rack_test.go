@@ -97,7 +97,7 @@ func TestRack(t *testing.T) {
 				{'M', 1},
 			}
 
-			remaining, missing := r.tryPlayTiles([]TilePlacement{
+			remaining, missing := r.tryPlayTiles(TilePlacements{
 				{Tile{'B', 1}, 0, 0},
 				{Tile{'O', 1}, 0, 1},
 				{Tile{'O', 1}, 0, 2},
@@ -129,7 +129,7 @@ func TestRack(t *testing.T) {
 				{'O', 1},
 			}
 
-			remaining, missing := r.tryPlayTiles([]TilePlacement{
+			remaining, missing := r.tryPlayTiles(TilePlacements{
 				{Tile{'B', 1}, 0, 0},
 				{Tile{'O', 1}, 0, 1},
 				{Tile{'O', 1}, 0, 2},

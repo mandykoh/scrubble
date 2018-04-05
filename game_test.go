@@ -101,7 +101,7 @@ func TestGame(t *testing.T) {
 				Phase: SetupPhase,
 			}
 
-			err := game.Play([]TilePlacement{})
+			err := game.Play(TilePlacements{})
 
 			if actual, expected := err, (GameOutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
@@ -111,7 +111,7 @@ func TestGame(t *testing.T) {
 		t.Run("returns an error when no tiles are being played", func(t *testing.T) {
 			game, _ := setupGame()
 
-			err := game.Play([]TilePlacement{})
+			err := game.Play(TilePlacements{})
 
 			if actual, expected := err, (InvalidTilePlacementError{NoTilesPlacedReason}); actual != expected {
 				t.Errorf("Expected %v when attempting to play zero tiles but got %v", expected, actual)
@@ -129,7 +129,7 @@ func TestGame(t *testing.T) {
 				{'S', 1},
 			}
 
-			var placements []TilePlacement
+			var placements TilePlacements
 			for i, t := range playTiles {
 				placements = append(placements, TilePlacement{t, 0, i})
 			}
@@ -161,13 +161,13 @@ func TestGame(t *testing.T) {
 
 			game.Board.Position(0, 0).Tile = &Tile{'A', 1}
 
-			err := game.Play([]TilePlacement{{Tile{'B', 1}, 0, -1}})
+			err := game.Play(TilePlacements{{Tile{'B', 1}, 0, -1}})
 
 			if actual, expected := err, (InvalidTilePlacementError{PlacementOutOfBoundsReason}); actual != expected {
 				t.Errorf("Expected %v when attempting to play tiles out of bounds but got %v", expected, actual)
 			}
 
-			err = game.Play([]TilePlacement{{Tile{'B', 1}, game.Board.Rows, 0}})
+			err = game.Play(TilePlacements{{Tile{'B', 1}, game.Board.Rows, 0}})
 
 			if actual, expected := err, (InvalidTilePlacementError{PlacementOutOfBoundsReason}); actual != expected {
 				t.Errorf("Expected %v when attempting to play tiles out of bounds but got %v", expected, actual)
@@ -179,7 +179,7 @@ func TestGame(t *testing.T) {
 
 			game.Board.Position(0, 0).Tile = &Tile{'A', 1}
 
-			err := game.Play([]TilePlacement{
+			err := game.Play(TilePlacements{
 				{Tile{'B', 1}, 0, 0},
 				{Tile{'A', 1}, 0, 1},
 				{Tile{'D', 1}, 0, 2},
@@ -193,7 +193,7 @@ func TestGame(t *testing.T) {
 		t.Run("returns an error when the placements aren't in a straight line", func(t *testing.T) {
 			game, _ := setupGame()
 
-			err := game.Play([]TilePlacement{
+			err := game.Play(TilePlacements{
 				{Tile{'B', 1}, 0, 0},
 				{Tile{'A', 1}, 0, 1},
 				{Tile{'D', 1}, 1, 1},
@@ -207,7 +207,7 @@ func TestGame(t *testing.T) {
 		t.Run("returns an error when the placements overlap", func(t *testing.T) {
 			game, _ := setupGame()
 
-			err := game.Play([]TilePlacement{
+			err := game.Play(TilePlacements{
 				{Tile{'B', 1}, 0, 0},
 				{Tile{'A', 1}, 0, 1},
 				{Tile{'D', 1}, 0, 0},
@@ -221,7 +221,7 @@ func TestGame(t *testing.T) {
 		t.Run("returns an error when the placements aren't contiguous and would create gaps", func(t *testing.T) {
 			game, _ := setupGame()
 
-			err := game.Play([]TilePlacement{
+			err := game.Play(TilePlacements{
 				{Tile{'B', 1}, 0, 0},
 				{Tile{'A', 1}, 0, 1},
 				{Tile{'D', 1}, 0, 3},
@@ -237,7 +237,7 @@ func TestGame(t *testing.T) {
 
 			game.Board.Position(0, 0).Tile = &Tile{'A', 1}
 
-			err := game.Play([]TilePlacement{
+			err := game.Play(TilePlacements{
 				{Tile{'M', 1}, 2, 0},
 				{Tile{'A', 1}, 2, 1},
 				{Tile{'D', 1}, 2, 2},
@@ -251,7 +251,7 @@ func TestGame(t *testing.T) {
 				t.Fatalf("Expected starting position at 7,7 but found %v", actual)
 			}
 
-			err = game.Play([]TilePlacement{
+			err = game.Play(TilePlacements{
 				{Tile{'M', 1}, 7, 6},
 				{Tile{'A', 1}, 7, 7},
 				{Tile{'D', 1}, 7, 8},
@@ -267,7 +267,7 @@ func TestGame(t *testing.T) {
 
 			game.Board.Position(0, 1).Tile = &Tile{'A', 1}
 
-			placements := []TilePlacement{
+			placements := TilePlacements{
 				{Tile{'B', 1}, 0, 0},
 				{Tile{'D', 1}, 0, 2},
 			}

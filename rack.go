@@ -15,7 +15,7 @@ func (r *Rack) FillFromBag(b *Bag) {
 	}
 }
 
-func (r *Rack) tryPlayTiles(placements []TilePlacement) (remaining Rack, missing []Tile) {
+func (r *Rack) tryPlayTiles(placements TilePlacements) (remaining Rack, missing []Tile) {
 	remaining = append(remaining, *r...)
 
 Placements:
