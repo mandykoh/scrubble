@@ -101,7 +101,9 @@ func TestGame(t *testing.T) {
 				Phase: SetupPhase,
 			}
 
-			err := game.Play(TilePlacements{})
+			err := game.Play(TilePlacements{
+				{Tile{'A', 1}, 7, 7},
+			})
 
 			if actual, expected := err, (GameOutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
@@ -131,7 +133,7 @@ func TestGame(t *testing.T) {
 
 			var placements TilePlacements
 			for i, t := range playTiles {
-				placements = append(placements, TilePlacement{t, 0, i})
+				placements = append(placements, TilePlacement{t, 7, 7 + i})
 			}
 
 			err := game.Play(placements)
