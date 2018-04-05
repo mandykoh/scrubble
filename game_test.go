@@ -84,6 +84,7 @@ func TestGame(t *testing.T) {
 
 			game := Game{
 				Phase: MainPhase,
+				Bag:   BagWithStandardEnglishTiles(),
 				Board: BoardWithStandardLayout(),
 				Seats: []Seat{
 					{
@@ -264,10 +265,15 @@ func TestGame(t *testing.T) {
 			}
 		})
 
-		t.Run("places tiles on the board for a valid play", func(t *testing.T) {
+		t.Run("with a valid play", func(t *testing.T) {
 			game, _ := setupGame()
-
 			game.Board.Position(0, 1).Tile = &Tile{'A', 1}
+
+			nextBagTiles := []Tile{
+				game.Bag[len(game.Bag)-1],
+				game.Bag[len(game.Bag)-2],
+				game.Bag[len(game.Bag)-3],
+			}
 
 			placements := TilePlacements{
 				{Tile{'B', 1}, 0, 0},
@@ -275,38 +281,53 @@ func TestGame(t *testing.T) {
 			}
 			err := game.Play(placements)
 
-			if err != nil {
-				t.Errorf("Expected play to succeed but got error %v", err)
-			}
+			t.Run("doesn't return an error", func(t *testing.T) {
+				if err != nil {
+					t.Errorf("Expected play to succeed but got error %v", err)
+				}
+			})
 
-			rack := game.currentSeat().Rack
-
-			if actual, expected := len(rack), 4; actual != expected {
-				t.Errorf("Expected %d tiles to remain in the player's rack but found %d", expected, actual)
-			} else {
-				if actual, expected := rack[0], (Tile{'A', 1}); actual != expected {
-					t.Errorf("Expected first remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-				}
-				if actual, expected := rack[1], (Tile{'E', 1}); actual != expected {
-					t.Errorf("Expected second remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-				}
-				if actual, expected := rack[2], (Tile{'O', 1}); actual != expected {
-					t.Errorf("Expected third remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-				}
-				if actual, expected := rack[3], (Tile{'M', 1}); actual != expected {
-					t.Errorf("Expected fourth remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-				}
-			}
-
-			for _, p := range placements {
-				if actual := game.Board.Position(p.Row, p.Column).Tile; actual == nil || *actual != p.Tile {
-					if actual == nil {
-						t.Errorf("Expected tile %c(%d) to be in position %d,%d but got <nil>", p.Tile.Letter, p.Tile.Points, p.Row, p.Column)
-					} else {
-						t.Errorf("Expected tile %c(%d) to be in position %d,%d but got %c(%d)", p.Tile.Letter, p.Tile.Points, p.Row, p.Column, actual.Letter, actual.Points)
+			t.Run("places tiles on the board", func(t *testing.T) {
+				for _, p := range placements {
+					if actual := game.Board.Position(p.Row, p.Column).Tile; actual == nil || *actual != p.Tile {
+						if actual == nil {
+							t.Errorf("Expected tile %c(%d) to be in position %d,%d but got <nil>", p.Tile.Letter, p.Tile.Points, p.Row, p.Column)
+						} else {
+							t.Errorf("Expected tile %c(%d) to be in position %d,%d but got %c(%d)", p.Tile.Letter, p.Tile.Points, p.Row, p.Column, actual.Letter, actual.Points)
+						}
 					}
 				}
-			}
+			})
+
+			t.Run("replenishes the player's rack from the bag", func(t *testing.T) {
+				rack := game.Seats[0].Rack
+
+				if actual, expected := len(rack), MaxRackTiles; actual != expected {
+					t.Errorf("Expected player's rack to have been replenished to %d tiles but found %d", expected, actual)
+				} else {
+					if actual, expected := rack[0], (Tile{'A', 1}); actual != expected {
+						t.Errorf("Expected first remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+					}
+					if actual, expected := rack[1], (Tile{'E', 1}); actual != expected {
+						t.Errorf("Expected second remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+					}
+					if actual, expected := rack[2], (Tile{'O', 1}); actual != expected {
+						t.Errorf("Expected third remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+					}
+					if actual, expected := rack[3], (Tile{'M', 1}); actual != expected {
+						t.Errorf("Expected fourth remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+					}
+					if actual, expected := rack[4], nextBagTiles[0]; actual != expected {
+						t.Errorf("Expected fifth remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+					}
+					if actual, expected := rack[5], nextBagTiles[1]; actual != expected {
+						t.Errorf("Expected sixth remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+					}
+					if actual, expected := rack[6], nextBagTiles[2]; actual != expected {
+						t.Errorf("Expected seventh remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+					}
+				}
+			})
 		})
 	})
 

@@ -50,6 +50,7 @@ func (g *Game) Play(placements TilePlacements) error {
 
 		g.Board.placeTiles(placements)
 		g.currentSeat().Rack = remaining
+		g.currentSeat().Rack.FillFromBag(&g.Bag)
 
 		return nil
 	})
