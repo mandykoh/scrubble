@@ -34,10 +34,6 @@ func (g *Game) AddPlayer(p *Player) error {
 // If the tile placement is illegal, an InvalidTilePlacementError is returned.
 func (g *Game) Play(placements TilePlacements) error {
 	return g.requirePhase(MainPhase, func() error {
-		if len(placements) == 0 {
-			return InvalidTilePlacementError{NoTilesPlacedReason}
-		}
-
 		remaining, missing := g.currentSeat().Rack.tryPlayTiles(placements)
 		if len(missing) != 0 {
 			return InsufficientTilesError{missing}
@@ -114,6 +110,10 @@ func (g *Game) requirePhase(phase GamePhase, action func() error) error {
 }
 
 func (g *Game) validateTilePositions(placements TilePlacements) error {
+	if len(placements) == 0 {
+		return InvalidTilePlacementError{NoTilesPlacedReason}
+	}
+
 	minRow, minCol, maxRow, maxCol := placements.Bounds()
 
 	if minRow != maxRow && minCol != maxCol {
