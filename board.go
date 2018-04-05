@@ -81,6 +81,16 @@ func (b *Board) Position(row, col int) *BoardPosition {
 	return &b.Positions[row*b.Columns+col]
 }
 
+func (b *Board) neighbourHasTile(row, col int) bool {
+	neighbours := b.Neighbours(row, col)
+	for _, n := range neighbours {
+		if n != nil && n.Tile != nil {
+			return true
+		}
+	}
+	return false
+}
+
 func (b *Board) placeTiles(placements []TilePlacement) {
 	for _, p := range placements {
 		tile := p.Tile

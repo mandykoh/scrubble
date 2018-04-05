@@ -104,16 +104,6 @@ func (g *Game) currentSeat() *Seat {
 	return &g.Seats[g.CurrentSeatIndex]
 }
 
-func (g *Game) neighbourHasTile(row, col int) bool {
-	neighbours := g.Board.Neighbours(row, col)
-	for _, n := range neighbours {
-		if n != nil && n.Tile != nil {
-			return true
-		}
-	}
-	return false
-}
-
 func (g *Game) requirePhase(phase GamePhase, action func() error) error {
 	if g.Phase != phase {
 		return GameOutOfPhaseError{phase, g.Phase}
@@ -146,7 +136,7 @@ func (g *Game) validateTilePositions(placements TilePlacements) error {
 					return InvalidTilePlacementError{PositionOccupiedReason}
 				}
 
-				connected = connected || position.Type == startPositionTypeInstance || g.neighbourHasTile(r, c)
+				connected = connected || position.Type == startPositionTypeInstance || g.Board.neighbourHasTile(r, c)
 				placed++
 
 			} else if position.Tile == nil {
