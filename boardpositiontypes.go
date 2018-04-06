@@ -26,9 +26,3 @@ func BoardPositionTypes() (__, st, dl, dw, tl, tw PositionType) {
 		tripleLetterScorePositionTypeInstance,
 		tripleWordScorePositionTypeInstance
 }
-
-// IsStartPosition returns true if the specified board position is a start
-// position type.
-func IsStartPosition(p *BoardPosition) bool {
-	return p.Type == startPositionTypeInstance
-}

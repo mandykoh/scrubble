@@ -137,7 +137,7 @@ func (g *Game) validateTilePositions(placements TilePlacements) error {
 				return InvalidTilePlacementError{PositionOccupiedReason}
 			}
 
-			connected = connected || IsStartPosition(position) || g.Board.neighbourHasTile(c)
+			connected = connected || position.Type.CountsAsConnected() || g.Board.neighbourHasTile(c)
 			placementsLeft--
 
 		} else if position.Tile == nil {
