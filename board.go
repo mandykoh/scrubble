@@ -23,12 +23,12 @@ func BoardWithLayout(layout BoardLayout) Board {
 
 		// Set position types according to the specified layout
 		for col, posType := range lRow {
-			b.Position(row, col).Type = posType
+			b.Position(Coord{row, col}).Type = posType
 		}
 
 		// Fill in any unspecified remainder of the row with Normal positions
 		for col := len(lRow); col < columns; col++ {
-			b.Position(row, col).Type = normalPositionTypeInstance
+			b.Position(Coord{row, col}).Type = normalPositionTypeInstance
 		}
 	}
 
@@ -58,31 +58,29 @@ func BoardWithStandardLayout() Board {
 	})
 }
 
-// Neighbours returns the cardinal neighbouring positions to the specified row
-// and column. Rows and columns are zero-indexed. If a neighbour would be out
-// of bounds, nil is returned in its place. Neighbours are always returned in
-// North, South, East, West order.
-func (b *Board) Neighbours(row, col int) [4]*BoardPosition {
+// Neighbours returns the cardinal neighbouring positions to the specified
+// coordinate. If a neighbour would be out of bounds, nil is returned in its
+// place. Neighbours are always returned in North, South, East, West order.
+func (b *Board) Neighbours(c Coord) [4]*BoardPosition {
 	return [4]*BoardPosition{
-		b.Position(row-1, col),
-		b.Position(row+1, col),
-		b.Position(row, col+1),
-		b.Position(row, col-1),
+		b.Position(c.North()),
+		b.Position(c.South()),
+		b.Position(c.East()),
+		b.Position(c.West()),
 	}
 }
 
-// Position returns the board position related to the specified row and column.
-// Rows and columns are zero-indexed. If the requested position is out of
-// bounds, nil is returned.
-func (b *Board) Position(row, col int) *BoardPosition {
-	if row < 0 || row >= b.Rows || col < 0 || col >= b.Columns {
+// Position returns the board position related to the specified coordinate.
+// If the requested position is out of bounds, nil is returned.
+func (b *Board) Position(c Coord) *BoardPosition {
+	if c.Row < 0 || c.Row >= b.Rows || c.Column < 0 || c.Column >= b.Columns {
 		return nil
 	}
-	return &b.Positions[row*b.Columns+col]
+	return &b.Positions[c.Row*b.Columns+c.Column]
 }
 
-func (b *Board) neighbourHasTile(row, col int) bool {
-	neighbours := b.Neighbours(row, col)
+func (b *Board) neighbourHasTile(c Coord) bool {
+	neighbours := b.Neighbours(c)
 	for _, n := range neighbours {
 		if n != nil && n.Tile != nil {
 			return true
@@ -94,6 +92,6 @@ func (b *Board) neighbourHasTile(row, col int) bool {
 func (b *Board) placeTiles(placements TilePlacements) {
 	for _, p := range placements {
 		tile := p.Tile
-		b.Position(p.Row, p.Column).Tile = &tile
+		b.Position(p.Coord).Tile = &tile
 	}
 }

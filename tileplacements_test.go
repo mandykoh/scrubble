@@ -8,25 +8,25 @@ func TestTilePlacements(t *testing.T) {
 
 		t.Run("returns the correct bounds of the placements", func(t *testing.T) {
 			placements := TilePlacements{
-				{Tile{'A', 1}, 3, 0},
-				{Tile{'B', 1}, 3, 1},
-				{Tile{'C', 1}, 2, 7},
-				{Tile{'D', 1}, 5, 6},
+				{Tile{'A', 1}, Coord{3, 0}},
+				{Tile{'B', 1}, Coord{3, 1}},
+				{Tile{'C', 1}, Coord{2, 7}},
+				{Tile{'D', 1}, Coord{5, 6}},
 			}
 
-			minRow, minCol, maxRow, maxCol := placements.Bounds()
+			bounds := placements.Bounds()
 
-			if expected := 2; minRow != expected {
-				t.Errorf("Expected minimum row to be %d but was %d", expected, minRow)
+			if expected := 2; bounds.Min.Row != expected {
+				t.Errorf("Expected minimum row to be %d but was %d", expected, bounds.Min.Row)
 			}
-			if expected := 0; minCol != expected {
-				t.Errorf("Expected minimum column to be %d but was %d", expected, minCol)
+			if expected := 0; bounds.Min.Column != expected {
+				t.Errorf("Expected minimum column to be %d but was %d", expected, bounds.Min.Column)
 			}
-			if expected := 5; maxRow != expected {
-				t.Errorf("Expected maximum row to be %d but was %d", expected, maxRow)
+			if expected := 5; bounds.Max.Row != expected {
+				t.Errorf("Expected maximum row to be %d but was %d", expected, bounds.Max.Row)
 			}
-			if expected := 7; maxCol != expected {
-				t.Errorf("Expected maximum column to be %d but was %d", expected, maxCol)
+			if expected := 7; bounds.Max.Column != expected {
+				t.Errorf("Expected maximum column to be %d but was %d", expected, bounds.Max.Column)
 			}
 		})
 	})
@@ -34,15 +34,15 @@ func TestTilePlacements(t *testing.T) {
 	t.Run(".Find()", func(t *testing.T) {
 
 		placements := TilePlacements{
-			{Tile{'Z', 1}, 2, 5},
-			{Tile{'A', 1}, 3, 7},
-			{Tile{'B', 1}, 3, 2},
-			{Tile{'C', 1}, 3, 7},
-			{Tile{'D', 1}, 1, 7},
+			{Tile{'Z', 1}, Coord{2, 5}},
+			{Tile{'A', 1}, Coord{3, 7}},
+			{Tile{'B', 1}, Coord{3, 2}},
+			{Tile{'C', 1}, Coord{3, 7}},
+			{Tile{'D', 1}, Coord{1, 7}},
 		}
 
 		t.Run("returns the first matching placement", func(t *testing.T) {
-			p := placements.Find(3, 7)
+			p := placements.Find(Coord{3, 7})
 
 			if p == nil {
 				t.Errorf("Expected to find a placement but got nil")
@@ -54,7 +54,7 @@ func TestTilePlacements(t *testing.T) {
 		})
 
 		t.Run("returns nil if none match", func(t *testing.T) {
-			p := placements.Find(3, 99)
+			p := placements.Find(Coord{3, 99})
 
 			if p != nil {
 				t.Errorf("Expected not to find a placement but got one for tile %c(%d) at position %d,%d", p.Tile.Letter, p.Tile.Points, p.Row, p.Column)

@@ -114,43 +114,43 @@ func (g *Game) requirePhase(phase GamePhase, action func() error) error {
 }
 
 func (g *Game) validateTilePositions(placements TilePlacements) error {
-	if len(placements) == 0 {
+	placementsLeft := len(placements)
+	if placementsLeft == 0 {
 		return InvalidTilePlacementError{NoTilesPlacedReason}
 	}
 
-	minRow, minCol, maxRow, maxCol := placements.Bounds()
-
-	if minRow != maxRow && minCol != maxCol {
+	bounds := placements.Bounds()
+	if !bounds.IsLinear() {
 		return InvalidTilePlacementError{PlacementNotLinearReason}
 	}
 
-	placed := 0
 	connected := false
 
-	for r := minRow; r <= maxRow; r++ {
-		for c := minCol; c <= maxCol; c++ {
-
-			position := g.Board.Position(r, c)
-			if position == nil {
-				return InvalidTilePlacementError{PlacementOutOfBoundsReason}
-			}
-
-			placement := placements.Find(r, c)
-			if placement != nil {
-				if position.Tile != nil {
-					return InvalidTilePlacementError{PositionOccupiedReason}
-				}
-
-				connected = connected || position.Type == startPositionTypeInstance || g.Board.neighbourHasTile(r, c)
-				placed++
-
-			} else if position.Tile == nil {
-				return InvalidTilePlacementError{PlacementNotContiguousReason}
-			}
+	err := bounds.EachCoord(func(c Coord) error {
+		position := g.Board.Position(c)
+		if position == nil {
+			return InvalidTilePlacementError{PlacementOutOfBoundsReason}
 		}
+
+		if placement := placements.Find(c); placement != nil {
+			if position.Tile != nil {
+				return InvalidTilePlacementError{PositionOccupiedReason}
+			}
+
+			connected = connected || IsStartPosition(position) || g.Board.neighbourHasTile(c)
+			placementsLeft--
+
+		} else if position.Tile == nil {
+			return InvalidTilePlacementError{PlacementNotContiguousReason}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 
-	if placed != len(placements) {
+	if placementsLeft != 0 {
 		return InvalidTilePlacementError{PlacementOverlapReason}
 	}
 	if !connected {

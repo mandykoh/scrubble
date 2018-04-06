@@ -56,7 +56,7 @@ func TestBoard(t *testing.T) {
 					posType = lRow[col]
 				}
 
-				pos := b.Position(row, col)
+				pos := b.Position(Coord{row, col})
 
 				if tile := pos.Tile; tile != nil {
 					t.Errorf("Expected position %d,%d to be empty but found tile %c(%d)", row, col, tile.Letter, tile.Points)
@@ -136,28 +136,28 @@ func TestBoard(t *testing.T) {
 		}
 
 		t.Run("returns four cardinal neighbours of the specified position", func(t *testing.T) {
-			neighbours := b.Neighbours(1, 1)
+			neighbours := b.Neighbours(Coord{1, 1})
 
 			if actual, expected := len(neighbours), 4; actual != expected {
 				t.Errorf("Expected %d neighbours but got %d instead", expected, actual)
 			} else {
-				if actual, expected := neighbours[0], b.Position(0, 1); actual != expected {
+				if actual, expected := neighbours[0], b.Position(Coord{0, 1}); actual != expected {
 					t.Errorf("Expected north position to be returned but got %v", actual)
 				}
-				if actual, expected := neighbours[1], b.Position(2, 1); actual != expected {
+				if actual, expected := neighbours[1], b.Position(Coord{2, 1}); actual != expected {
 					t.Errorf("Expected south position to be returned but got %v", actual)
 				}
-				if actual, expected := neighbours[2], b.Position(1, 2); actual != expected {
+				if actual, expected := neighbours[2], b.Position(Coord{1, 2}); actual != expected {
 					t.Errorf("Expected east position to be returned but got %v", actual)
 				}
-				if actual, expected := neighbours[3], b.Position(1, 0); actual != expected {
+				if actual, expected := neighbours[3], b.Position(Coord{1, 0}); actual != expected {
 					t.Errorf("Expected west position to be returned but got %v", actual)
 				}
 			}
 		})
 
 		t.Run("omits neighbours that would be out of bounds", func(t *testing.T) {
-			neighbours := b.Neighbours(0, 0)
+			neighbours := b.Neighbours(Coord{0, 0})
 
 			if actual, expected := len(neighbours), 4; actual != expected {
 				t.Errorf("Expected %d neighbours but got %d instead", expected, actual)
@@ -165,10 +165,10 @@ func TestBoard(t *testing.T) {
 				if actual := neighbours[0]; actual != nil {
 					t.Errorf("Expected north position to be nil but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
 				}
-				if actual, expected := neighbours[1], b.Position(1, 0); actual != expected {
+				if actual, expected := neighbours[1], b.Position(Coord{1, 0}); actual != expected {
 					t.Errorf("Expected south position to be returned but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
 				}
-				if actual, expected := neighbours[2], b.Position(0, 1); actual != expected {
+				if actual, expected := neighbours[2], b.Position(Coord{0, 1}); actual != expected {
 					t.Errorf("Expected east position to be returned but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
 				}
 				if actual := neighbours[3]; actual != nil {
@@ -176,12 +176,12 @@ func TestBoard(t *testing.T) {
 				}
 			}
 
-			neighbours = b.Neighbours(2, 2)
+			neighbours = b.Neighbours(Coord{2, 2})
 
 			if actual, expected := len(neighbours), 4; actual != expected {
 				t.Errorf("Expected %d neighbours but got %d instead", expected, actual)
 			} else {
-				if actual, expected := neighbours[0], b.Position(1, 2); actual != expected {
+				if actual, expected := neighbours[0], b.Position(Coord{1, 2}); actual != expected {
 					t.Errorf("Expected north position to be returned but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
 				}
 				if actual := neighbours[1]; actual != nil {
@@ -190,7 +190,7 @@ func TestBoard(t *testing.T) {
 				if actual := neighbours[2]; actual != nil {
 					t.Errorf("Expected east position to be nil but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
 				}
-				if actual, expected := neighbours[3], b.Position(2, 1); actual != expected {
+				if actual, expected := neighbours[3], b.Position(Coord{2, 1}); actual != expected {
 					t.Errorf("Expected west position to be returned but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
 				}
 			}
@@ -209,34 +209,34 @@ func TestBoard(t *testing.T) {
 		}
 
 		t.Run("returns the specified position", func(t *testing.T) {
-			if actual, expected := b.Position(0, 0), &b.Positions[0]; actual != expected {
+			if actual, expected := b.Position(Coord{0, 0}), &b.Positions[0]; actual != expected {
 				t.Errorf("Expected 0,0 to correspond to position with '%s' type, but found %+v", expected.Type.Name(), actual)
 			}
 
-			if actual, expected := b.Position(0, 1), &b.Positions[1]; actual != expected {
+			if actual, expected := b.Position(Coord{0, 1}), &b.Positions[1]; actual != expected {
 				t.Errorf("Expected 0,1 to correspond to position with '%s' type, but found %+v", expected.Type.Name(), actual)
 			}
 
-			if actual, expected := b.Position(1, 0), &b.Positions[2]; actual != expected {
+			if actual, expected := b.Position(Coord{1, 0}), &b.Positions[2]; actual != expected {
 				t.Errorf("Expected 1,0 to correspond to position with '%s' type, but found %+v", expected.Type.Name(), actual)
 			}
 
-			if actual, expected := b.Position(1, 1), &b.Positions[3]; actual != expected {
+			if actual, expected := b.Position(Coord{1, 1}), &b.Positions[3]; actual != expected {
 				t.Errorf("Expected 1,1 to correspond to position with '%s' type, but found %+v", expected.Type.Name(), actual)
 			}
 		})
 
 		t.Run("returns nil when out of bounds", func(t *testing.T) {
-			if actual, expected := b.Position(-1, 0), (*BoardPosition)(nil); actual != expected {
+			if actual, expected := b.Position(Coord{-1, 0}), (*BoardPosition)(nil); actual != expected {
 				t.Errorf("Expected -1,0 to be out of bounds but got position %+v", actual)
 			}
-			if actual, expected := b.Position(0, -1), (*BoardPosition)(nil); actual != expected {
+			if actual, expected := b.Position(Coord{0, -1}), (*BoardPosition)(nil); actual != expected {
 				t.Errorf("Expected 0,-1 to be out of bounds but got position %+v", actual)
 			}
-			if actual, expected := b.Position(2, 0), (*BoardPosition)(nil); actual != expected {
+			if actual, expected := b.Position(Coord{2, 0}), (*BoardPosition)(nil); actual != expected {
 				t.Errorf("Expected 2,0 to be out of bounds but got position %+v", actual)
 			}
-			if actual, expected := b.Position(0, 2), (*BoardPosition)(nil); actual != expected {
+			if actual, expected := b.Position(Coord{0, 2}), (*BoardPosition)(nil); actual != expected {
 				t.Errorf("Expected 0,2 to be out of bounds but got position %+v", actual)
 			}
 		})

@@ -98,11 +98,11 @@ func TestRack(t *testing.T) {
 			}
 
 			remaining, missing := r.tryPlayTiles(TilePlacements{
-				{Tile{'B', 1}, 0, 0},
-				{Tile{'O', 1}, 0, 1},
-				{Tile{'O', 1}, 0, 2},
-				{Tile{'M', 1}, 0, 3},
-				{Tile{'S', 1}, 0, 3},
+				{Tile{'B', 1}, Coord{0, 0}},
+				{Tile{'O', 1}, Coord{0, 1}},
+				{Tile{'O', 1}, Coord{0, 2}},
+				{Tile{'M', 1}, Coord{0, 3}},
+				{Tile{'S', 1}, Coord{0, 3}},
 			})
 
 			if actual, expected := len(missing), 2; actual != expected {
@@ -130,10 +130,10 @@ func TestRack(t *testing.T) {
 			}
 
 			remaining, missing := r.tryPlayTiles(TilePlacements{
-				{Tile{'B', 1}, 0, 0},
-				{Tile{'O', 1}, 0, 1},
-				{Tile{'O', 1}, 0, 2},
-				{Tile{'M', 1}, 0, 3},
+				{Tile{'B', 1}, Coord{0, 0}},
+				{Tile{'O', 1}, Coord{0, 1}},
+				{Tile{'O', 1}, Coord{0, 2}},
+				{Tile{'M', 1}, Coord{0, 3}},
 			})
 
 			if actual, expected := len(missing), 0; actual != expected {
