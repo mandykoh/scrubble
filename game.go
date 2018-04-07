@@ -35,6 +35,8 @@ func (g *Game) AddPlayer(p *Player) error {
 // InsufficientTilesError is returned.
 //
 // If the tile placement is illegal, an InvalidTilePlacementError is returned.
+//
+// If any formed words are invalid, an InvalidWordError is returned.
 func (g *Game) Play(placements TilePlacements) error {
 	return g.requirePhase(MainPhase, func() error {
 		remaining, err := g.Rules.ValidateTilesFromRack(g.currentSeat().Rack, placements)
@@ -47,12 +49,17 @@ func (g *Game) Play(placements TilePlacements) error {
 			return err
 		}
 
-		g.Board.placeTiles(placements)
+		score, err := g.Rules.ScoreWords(placements, &g.Board)
+		if err != nil {
+			return err
+		}
 
 		seat := g.currentSeat()
+		seat.Score += score
 		seat.Rack = remaining
 		seat.Rack.FillFromBag(&g.Bag)
 
+		g.Board.placeTiles(placements)
 		g.CurrentSeatIndex = (g.CurrentSeatIndex + 1) % len(g.Seats)
 
 		return nil

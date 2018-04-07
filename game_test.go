@@ -72,10 +72,12 @@ func TestGame(t *testing.T) {
 	t.Run(".Play()", func(t *testing.T) {
 		placementsValidated := 0
 		tilesFromRackValidated := 0
+		wordsScored := 0
 
 		setupGame := func() Game {
 			placementsValidated = 0
 			tilesFromRackValidated = 0
+			wordsScored = 0
 
 			p1 := &Player{Name: "Alice"}
 			p2 := &Player{Name: "Bob"}
@@ -99,6 +101,10 @@ func TestGame(t *testing.T) {
 				},
 				CurrentSeatIndex: 1,
 				Rules: Rules{
+					ScoreWordsFunc: func(placements TilePlacements, board *Board) (score int, err error) {
+						wordsScored++
+						return 123, nil
+					},
 					ValidatePlacementsFunc: func(placements TilePlacements, board *Board) error {
 						placementsValidated++
 						return nil
@@ -229,6 +235,15 @@ func TestGame(t *testing.T) {
 			t.Run("validates tile placement using the set rules", func(t *testing.T) {
 				if actual, expected := placementsValidated, 1; actual != expected {
 					t.Errorf("Expected tile placement validation to have been invoked once but was called %d times", actual)
+				}
+			})
+
+			t.Run("scores the formed words using the set rules", func(t *testing.T) {
+				if actual, expected := wordsScored, 1; actual != expected {
+					t.Errorf("Expected word scoring to have been invoked once but was called %d times", actual)
+				}
+				if actual, expected := game.Seats[1].Score, 123; actual != expected {
+					t.Errorf("Expected word score of %d to have been added to player total but was %d", expected, actual)
 				}
 			})
 

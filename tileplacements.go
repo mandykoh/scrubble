@@ -29,3 +29,25 @@ func (tp TilePlacements) Find(c Coord) *TilePlacement {
 	}
 	return nil
 }
+
+func (tp *TilePlacements) take(c Coord) *TilePlacement {
+	for i := range *tp {
+		p := (*tp)[i]
+		if p.Coord == c {
+			*tp = append((*tp)[:i], (*tp)[i+1:]...)
+			return &p
+		}
+	}
+	return nil
+}
+
+func (tp *TilePlacements) takeLast() *TilePlacement {
+	length := len(*tp)
+	if length == 0 {
+		return nil
+	}
+
+	p := &(*tp)[length-1]
+	*tp = (*tp)[:length-1]
+	return p
+}
