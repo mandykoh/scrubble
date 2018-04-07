@@ -49,7 +49,7 @@ func (g *Game) Play(placements TilePlacements) error {
 			return err
 		}
 
-		score, err := g.Rules.ScoreWords(placements, &g.Board)
+		score, _, err := g.Rules.ScoreWords(placements, &g.Board)
 		if err != nil {
 			return err
 		}

@@ -6,13 +6,16 @@ package scrubble
 //
 // If a score cannot be determined (eg because not all formed words are valid),
 // an error is returned.
-func ScoreWords(placements TilePlacements, board *Board) (score int, err error) {
-	var wordSpans []CoordRange
+//
+// Otherwise, the total score is returned along with coordinate ranges
+// indicating the positions of each word on the board should the tiles be
+// placed.
+func ScoreWords(placements TilePlacements, board *Board) (score int, wordSpans []CoordRange, err error) {
 	findSpans(Coord.West, Coord.East, placements, &wordSpans, board)
 	findSpans(Coord.North, Coord.South, placements, &wordSpans, board)
 
 	if len(wordSpans) == 0 && len(placements) > 0 {
-		return 0, InvalidWordError{SingleLetterWordDisallowedReason}
+		return 0, nil, InvalidWordError{SingleLetterWordDisallowedReason}
 	}
 
 	for _, s := range wordSpans {

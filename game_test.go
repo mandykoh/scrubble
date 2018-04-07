@@ -101,9 +101,9 @@ func TestGame(t *testing.T) {
 				},
 				CurrentSeatIndex: 1,
 				Rules: Rules{
-					ScoreWordsFunc: func(placements TilePlacements, board *Board) (score int, err error) {
+					ScoreWordsFunc: func(placements TilePlacements, board *Board) (score int, wordSpans []CoordRange, err error) {
 						wordsScored++
-						return 123, nil
+						return 123, nil, nil
 					},
 					ValidatePlacementsFunc: func(placements TilePlacements, board *Board) error {
 						placementsValidated++

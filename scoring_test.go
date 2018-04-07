@@ -12,7 +12,7 @@ func TestScoreWords(t *testing.T) {
 	t.Run("returns an error for single-letter words", func(t *testing.T) {
 		board := setupBoard()
 
-		_, err := ScoreWords(TilePlacements{
+		_, _, err := ScoreWords(TilePlacements{
 			{Tile{'A', 2}, Coord{7, 7}},
 		}, board)
 
@@ -28,7 +28,7 @@ func TestScoreWords(t *testing.T) {
 	t.Run("counts entire horizontal word placed on starting position", func(t *testing.T) {
 		board := setupBoard()
 
-		score, err := ScoreWords(TilePlacements{
+		score, wordSpans, err := ScoreWords(TilePlacements{
 			{Tile{'D', 2}, Coord{7, 6}},
 			{Tile{'O', 1}, Coord{7, 7}},
 			{Tile{'G', 2}, Coord{7, 8}},
@@ -40,13 +40,24 @@ func TestScoreWords(t *testing.T) {
 			if actual, expected := score, 5; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
+
+			if actual, expected := len(wordSpans), 1; actual != expected {
+				t.Errorf("Expected one word formed but found %d", actual)
+			} else {
+				if actual, expected := wordSpans[0].Min, (Coord{7, 6}); actual != expected {
+					t.Errorf("Expected word to begin at %v but was %v", expected, actual)
+				}
+				if actual, expected := wordSpans[0].Max, (Coord{7, 8}); actual != expected {
+					t.Errorf("Expected word to end at %v but was %v", expected, actual)
+				}
+			}
 		}
 	})
 
 	t.Run("counts entire vertical word placed on starting position", func(t *testing.T) {
 		board := setupBoard()
 
-		score, err := ScoreWords(TilePlacements{
+		score, wordSpans, err := ScoreWords(TilePlacements{
 			{Tile{'D', 2}, Coord{6, 7}},
 			{Tile{'O', 1}, Coord{7, 7}},
 			{Tile{'G', 2}, Coord{8, 7}},
@@ -58,6 +69,17 @@ func TestScoreWords(t *testing.T) {
 			if actual, expected := score, 5; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
+
+			if actual, expected := len(wordSpans), 1; actual != expected {
+				t.Errorf("Expected one word formed but found %d", actual)
+			} else {
+				if actual, expected := wordSpans[0].Min, (Coord{6, 7}); actual != expected {
+					t.Errorf("Expected word to begin at %v but was %v", expected, actual)
+				}
+				if actual, expected := wordSpans[0].Max, (Coord{8, 7}); actual != expected {
+					t.Errorf("Expected word to end at %v but was %v", expected, actual)
+				}
+			}
 		}
 	})
 
@@ -67,7 +89,7 @@ func TestScoreWords(t *testing.T) {
 		board.Position(Coord{6, 4}).Tile = &Tile{'O', 1}
 		board.Position(Coord{7, 4}).Tile = &Tile{'G', 2}
 
-		score, err := ScoreWords(TilePlacements{
+		score, wordSpans, err := ScoreWords(TilePlacements{
 			{Tile{'S', 2}, Coord{8, 4}},
 			{Tile{'O', 2}, Coord{8, 5}},
 		}, board)
@@ -78,6 +100,23 @@ func TestScoreWords(t *testing.T) {
 			if actual, expected := score, 11; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
+
+			if actual, expected := len(wordSpans), 2; actual != expected {
+				t.Errorf("Expected two words formed but found %d", actual)
+			} else {
+				if actual, expected := wordSpans[0].Min, (Coord{8, 4}); actual != expected {
+					t.Errorf("Expected first word to begin at %v but was %v", expected, actual)
+				}
+				if actual, expected := wordSpans[0].Max, (Coord{8, 5}); actual != expected {
+					t.Errorf("Expected first word to end at %v but was %v", expected, actual)
+				}
+				if actual, expected := wordSpans[1].Min, (Coord{5, 4}); actual != expected {
+					t.Errorf("Expected second word to begin at %v but was %v", expected, actual)
+				}
+				if actual, expected := wordSpans[1].Max, (Coord{8, 4}); actual != expected {
+					t.Errorf("Expected second word to end at %v but was %v", expected, actual)
+				}
+			}
 		}
 	})
 
@@ -87,7 +126,7 @@ func TestScoreWords(t *testing.T) {
 		board.Position(Coord{6, 4}).Tile = &Tile{'O', 1}
 		board.Position(Coord{7, 4}).Tile = &Tile{'G', 2}
 
-		score, err := ScoreWords(TilePlacements{
+		score, wordSpans, err := ScoreWords(TilePlacements{
 			{Tile{'G', 2}, Coord{6, 3}},
 			{Tile{'D', 2}, Coord{6, 5}},
 		}, board)
@@ -97,6 +136,17 @@ func TestScoreWords(t *testing.T) {
 		} else {
 			if actual, expected := score, 5; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
+			}
+
+			if actual, expected := len(wordSpans), 1; actual != expected {
+				t.Errorf("Expected one word formed but found %d", actual)
+			} else {
+				if actual, expected := wordSpans[0].Min, (Coord{6, 3}); actual != expected {
+					t.Errorf("Expected word to begin at %v but was %v", expected, actual)
+				}
+				if actual, expected := wordSpans[0].Max, (Coord{6, 5}); actual != expected {
+					t.Errorf("Expected word to end at %v but was %v", expected, actual)
+				}
 			}
 		}
 	})
