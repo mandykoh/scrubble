@@ -58,3 +58,35 @@ func ValidatePlacements(placements TilePlacements, board *Board) error {
 
 	return nil
 }
+
+// ValidateTilesFromRack checks the intended usage of tiles from a rack for
+// legality. This includes that the rack actually has the tiles to be placed.
+//
+// If not, InsufficientTilesError is returned with the missing tiles in the
+// Missing field.
+//
+// Otherwise, the remainder (after the placed tiles have been removed from the
+// rack is returned with no error, indicating that it would be safe to update
+// the rack for placement.
+func ValidateTilesFromRack(rack Rack, placements TilePlacements) (remaining Rack, err error) {
+	var missing []Tile
+	remaining = append(remaining, rack...)
+
+Placements:
+	for _, p := range placements {
+		for i, t := range remaining {
+			if t == p.Tile {
+				remaining = append(remaining[:i], remaining[i+1:]...)
+				continue Placements
+			}
+		}
+
+		missing = append(missing, p.Tile)
+	}
+
+	if len(missing) != 0 {
+		err = InsufficientTilesError{missing}
+	}
+
+	return
+}

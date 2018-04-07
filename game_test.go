@@ -71,9 +71,11 @@ func TestGame(t *testing.T) {
 
 	t.Run(".Play()", func(t *testing.T) {
 		placementsValidated := 0
+		tilesFromRackValidated := 0
 
 		setupGame := func() Game {
 			placementsValidated = 0
+			tilesFromRackValidated = 0
 
 			p1 := &Player{Name: "Alice"}
 			p2 := &Player{Name: "Bob"}
@@ -97,9 +99,13 @@ func TestGame(t *testing.T) {
 				},
 				CurrentSeatIndex: 1,
 				Rules: Rules{
-					ValidatePlacements: func(placements TilePlacements, board *Board) error {
+					ValidatePlacementsFunc: func(placements TilePlacements, board *Board) error {
 						placementsValidated++
 						return nil
+					},
+					ValidateTilesFromRackFunc: func(rack Rack, placements TilePlacements) (Rack, error) {
+						tilesFromRackValidated++
+						return ValidateTilesFromRack(rack, placements)
 					},
 				},
 			}
@@ -121,8 +127,12 @@ func TestGame(t *testing.T) {
 			}
 		})
 
-		t.Run("returns an error when the current player doesn't have the required tiles", func(t *testing.T) {
+		t.Run("with insufficient tiles on the rack", func(t *testing.T) {
 			game := setupGame()
+
+			game.Rules.ValidateTilesFromRackFunc = func(rack Rack, placements TilePlacements) (Rack, error) {
+				return rack, errors.New("some error")
+			}
 
 			playTiles := []Tile{
 				{'B', 1},
@@ -139,30 +149,27 @@ func TestGame(t *testing.T) {
 
 			err := game.Play(placements)
 
-			if insufficientError, ok := err.(InsufficientTilesError); !ok {
-				t.Errorf("Expected InsufficientTilesError but got %v", err)
-			} else {
-				if actual, expected := len(insufficientError.Missing), 2; actual != expected {
-					t.Errorf("Expected error to indicate one missing tile but was %d", actual)
+			t.Run("returns an error", func(t *testing.T) {
+				if err == nil {
+					t.Errorf("Expected an error but didn't get one")
 				} else {
-					if actual, expected := insufficientError.Missing[0], (Tile{'O', 1}); actual != expected {
-						t.Errorf("Expected missing tile %c(%d) but was %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-					}
-					if actual, expected := insufficientError.Missing[1], (Tile{'S', 1}); actual != expected {
-						t.Errorf("Expected missing tile %c(%d) but was %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+					if actual, expected := err.Error(), "some error"; actual != expected {
+						t.Errorf("Expected an error from tile rack validation but got %v", actual)
 					}
 				}
-			}
+			})
 
-			if actual, expected := len(game.Seats[1].Rack), 6; actual != expected {
-				t.Errorf("Expected player to still have %d tiles but found %d", expected, actual)
-			}
+			t.Run("does not remove tiles from the player's rack", func(t *testing.T) {
+				if actual, expected := len(game.Seats[1].Rack), 6; actual != expected {
+					t.Errorf("Expected player to still have %d tiles but found %d", expected, actual)
+				}
+			})
 		})
 
 		t.Run("with invalid tile placement", func(t *testing.T) {
 			game := setupGame()
 
-			game.Rules.ValidatePlacements = func(placements TilePlacements, board *Board) error {
+			game.Rules.ValidatePlacementsFunc = func(placements TilePlacements, board *Board) error {
 				return errors.New("some error")
 			}
 
@@ -210,6 +217,12 @@ func TestGame(t *testing.T) {
 			t.Run("doesn't return an error", func(t *testing.T) {
 				if err != nil {
 					t.Errorf("Expected play to succeed but got error %v", err)
+				}
+			})
+
+			t.Run("validates tiles used from the rack using the set rules", func(t *testing.T) {
+				if actual, expected := tilesFromRackValidated, 1; actual != expected {
+					t.Errorf("Expected tile rack validation to have been invoked once but was called %d times", actual)
 				}
 			})
 
@@ -395,12 +408,6 @@ func TestGame(t *testing.T) {
 		t.Run("succeeds", func(t *testing.T) {
 			if actual, expected := err, error(nil); actual != expected {
 				t.Fatalf("Expected game to be started but got error: %v", actual)
-			}
-		})
-
-		t.Run("sets the default rules if none were specified", func(t *testing.T) {
-			if game.Rules.ValidatePlacements == nil {
-				t.Errorf("Expected ValidatePlacements to be set but was nil")
 			}
 		})
 

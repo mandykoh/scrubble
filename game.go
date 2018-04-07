@@ -37,12 +37,12 @@ func (g *Game) AddPlayer(p *Player) error {
 // If the tile placement is illegal, an InvalidTilePlacementError is returned.
 func (g *Game) Play(placements TilePlacements) error {
 	return g.requirePhase(MainPhase, func() error {
-		remaining, missing := g.currentSeat().Rack.tryPlayTiles(placements)
-		if len(missing) != 0 {
-			return InsufficientTilesError{missing}
+		remaining, err := g.Rules.ValidateTilesFromRack(g.currentSeat().Rack, placements)
+		if err != nil {
+			return err
 		}
 
-		err := g.Rules.ValidatePlacements(placements, &g.Board)
+		err = g.Rules.ValidatePlacements(placements, &g.Board)
 		if err != nil {
 			return err
 		}
@@ -90,10 +90,6 @@ func (g *Game) Start(r *rand.Rand) error {
 
 		if len(g.Seats) < GameMinPlayers {
 			return NotEnoughPlayersError{GameMinPlayers, len(g.Seats)}
-		}
-
-		if g.Rules.ValidatePlacements == nil {
-			g.Rules.ValidatePlacements = ValidatePlacements
 		}
 
 		g.CurrentSeatIndex = r.Intn(len(g.Seats))

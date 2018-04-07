@@ -122,3 +122,80 @@ func TestValidatePlacements(t *testing.T) {
 		}
 	})
 }
+
+func TestValidateTilesFromRack(t *testing.T) {
+
+	expectRackContains := func(t *testing.T, r Rack, letters ...rune) {
+		if actual, expected := len(r), len(letters); actual != expected {
+			t.Fatalf("Expected rack to contain %d tiles but found %d", expected, actual)
+		}
+
+		for i, expected := range letters {
+			if actual := r[i].Letter; actual != expected {
+				t.Errorf("Expected letter '%c' on the rack but found '%c' instead", expected, actual)
+			}
+		}
+	}
+
+	t.Run("returns missing tiles when the rack has insufficient tiles for the play", func(t *testing.T) {
+		r := Rack{
+			{'A', 1},
+			{'B', 1},
+			{'O', 1},
+			{'M', 1},
+		}
+
+		remaining, err := ValidateTilesFromRack(r, TilePlacements{
+			{Tile{'B', 1}, Coord{0, 0}},
+			{Tile{'O', 1}, Coord{0, 1}},
+			{Tile{'O', 1}, Coord{0, 2}},
+			{Tile{'M', 1}, Coord{0, 3}},
+			{Tile{'S', 1}, Coord{0, 3}},
+		})
+
+		switch e := err.(type) {
+
+		case InsufficientTilesError:
+			if actual, expected := len(e.Missing), 2; actual != expected {
+				t.Errorf("Expected %d missing tile but found %d", expected, actual)
+			} else {
+				if actual, expected := e.Missing[0], (Tile{'O', 1}); actual != expected {
+					t.Errorf("Expected missing tile to be %c(%d) but was %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+				}
+				if actual, expected := e.Missing[1], (Tile{'S', 1}); actual != expected {
+					t.Errorf("Expected missing tile to be %c(%d) but was %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+				}
+			}
+
+		default:
+			t.Errorf("Expected an InsufficientTilesError but got %v", err)
+		}
+
+		expectRackContains(t, remaining, 'A')
+		expectRackContains(t, r, 'A', 'B', 'O', 'M')
+	})
+
+	t.Run("returns no missing tiles and the remainder if successful", func(t *testing.T) {
+		r := Rack{
+			{'A', 1},
+			{'O', 1},
+			{'M', 1},
+			{'B', 1},
+			{'O', 1},
+		}
+
+		remaining, err := ValidateTilesFromRack(r, TilePlacements{
+			{Tile{'B', 1}, Coord{0, 0}},
+			{Tile{'O', 1}, Coord{0, 1}},
+			{Tile{'O', 1}, Coord{0, 2}},
+			{Tile{'M', 1}, Coord{0, 3}},
+		})
+
+		if err != nil {
+			t.Errorf("Expected success but got error %v", err)
+		} else {
+			expectRackContains(t, remaining, 'A')
+			expectRackContains(t, r, 'A', 'O', 'M', 'B', 'O')
+		}
+	})
+}
