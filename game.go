@@ -1,6 +1,8 @@
 package scrubble
 
-import "math/rand"
+import (
+	"math/rand"
+)
 
 const GameMinPlayers = 1
 
@@ -12,6 +14,7 @@ type Game struct {
 	Bag              Bag
 	Board            Board
 	CurrentSeatIndex int
+	Rules            Rules
 }
 
 // AddPlayer adds a seat for a new player to the game.
@@ -39,7 +42,7 @@ func (g *Game) Play(placements TilePlacements) error {
 			return InsufficientTilesError{missing}
 		}
 
-		err := g.validateTilePositions(placements)
+		err := g.Rules.ValidatePlacements(placements, &g.Board)
 		if err != nil {
 			return err
 		}
@@ -89,6 +92,10 @@ func (g *Game) Start(r *rand.Rand) error {
 			return NotEnoughPlayersError{GameMinPlayers, len(g.Seats)}
 		}
 
+		if g.Rules.ValidatePlacements == nil {
+			g.Rules.ValidatePlacements = ValidatePlacements
+		}
+
 		g.CurrentSeatIndex = r.Intn(len(g.Seats))
 		g.Bag.Shuffle(r)
 
@@ -111,51 +118,4 @@ func (g *Game) requirePhase(phase GamePhase, action func() error) error {
 	}
 
 	return action()
-}
-
-func (g *Game) validateTilePositions(placements TilePlacements) error {
-	placementsLeft := len(placements)
-	if placementsLeft == 0 {
-		return InvalidTilePlacementError{NoTilesPlacedReason}
-	}
-
-	bounds := placements.Bounds()
-	if !bounds.IsLinear() {
-		return InvalidTilePlacementError{PlacementNotLinearReason}
-	}
-
-	connected := false
-
-	err := bounds.EachCoord(func(c Coord) error {
-		position := g.Board.Position(c)
-		if position == nil {
-			return InvalidTilePlacementError{PlacementOutOfBoundsReason}
-		}
-
-		if placement := placements.Find(c); placement != nil {
-			if position.Tile != nil {
-				return InvalidTilePlacementError{PositionOccupiedReason}
-			}
-
-			connected = connected || position.Type.CountsAsConnected() || g.Board.neighbourHasTile(c)
-			placementsLeft--
-
-		} else if position.Tile == nil {
-			return InvalidTilePlacementError{PlacementNotContiguousReason}
-		}
-
-		return nil
-	})
-	if err != nil {
-		return err
-	}
-
-	if placementsLeft != 0 {
-		return InvalidTilePlacementError{PlacementOverlapReason}
-	}
-	if !connected {
-		return InvalidTilePlacementError{PlacementNotConnectedReason}
-	}
-
-	return nil
 }
