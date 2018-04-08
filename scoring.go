@@ -4,8 +4,8 @@ package scrubble
 // This assumes that the tiles are being placed in valid positions according to
 // the game rules.
 //
-// If a score cannot be determined (eg because not all formed words are valid),
-// an error is returned.
+// If a score cannot be determined because not all formed words are valid, an
+// InvalidWordError is returned with the invalid words.
 //
 // Otherwise, the total score is returned along with coordinate ranges
 // indicating the positions of each word on the board should the tiles be
@@ -14,8 +14,11 @@ func ScoreWords(placements TilePlacements, board *Board) (score int, wordSpans [
 	findSpans(Coord.West, Coord.East, placements, &wordSpans, board)
 	findSpans(Coord.North, Coord.South, placements, &wordSpans, board)
 
-	if len(wordSpans) == 0 && len(placements) > 0 {
-		return 0, nil, InvalidWordError{SingleLetterWordDisallowedReason}
+	var invalidWordSpans []CoordRange
+	findUnspanned(placements, wordSpans, &invalidWordSpans)
+
+	if len(invalidWordSpans) > 0 {
+		return 0, nil, InvalidWordError{invalidWordSpans}
 	}
 
 	for _, s := range wordSpans {
@@ -46,6 +49,23 @@ func findSpans(growMinDir, growMaxDir func(Coord) Coord, placements TilePlacemen
 
 		if span.Min.Row != span.Max.Row || span.Min.Column != span.Max.Column {
 			*results = append(*results, span)
+		}
+	}
+}
+
+func findUnspanned(placements TilePlacements, wordSpans []CoordRange, result *[]CoordRange) {
+	for _, p := range placements {
+		inSpan := false
+
+		for _, s := range wordSpans {
+			if s.Includes(p.Coord) {
+				inSpan = true
+				break
+			}
+		}
+
+		if !inSpan {
+			*result = append(*result, CoordRange{p.Coord, p.Coord})
 		}
 	}
 }

@@ -27,6 +27,12 @@ func (r *CoordRange) Include(c Coord) CoordRange {
 	return CoordRange{r.Min.Min(c), r.Max.Max(c)}
 }
 
+// Includes returns true if the specified coordinate falls within this range.
+func (r *CoordRange) Includes(c Coord) bool {
+	return r.Min.Row <= c.Row && c.Row <= r.Max.Row &&
+		r.Min.Column <= c.Column && c.Column <= r.Max.Column
+}
+
 // IsLinear returns true if the range represents a straight line of coordinates
 // (as opposed to a rectangular area).
 func (r *CoordRange) IsLinear() bool {

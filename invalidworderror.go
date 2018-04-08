@@ -2,10 +2,10 @@ package scrubble
 
 import "fmt"
 
-// InvalidWordError indicates that a formed word is not valid for play and
-// cannot be scored.
+// InvalidWordError indicates that one or more formed words is not valid for
+// play and cannot be scored.
 type InvalidWordError struct {
-	Reason InvalidWordReason
+	WordSpans []CoordRange
 }
 
 func (e InvalidWordError) Error() string {

@@ -19,8 +19,18 @@ func TestScoreWords(t *testing.T) {
 		if err == nil {
 			t.Errorf("Expected an error for single-letter word but got nil")
 		} else {
-			if actual, expected := err, (InvalidWordError{SingleLetterWordDisallowedReason}); actual != expected {
-				t.Errorf("Expected error %#v but got %#v", expected, actual)
+			switch e := err.(type) {
+			case InvalidWordError:
+				if actual, expected := len(e.WordSpans), 1; actual != expected {
+					t.Errorf("Expected one word to be marked as invalid but found %d", actual)
+				} else {
+					if actual, expected := e.WordSpans[0], (CoordRange{Coord{7, 7}, Coord{7, 7}}); actual != expected {
+						t.Errorf("Expected invalid word in range %v but was %v", expected, actual)
+					}
+				}
+
+			default:
+				t.Errorf("Expected InvalidWordError but got %v", e)
 			}
 		}
 	})
