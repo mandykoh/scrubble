@@ -101,9 +101,10 @@ func TestGame(t *testing.T) {
 				},
 				CurrentSeatIndex: 1,
 				Rules: Rules{
-					ScoreWordsFunc: func(placements TilePlacements, board *Board) (score int, wordSpans []CoordRange, err error) {
+					ScoreWordsFunc: func(placements TilePlacements, board *Board) (score int, words []PlayedWord, err error) {
 						wordsScored++
-						return 123, nil, nil
+						words = append(words, PlayedWord{Word: "SOMEWORD", Score: 123, CoordRange: placements.Bounds()})
+						return 123, words, nil
 					},
 					ValidatePlacementsFunc: func(placements TilePlacements, board *Board) error {
 						placementsValidated++
@@ -124,7 +125,7 @@ func TestGame(t *testing.T) {
 				Phase: SetupPhase,
 			}
 
-			err := game.Play(TilePlacements{
+			_, err := game.Play(TilePlacements{
 				{Tile{'A', 1}, Coord{7, 7}},
 			})
 
@@ -153,7 +154,7 @@ func TestGame(t *testing.T) {
 				placements = append(placements, TilePlacement{t, Coord{7, 7 + i}})
 			}
 
-			err := game.Play(placements)
+			_, err := game.Play(placements)
 
 			t.Run("returns an error", func(t *testing.T) {
 				if err == nil {
@@ -183,7 +184,7 @@ func TestGame(t *testing.T) {
 				{Tile{'B', 1}, Coord{0, 0}},
 				{Tile{'D', 1}, Coord{0, 2}},
 			}
-			err := game.Play(placements)
+			_, err := game.Play(placements)
 
 			t.Run("returns an error", func(t *testing.T) {
 				if err == nil {
@@ -218,7 +219,7 @@ func TestGame(t *testing.T) {
 				{Tile{'B', 1}, Coord{0, 0}},
 				{Tile{'D', 1}, Coord{0, 2}},
 			}
-			err := game.Play(placements)
+			playedWords, err := game.Play(placements)
 
 			t.Run("doesn't return an error", func(t *testing.T) {
 				if err != nil {
@@ -292,6 +293,21 @@ func TestGame(t *testing.T) {
 			t.Run("moves to next player's turn", func(t *testing.T) {
 				if actual, expected := game.CurrentSeatIndex, 0; actual != expected {
 					t.Errorf("Expected turn to move to next player but current seat is %d", game.CurrentSeatIndex)
+				}
+			})
+
+			t.Run("returns the words formed from scoring using the set rules", func(t *testing.T) {
+				if actual, expected := len(playedWords), 1; actual != expected {
+					t.Errorf("Expected one played word but got %d", actual)
+				} else {
+					expected := PlayedWord{
+						Word:       "SOMEWORD",
+						Score:      123,
+						CoordRange: placements.Bounds(),
+					}
+					if actual := playedWords[0]; actual != expected {
+						t.Errorf("Expected played word %v but got %v", expected, actual)
+					}
 				}
 			})
 		})

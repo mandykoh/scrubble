@@ -27,7 +27,8 @@ func (g *Game) AddPlayer(p *Player) error {
 	})
 }
 
-// Play attempts to place tiles from the current player's rack on the board.
+// Play attempts to place tiles from the current player's rack on the board. On
+// success, the words formed by the play are returned.
 //
 // If the game is not in the Main phase, GameOutOfPhaseError is returned.
 //
@@ -37,8 +38,8 @@ func (g *Game) AddPlayer(p *Player) error {
 // If the tile placement is illegal, an InvalidTilePlacementError is returned.
 //
 // If any formed words are invalid, an InvalidWordError is returned.
-func (g *Game) Play(placements TilePlacements) error {
-	return g.requirePhase(MainPhase, func() error {
+func (g *Game) Play(placements TilePlacements) (playedWords []PlayedWord, err error) {
+	return playedWords, g.requirePhase(MainPhase, func() error {
 		remaining, err := g.Rules.ValidateTilesFromRack(g.currentSeat().Rack, placements)
 		if err != nil {
 			return err
@@ -49,7 +50,8 @@ func (g *Game) Play(placements TilePlacements) error {
 			return err
 		}
 
-		score, _, err := g.Rules.ScoreWords(placements, &g.Board)
+		var score = 0
+		score, playedWords, err = g.Rules.ScoreWords(placements, &g.Board)
 		if err != nil {
 			return err
 		}

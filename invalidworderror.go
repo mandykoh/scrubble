@@ -5,7 +5,7 @@ import "fmt"
 // InvalidWordError indicates that one or more formed words is not valid for
 // play and cannot be scored.
 type InvalidWordError struct {
-	WordSpans []CoordRange
+	Words []PlayedWord
 }
 
 func (e InvalidWordError) Error() string {

@@ -3,12 +3,12 @@ package scrubble
 // Rules represent the rules used by the game to check and validate various
 // conditions for legality. The zero-value Rules uses default game play rules.
 type Rules struct {
-	ScoreWordsFunc            func(placements TilePlacements, board *Board) (score int, wordSpans []CoordRange, err error)
+	ScoreWordsFunc            func(placements TilePlacements, board *Board) (score int, words []PlayedWord, err error)
 	ValidatePlacementsFunc    func(placements TilePlacements, board *Board) error
 	ValidateTilesFromRackFunc func(rack Rack, placements TilePlacements) (remaining Rack, err error)
 }
 
-func (r *Rules) ScoreWords(placements TilePlacements, board *Board) (score int, wordSpans []CoordRange, err error) {
+func (r *Rules) ScoreWords(placements TilePlacements, board *Board) (score int, words []PlayedWord, err error) {
 	if r.ScoreWordsFunc == nil {
 		return ScoreWords(placements, board)
 	}

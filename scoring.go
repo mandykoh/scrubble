@@ -1,16 +1,18 @@
 package scrubble
 
-// ScoreWords determines the total score from a set of proposed tile placements.
+import "strings"
+
+// ScoreWords determines the scoring from a set of proposed tile placements.
 // This assumes that the tiles are being placed in valid positions according to
 // the game rules.
 //
 // If a score cannot be determined because not all formed words are valid, an
-// InvalidWordError is returned with the invalid words.
+// InvalidWordError is returned containing the invalid words.
 //
-// Otherwise, the total score is returned along with coordinate ranges
-// indicating the positions of each word on the board should the tiles be
-// placed.
-func ScoreWords(placements TilePlacements, board *Board) (score int, wordSpans []CoordRange, err error) {
+// Otherwise, the total score is returned along with the words that would be
+// formed on the board should the tiles be placed.
+func ScoreWords(placements TilePlacements, board *Board) (score int, words []PlayedWord, err error) {
+	var wordSpans []CoordRange
 	findSpans(Coord.West, Coord.East, placements, &wordSpans, board)
 	findSpans(Coord.North, Coord.South, placements, &wordSpans, board)
 
@@ -18,23 +20,11 @@ func ScoreWords(placements TilePlacements, board *Board) (score int, wordSpans [
 	findUnspanned(placements, wordSpans, &invalidWordSpans)
 
 	if len(invalidWordSpans) > 0 {
-		return 0, nil, InvalidWordError{invalidWordSpans}
+		_, invalidWords := spansToPlayedWords(invalidWordSpans, placements, board)
+		return 0, nil, InvalidWordError{invalidWords}
 	}
 
-	for _, s := range wordSpans {
-		s.EachCoord(func(c Coord) error {
-			position := board.Position(c)
-
-			if position.Tile != nil {
-				score += position.Tile.Points
-			} else {
-				placement := placements.Find(c)
-				score += placement.Tile.Points
-			}
-
-			return nil
-		})
-	}
+	score, words = spansToPlayedWords(wordSpans, placements, board)
 
 	return
 }
@@ -86,4 +76,34 @@ func growSpan(growCoord *Coord, growDir func(Coord) Coord, unspanned *TilePlacem
 			break
 		}
 	}
+}
+
+func spansToPlayedWords(wordSpans []CoordRange, placements TilePlacements, board *Board) (totalScore int, words []PlayedWord) {
+	for _, s := range wordSpans {
+		var playedWord = PlayedWord{CoordRange: s}
+		var word strings.Builder
+
+		s.EachCoord(func(c Coord) error {
+			var tile *Tile
+
+			position := board.Position(c)
+			if position.Tile != nil {
+				tile = position.Tile
+			} else {
+				tile = &placements.Find(c).Tile
+			}
+
+			playedWord.Score += tile.Points
+			word.WriteRune(tile.Letter)
+
+			return nil
+		})
+
+		totalScore += playedWord.Score
+
+		playedWord.Word = word.String()
+		words = append(words, playedWord)
+	}
+
+	return
 }
