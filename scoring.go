@@ -89,11 +89,12 @@ func spansToPlayedWords(wordSpans []CoordRange, placements TilePlacements, board
 			position := board.Position(c)
 			if position.Tile != nil {
 				tile = position.Tile
+				playedWord.Score += tile.Points
 			} else {
 				tile = &placements.Find(c).Tile
+				playedWord.Score += position.Type.ModifyTileScore(*tile)
 			}
 
-			playedWord.Score += tile.Points
 			word.WriteRune(tile.Letter)
 
 			return nil
