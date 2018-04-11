@@ -101,18 +101,18 @@ func TestGame(t *testing.T) {
 				},
 				CurrentSeatIndex: 1,
 				Rules: Rules{
-					ScoreWordsFunc: func(placements TilePlacements, board *Board) (score int, words []PlayedWord, err error) {
-						wordsScored++
-						words = append(words, PlayedWord{Word: "SOMEWORD", Score: 123, CoordRange: placements.Bounds()})
-						return 123, words, nil
-					},
-					ValidatePlacementsFunc: func(placements TilePlacements, board *Board) error {
+					placementValidator: func(placements TilePlacements, board *Board) error {
 						placementsValidated++
 						return nil
 					},
-					ValidateTilesFromRackFunc: func(rack Rack, placements TilePlacements) (Rack, error) {
+					rackValidator: func(rack Rack, placements TilePlacements) (Rack, error) {
 						tilesFromRackValidated++
 						return ValidateTilesFromRack(rack, placements)
+					},
+					wordScorer: func(placements TilePlacements, board *Board, dictionary Dictionary) (score int, words []PlayedWord, err error) {
+						wordsScored++
+						words = append(words, PlayedWord{Word: "SOMEWORD", Score: 123, CoordRange: placements.Bounds()})
+						return 123, words, nil
 					},
 				},
 			}
@@ -137,7 +137,7 @@ func TestGame(t *testing.T) {
 		t.Run("with insufficient tiles on the rack", func(t *testing.T) {
 			game := setupGame()
 
-			game.Rules.ValidateTilesFromRackFunc = func(rack Rack, placements TilePlacements) (Rack, error) {
+			game.Rules.rackValidator = func(rack Rack, placements TilePlacements) (Rack, error) {
 				return rack, errors.New("some error")
 			}
 
@@ -176,7 +176,7 @@ func TestGame(t *testing.T) {
 		t.Run("with invalid tile placement", func(t *testing.T) {
 			game := setupGame()
 
-			game.Rules.ValidatePlacementsFunc = func(placements TilePlacements, board *Board) error {
+			game.Rules.placementValidator = func(placements TilePlacements, board *Board) error {
 				return errors.New("some error")
 			}
 

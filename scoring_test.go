@@ -3,10 +3,13 @@ package scrubble
 import "testing"
 
 func TestScoreWords(t *testing.T) {
-
 	setupBoard := func() *Board {
 		board := BoardWithStandardLayout()
 		return &board
+	}
+
+	dictionary := func(word string) (valid bool) {
+		return true
 	}
 
 	expectFormedWords := func(t *testing.T, actualWords []PlayedWord, expectedWords ...PlayedWord) {
@@ -26,25 +29,57 @@ func TestScoreWords(t *testing.T) {
 
 		_, _, err := ScoreWords(TilePlacements{
 			{Tile{'A', 2}, Coord{7, 7}},
-		}, board)
+		}, board, dictionary)
 
 		if err == nil {
 			t.Errorf("Expected an error for single-letter word but got nil")
 		} else {
 			switch e := err.(type) {
 			case InvalidWordError:
-				if actual, expected := len(e.Words), 1; actual != expected {
-					t.Errorf("Expected one word to be marked as invalid but found %d", actual)
+				expectFormedWords(t, e.Words, PlayedWord{"A", 4, CoordRange{Coord{7, 7}, Coord{7, 7}}})
+
+			default:
+				t.Errorf("Expected InvalidWordError but got %v", e)
+			}
+		}
+	})
+
+	t.Run("checks each word against dictionary for validity", func(t *testing.T) {
+		board := setupBoard()
+		board.Position(Coord{0, 3}).Tile = &Tile{'G', 2}
+		board.Position(Coord{2, 3}).Tile = &Tile{'D', 2}
+
+		var wordsLookedUp []string
+
+		dictionary := func(word string) bool {
+			wordsLookedUp = append(wordsLookedUp, word)
+			return false
+		}
+
+		_, _, err := ScoreWords(TilePlacements{
+			{Tile{'D', 2}, Coord{1, 2}},
+			{Tile{'O', 1}, Coord{1, 3}},
+			{Tile{'G', 2}, Coord{1, 4}},
+		}, board, dictionary)
+
+		if err == nil {
+			t.Errorf("Expected an error but succeeded")
+		} else {
+			switch e := err.(type) {
+			case InvalidWordError:
+				if actual, expected := len(wordsLookedUp), 2; actual != expected {
+					t.Errorf("Expected %d words to be validated against dictionary but only got %d", expected, actual)
 				} else {
-					expected := PlayedWord{
-						Word:       "A",
-						Score:      4,
-						CoordRange: CoordRange{Coord{7, 7}, Coord{7, 7}},
+					if actual, expected := wordsLookedUp[0], "DOG"; actual != expected {
+						t.Errorf("Expected '%s' to be validated against dictionary but got '%s'", expected, actual)
 					}
-					if actual := e.Words[0]; actual != expected {
-						t.Errorf("Expected invalid played word %#v but was %#v", expected, actual)
+					if actual, expected := wordsLookedUp[1], "GOD"; actual != expected {
+						t.Errorf("Expected '%s' to be validated against dictionary but got '%s'", expected, actual)
 					}
 				}
+				expectFormedWords(t, e.Words,
+					PlayedWord{"DOG", 5, CoordRange{Coord{1, 2}, Coord{1, 4}}},
+					PlayedWord{"GOD", 5, CoordRange{Coord{0, 3}, Coord{2, 3}}})
 
 			default:
 				t.Errorf("Expected InvalidWordError but got %v", e)
@@ -59,7 +94,7 @@ func TestScoreWords(t *testing.T) {
 			{Tile{'D', 2}, Coord{1, 2}},
 			{Tile{'O', 1}, Coord{1, 3}},
 			{Tile{'G', 2}, Coord{1, 4}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -78,7 +113,7 @@ func TestScoreWords(t *testing.T) {
 		score, words, err := ScoreWords(TilePlacements{
 			{Tile{'O', 1}, Coord{2, 4}},
 			{Tile{'G', 2}, Coord{2, 5}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -97,7 +132,7 @@ func TestScoreWords(t *testing.T) {
 			{Tile{'D', 2}, Coord{2, 1}},
 			{Tile{'O', 1}, Coord{3, 1}},
 			{Tile{'G', 2}, Coord{4, 1}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -116,7 +151,7 @@ func TestScoreWords(t *testing.T) {
 		score, words, err := ScoreWords(TilePlacements{
 			{Tile{'O', 1}, Coord{2, 4}},
 			{Tile{'G', 2}, Coord{3, 4}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -137,7 +172,7 @@ func TestScoreWords(t *testing.T) {
 		score, words, err := ScoreWords(TilePlacements{
 			{Tile{'S', 2}, Coord{8, 4}},
 			{Tile{'O', 2}, Coord{8, 5}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -160,7 +195,7 @@ func TestScoreWords(t *testing.T) {
 		score, words, err := ScoreWords(TilePlacements{
 			{Tile{'G', 2}, Coord{6, 3}},
 			{Tile{'D', 2}, Coord{6, 5}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -179,7 +214,7 @@ func TestScoreWords(t *testing.T) {
 		score, words, err := ScoreWords(TilePlacements{
 			{Tile{'O', 1}, Coord{2, 5}},
 			{Tile{'G', 2}, Coord{2, 6}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -200,7 +235,7 @@ func TestScoreWords(t *testing.T) {
 		score, words, err := ScoreWords(TilePlacements{
 			{Tile{'O', 1}, Coord{2, 5}},
 			{Tile{'G', 2}, Coord{2, 6}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -221,7 +256,7 @@ func TestScoreWords(t *testing.T) {
 		score, words, err := ScoreWords(TilePlacements{
 			{Tile{'O', 1}, Coord{2, 9}},
 			{Tile{'G', 2}, Coord{2, 10}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -240,7 +275,7 @@ func TestScoreWords(t *testing.T) {
 		score, words, err := ScoreWords(TilePlacements{
 			{Tile{'O', 1}, Coord{1, 4}},
 			{Tile{'G', 2}, Coord{1, 5}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -261,7 +296,7 @@ func TestScoreWords(t *testing.T) {
 		score, words, err := ScoreWords(TilePlacements{
 			{Tile{'O', 1}, Coord{1, 4}},
 			{Tile{'G', 2}, Coord{1, 5}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -282,7 +317,7 @@ func TestScoreWords(t *testing.T) {
 		score, words, err := ScoreWords(TilePlacements{
 			{Tile{'O', 1}, Coord{1, 10}},
 			{Tile{'G', 2}, Coord{1, 11}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -301,7 +336,7 @@ func TestScoreWords(t *testing.T) {
 		score, words, err := ScoreWords(TilePlacements{
 			{Tile{'O', 1}, Coord{3, 2}},
 			{Tile{'G', 2}, Coord{3, 3}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -320,7 +355,7 @@ func TestScoreWords(t *testing.T) {
 		score, words, err := ScoreWords(TilePlacements{
 			{Tile{'O', 1}, Coord{7, 6}},
 			{Tile{'G', 2}, Coord{7, 7}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -341,7 +376,7 @@ func TestScoreWords(t *testing.T) {
 		score, words, err := ScoreWords(TilePlacements{
 			{Tile{'O', 1}, Coord{3, 2}},
 			{Tile{'G', 2}, Coord{3, 3}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -362,7 +397,7 @@ func TestScoreWords(t *testing.T) {
 		score, words, err := ScoreWords(TilePlacements{
 			{Tile{'O', 1}, Coord{1, 2}},
 			{Tile{'G', 2}, Coord{1, 3}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -383,7 +418,7 @@ func TestScoreWords(t *testing.T) {
 			{Tile{'G', 2}, Coord{1, 3}},
 			{Tile{'O', 1}, Coord{2, 3}},
 			{Tile{'D', 2}, Coord{3, 3}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -404,7 +439,7 @@ func TestScoreWords(t *testing.T) {
 		score, words, err := ScoreWords(TilePlacements{
 			{Tile{'O', 1}, Coord{0, 13}},
 			{Tile{'G', 2}, Coord{0, 14}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -425,7 +460,7 @@ func TestScoreWords(t *testing.T) {
 		score, words, err := ScoreWords(TilePlacements{
 			{Tile{'O', 1}, Coord{0, 13}},
 			{Tile{'G', 2}, Coord{0, 14}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -446,7 +481,7 @@ func TestScoreWords(t *testing.T) {
 		score, words, err := ScoreWords(TilePlacements{
 			{Tile{'O', 1}, Coord{0, 1}},
 			{Tile{'G', 2}, Coord{0, 2}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -467,7 +502,7 @@ func TestScoreWords(t *testing.T) {
 			{Tile{'G', 2}, Coord{12, 7}},
 			{Tile{'O', 1}, Coord{13, 7}},
 			{Tile{'D', 2}, Coord{14, 7}},
-		}, board)
+		}, board, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -494,7 +529,7 @@ func TestScoreWords(t *testing.T) {
 			{Tile{'A', 1}, Coord{0, 5}},
 			{Tile{'N', 1}, Coord{0, 6}},
 			{Tile{'T', 1}, Coord{0, 7}},
-		}, board)
+		}, board, dictionary)
 
 		expectedScore := 3 * 3 * (1 + 1 + 1 + 2*3 + 4 + 1 + 1 + 1 + 1)
 

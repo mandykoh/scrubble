@@ -11,20 +11,26 @@ import "strings"
 //
 // Otherwise, the total score is returned along with the words that would be
 // formed on the board should the tiles be placed.
-func ScoreWords(placements TilePlacements, board *Board) (score int, words []PlayedWord, err error) {
+func ScoreWords(placements TilePlacements, board *Board, isWordValid Dictionary) (score int, words []PlayedWord, err error) {
 	var wordSpans []CoordRange
 	findSpans(Coord.West, Coord.East, placements, &wordSpans, board)
 	findSpans(Coord.North, Coord.South, placements, &wordSpans, board)
 
-	var invalidWordSpans []CoordRange
-	findUnspanned(placements, wordSpans, &invalidWordSpans)
+	score, words = spansToPlayedWords(wordSpans, placements, board)
 
-	if len(invalidWordSpans) > 0 {
-		_, invalidWords := spansToPlayedWords(invalidWordSpans, placements, board)
-		return 0, nil, InvalidWordError{invalidWords}
+	var singleTileSpans []CoordRange
+	findUnspanned(placements, wordSpans, &singleTileSpans)
+	_, invalidWords := spansToPlayedWords(singleTileSpans, placements, board)
+
+	for _, w := range words {
+		if !isWordValid(w.Word) {
+			invalidWords = append(invalidWords, w)
+		}
 	}
 
-	score, words = spansToPlayedWords(wordSpans, placements, board)
+	if len(invalidWords) > 0 {
+		return 0, nil, InvalidWordError{invalidWords}
+	}
 
 	return
 }
