@@ -26,7 +26,7 @@ func TestScoreWords(t *testing.T) {
 				} else {
 					expected := PlayedWord{
 						Word:       "A",
-						Score:      2,
+						Score:      4,
 						CoordRange: CoordRange{Coord{7, 7}, Coord{7, 7}},
 					}
 					if actual := e.Words[0]; actual != expected {
@@ -40,13 +40,13 @@ func TestScoreWords(t *testing.T) {
 		}
 	})
 
-	t.Run("counts entire horizontal word placed on starting position", func(t *testing.T) {
+	t.Run("counts entire horizontal word", func(t *testing.T) {
 		board := setupBoard()
 
 		score, words, err := ScoreWords(TilePlacements{
-			{Tile{'D', 2}, Coord{7, 6}},
-			{Tile{'O', 1}, Coord{7, 7}},
-			{Tile{'G', 2}, Coord{7, 8}},
+			{Tile{'D', 2}, Coord{1, 2}},
+			{Tile{'O', 1}, Coord{1, 3}},
+			{Tile{'G', 2}, Coord{1, 4}},
 		}, board)
 
 		if err != nil {
@@ -65,10 +65,10 @@ func TestScoreWords(t *testing.T) {
 				if actual, expected := words[0].Score, 5; actual != expected {
 					t.Errorf("Expected formed word to be worth %d points but was %d", expected, actual)
 				}
-				if actual, expected := words[0].Min, (Coord{7, 6}); actual != expected {
+				if actual, expected := words[0].Min, (Coord{1, 2}); actual != expected {
 					t.Errorf("Expected word to begin at %v but was %v", expected, actual)
 				}
-				if actual, expected := words[0].Max, (Coord{7, 8}); actual != expected {
+				if actual, expected := words[0].Max, (Coord{1, 4}); actual != expected {
 					t.Errorf("Expected word to end at %v but was %v", expected, actual)
 				}
 			}
@@ -110,13 +110,13 @@ func TestScoreWords(t *testing.T) {
 		}
 	})
 
-	t.Run("counts entire vertical word placed on starting position", func(t *testing.T) {
+	t.Run("counts entire vertical word", func(t *testing.T) {
 		board := setupBoard()
 
 		score, words, err := ScoreWords(TilePlacements{
-			{Tile{'D', 2}, Coord{6, 7}},
-			{Tile{'O', 1}, Coord{7, 7}},
-			{Tile{'G', 2}, Coord{8, 7}},
+			{Tile{'D', 2}, Coord{2, 1}},
+			{Tile{'O', 1}, Coord{3, 1}},
+			{Tile{'G', 2}, Coord{4, 1}},
 		}, board)
 
 		if err != nil {
@@ -135,10 +135,10 @@ func TestScoreWords(t *testing.T) {
 				if actual, expected := words[0].Score, 5; actual != expected {
 					t.Errorf("Expected formed word to be worth %d points but was %d", expected, actual)
 				}
-				if actual, expected := words[0].Min, (Coord{6, 7}); actual != expected {
+				if actual, expected := words[0].Min, (Coord{2, 1}); actual != expected {
 					t.Errorf("Expected word to begin at %v but was %v", expected, actual)
 				}
-				if actual, expected := words[0].Max, (Coord{8, 7}); actual != expected {
+				if actual, expected := words[0].Max, (Coord{4, 1}); actual != expected {
 					t.Errorf("Expected word to end at %v but was %v", expected, actual)
 				}
 			}
@@ -451,6 +451,336 @@ func TestScoreWords(t *testing.T) {
 					t.Errorf("Expected formed word to be %v but was %v", expected, actual)
 				}
 				if actual, expected := words[0].Score, 5; actual != expected {
+					t.Errorf("Expected formed word to be worth %d points but was %d", expected, actual)
+				}
+			}
+		}
+	})
+
+	t.Run("awards double-word score under a newly placed tile", func(t *testing.T) {
+		board := setupBoard()
+		board.Position(Coord{3, 1}).Tile = &Tile{'D', 2}
+
+		score, words, err := ScoreWords(TilePlacements{
+			{Tile{'O', 1}, Coord{3, 2}},
+			{Tile{'G', 2}, Coord{3, 3}},
+		}, board)
+
+		if err != nil {
+			t.Errorf("Expected success but got error %v", err)
+		} else {
+			if actual, expected := score, 10; actual != expected {
+				t.Errorf("Expected a total score of %d but got %d", expected, actual)
+			}
+
+			if actual, expected := len(words), 1; actual != expected {
+				t.Errorf("Expected one word formed but found %d", actual)
+			} else {
+				if actual, expected := words[0].Word, "DOG"; actual != expected {
+					t.Errorf("Expected formed word to be %v but was %v", expected, actual)
+				}
+				if actual, expected := words[0].Score, 10; actual != expected {
+					t.Errorf("Expected formed word to be worth %d points but was %d", expected, actual)
+				}
+			}
+		}
+	})
+
+	t.Run("awards double-word score for the start position", func(t *testing.T) {
+		board := setupBoard()
+		board.Position(Coord{7, 5}).Tile = &Tile{'D', 2}
+
+		score, words, err := ScoreWords(TilePlacements{
+			{Tile{'O', 1}, Coord{7, 6}},
+			{Tile{'G', 2}, Coord{7, 7}},
+		}, board)
+
+		if err != nil {
+			t.Errorf("Expected success but got error %v", err)
+		} else {
+			if actual, expected := score, 10; actual != expected {
+				t.Errorf("Expected a total score of %d but got %d", expected, actual)
+			}
+
+			if actual, expected := len(words), 1; actual != expected {
+				t.Errorf("Expected one word formed but found %d", actual)
+			} else {
+				if actual, expected := words[0].Word, "DOG"; actual != expected {
+					t.Errorf("Expected formed word to be %v but was %v", expected, actual)
+				}
+				if actual, expected := words[0].Score, 10; actual != expected {
+					t.Errorf("Expected formed word to be worth %d points but was %d", expected, actual)
+				}
+			}
+		}
+	})
+
+	t.Run("awards double-word score for each word formed", func(t *testing.T) {
+		board := setupBoard()
+		board.Position(Coord{3, 1}).Tile = &Tile{'D', 2}
+		board.Position(Coord{4, 3}).Tile = &Tile{'O', 1}
+		board.Position(Coord{5, 3}).Tile = &Tile{'D', 2}
+
+		score, words, err := ScoreWords(TilePlacements{
+			{Tile{'O', 1}, Coord{3, 2}},
+			{Tile{'G', 2}, Coord{3, 3}},
+		}, board)
+
+		if err != nil {
+			t.Errorf("Expected success but got error %v", err)
+		} else {
+			if actual, expected := score, 20; actual != expected {
+				t.Errorf("Expected a total score of %d but got %d", expected, actual)
+			}
+
+			if actual, expected := len(words), 2; actual != expected {
+				t.Errorf("Expected one word formed but found %d", actual)
+			} else {
+				if actual, expected := words[0].Word, "DOG"; actual != expected {
+					t.Errorf("Expected formed word to be %v but was %v", expected, actual)
+				}
+				if actual, expected := words[0].Score, 10; actual != expected {
+					t.Errorf("Expected formed word to be worth %d points but was %d", expected, actual)
+				}
+				if actual, expected := words[1].Word, "GOD"; actual != expected {
+					t.Errorf("Expected formed word to be %v but was %v", expected, actual)
+				}
+				if actual, expected := words[1].Score, 10; actual != expected {
+					t.Errorf("Expected formed word to be worth %d points but was %d", expected, actual)
+				}
+			}
+		}
+	})
+
+	t.Run("does not award double-word score under an existing tile", func(t *testing.T) {
+		board := setupBoard()
+		board.Position(Coord{1, 1}).Tile = &Tile{'D', 2}
+
+		score, words, err := ScoreWords(TilePlacements{
+			{Tile{'O', 1}, Coord{1, 2}},
+			{Tile{'G', 2}, Coord{1, 3}},
+		}, board)
+
+		if err != nil {
+			t.Errorf("Expected success but got error %v", err)
+		} else {
+			if actual, expected := score, 5; actual != expected {
+				t.Errorf("Expected a total score of %d but got %d", expected, actual)
+			}
+
+			if actual, expected := len(words), 1; actual != expected {
+				t.Errorf("Expected one word formed but found %d", actual)
+			} else {
+				if actual, expected := words[0].Word, "DOG"; actual != expected {
+					t.Errorf("Expected formed word to be %v but was %v", expected, actual)
+				}
+				if actual, expected := words[0].Score, 5; actual != expected {
+					t.Errorf("Expected formed word to be worth %d points but was %d", expected, actual)
+				}
+			}
+		}
+	})
+
+	t.Run("awards double-word score only for the word its under", func(t *testing.T) {
+		board := setupBoard()
+		board.Position(Coord{1, 1}).Tile = &Tile{'D', 2}
+		board.Position(Coord{1, 2}).Tile = &Tile{'O', 1}
+
+		score, words, err := ScoreWords(TilePlacements{
+			{Tile{'G', 2}, Coord{1, 3}},
+			{Tile{'O', 1}, Coord{2, 3}},
+			{Tile{'D', 2}, Coord{3, 3}},
+		}, board)
+
+		if err != nil {
+			t.Errorf("Expected success but got error %v", err)
+		} else {
+			if actual, expected := score, 15; actual != expected {
+				t.Errorf("Expected a total score of %d but got %d", expected, actual)
+			}
+
+			if actual, expected := len(words), 2; actual != expected {
+				t.Errorf("Expected one word formed but found %d", actual)
+			} else {
+				if actual, expected := words[0].Word, "DOG"; actual != expected {
+					t.Errorf("Expected formed word to be %v but was %v", expected, actual)
+				}
+				if actual, expected := words[0].Score, 5; actual != expected {
+					t.Errorf("Expected formed word to be worth %d points but was %d", expected, actual)
+				}
+				if actual, expected := words[1].Word, "GOD"; actual != expected {
+					t.Errorf("Expected formed word to be %v but was %v", expected, actual)
+				}
+				if actual, expected := words[1].Score, 10; actual != expected {
+					t.Errorf("Expected formed word to be worth %d points but was %d", expected, actual)
+				}
+			}
+		}
+	})
+
+	t.Run("awards triple-word score under a newly placed tile", func(t *testing.T) {
+		board := setupBoard()
+		board.Position(Coord{0, 12}).Tile = &Tile{'D', 2}
+
+		score, words, err := ScoreWords(TilePlacements{
+			{Tile{'O', 1}, Coord{0, 13}},
+			{Tile{'G', 2}, Coord{0, 14}},
+		}, board)
+
+		if err != nil {
+			t.Errorf("Expected success but got error %v", err)
+		} else {
+			if actual, expected := score, 15; actual != expected {
+				t.Errorf("Expected a total score of %d but got %d", expected, actual)
+			}
+
+			if actual, expected := len(words), 1; actual != expected {
+				t.Errorf("Expected one word formed but found %d", actual)
+			} else {
+				if actual, expected := words[0].Word, "DOG"; actual != expected {
+					t.Errorf("Expected formed word to be %v but was %v", expected, actual)
+				}
+				if actual, expected := words[0].Score, 15; actual != expected {
+					t.Errorf("Expected formed word to be worth %d points but was %d", expected, actual)
+				}
+			}
+		}
+	})
+
+	t.Run("awards triple-word score for each word formed", func(t *testing.T) {
+		board := setupBoard()
+		board.Position(Coord{0, 12}).Tile = &Tile{'D', 2}
+		board.Position(Coord{1, 14}).Tile = &Tile{'O', 1}
+		board.Position(Coord{2, 14}).Tile = &Tile{'D', 2}
+
+		score, words, err := ScoreWords(TilePlacements{
+			{Tile{'O', 1}, Coord{0, 13}},
+			{Tile{'G', 2}, Coord{0, 14}},
+		}, board)
+
+		if err != nil {
+			t.Errorf("Expected success but got error %v", err)
+		} else {
+			if actual, expected := score, 30; actual != expected {
+				t.Errorf("Expected a total score of %d but got %d", expected, actual)
+			}
+
+			if actual, expected := len(words), 2; actual != expected {
+				t.Errorf("Expected one word formed but found %d", actual)
+			} else {
+				if actual, expected := words[0].Word, "DOG"; actual != expected {
+					t.Errorf("Expected formed word to be %v but was %v", expected, actual)
+				}
+				if actual, expected := words[0].Score, 15; actual != expected {
+					t.Errorf("Expected formed word to be worth %d points but was %d", expected, actual)
+				}
+				if actual, expected := words[1].Word, "GOD"; actual != expected {
+					t.Errorf("Expected formed word to be %v but was %v", expected, actual)
+				}
+				if actual, expected := words[1].Score, 15; actual != expected {
+					t.Errorf("Expected formed word to be worth %d points but was %d", expected, actual)
+				}
+			}
+		}
+	})
+
+	t.Run("does not award triple-word score under an existing tile", func(t *testing.T) {
+		board := setupBoard()
+		board.Position(Coord{0, 0}).Tile = &Tile{'D', 2}
+
+		score, words, err := ScoreWords(TilePlacements{
+			{Tile{'O', 1}, Coord{0, 1}},
+			{Tile{'G', 2}, Coord{0, 2}},
+		}, board)
+
+		if err != nil {
+			t.Errorf("Expected success but got error %v", err)
+		} else {
+			if actual, expected := score, 5; actual != expected {
+				t.Errorf("Expected a total score of %d but got %d", expected, actual)
+			}
+
+			if actual, expected := len(words), 1; actual != expected {
+				t.Errorf("Expected one word formed but found %d", actual)
+			} else {
+				if actual, expected := words[0].Word, "DOG"; actual != expected {
+					t.Errorf("Expected formed word to be %v but was %v", expected, actual)
+				}
+				if actual, expected := words[0].Score, 5; actual != expected {
+					t.Errorf("Expected formed word to be worth %d points but was %d", expected, actual)
+				}
+			}
+		}
+	})
+
+	t.Run("awards triple-word score only for the word its under", func(t *testing.T) {
+		board := setupBoard()
+		board.Position(Coord{13, 6}).Tile = &Tile{'D', 2}
+		board.Position(Coord{13, 8}).Tile = &Tile{'G', 2}
+
+		score, words, err := ScoreWords(TilePlacements{
+			{Tile{'G', 2}, Coord{12, 7}},
+			{Tile{'O', 1}, Coord{13, 7}},
+			{Tile{'D', 2}, Coord{14, 7}},
+		}, board)
+
+		if err != nil {
+			t.Errorf("Expected success but got error %v", err)
+		} else {
+			if actual, expected := score, 20; actual != expected {
+				t.Errorf("Expected a total score of %d but got %d", expected, actual)
+			}
+
+			if actual, expected := len(words), 2; actual != expected {
+				t.Errorf("Expected one word formed but found %d", actual)
+			} else {
+				if actual, expected := words[0].Word, "DOG"; actual != expected {
+					t.Errorf("Expected formed word to be %v but was %v", expected, actual)
+				}
+				if actual, expected := words[0].Score, 5; actual != expected {
+					t.Errorf("Expected formed word to be worth %d points but was %d", expected, actual)
+				}
+				if actual, expected := words[1].Word, "GOD"; actual != expected {
+					t.Errorf("Expected formed word to be %v but was %v", expected, actual)
+				}
+				if actual, expected := words[1].Score, 15; actual != expected {
+					t.Errorf("Expected formed word to be worth %d points but was %d", expected, actual)
+				}
+			}
+		}
+	})
+
+	t.Run("awards stacked word score bonuses", func(t *testing.T) {
+		board := setupBoard()
+		board.Position(Coord{0, 8}).Tile = &Tile{'S', 1}
+
+		score, words, err := ScoreWords(TilePlacements{
+			{Tile{'E', 1}, Coord{0, 0}},
+			{Tile{'L', 1}, Coord{0, 1}},
+			{Tile{'E', 1}, Coord{0, 2}},
+			{Tile{'P', 3}, Coord{0, 3}},
+			{Tile{'H', 4}, Coord{0, 4}},
+			{Tile{'A', 1}, Coord{0, 5}},
+			{Tile{'N', 1}, Coord{0, 6}},
+			{Tile{'T', 1}, Coord{0, 7}},
+		}, board)
+
+		expectedScore := 3 * 3 * (1 + 1 + 1 + 2*3 + 4 + 1 + 1 + 1 + 1)
+
+		if err != nil {
+			t.Errorf("Expected success but got error %v", err)
+		} else {
+			if actual, expected := score, expectedScore; actual != expected {
+				t.Errorf("Expected a total score of %d but got %d", expected, actual)
+			}
+
+			if actual, expected := len(words), 1; actual != expected {
+				t.Errorf("Expected one word formed but found %d", actual)
+			} else {
+				if actual, expected := words[0].Word, "ELEPHANTS"; actual != expected {
+					t.Errorf("Expected formed word to be %v but was %v", expected, actual)
+				}
+				if actual, expected := words[0].Score, expectedScore; actual != expected {
 					t.Errorf("Expected formed word to be worth %d points but was %d", expected, actual)
 				}
 			}

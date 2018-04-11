@@ -82,6 +82,7 @@ func spansToPlayedWords(wordSpans []CoordRange, placements TilePlacements, board
 	for _, s := range wordSpans {
 		var playedWord = PlayedWord{CoordRange: s}
 		var word strings.Builder
+		var wordScoreModifiers []PositionType
 
 		s.EachCoord(func(c Coord) error {
 			var tile *Tile
@@ -92,13 +93,18 @@ func spansToPlayedWords(wordSpans []CoordRange, placements TilePlacements, board
 				playedWord.Score += tile.Points
 			} else {
 				tile = &placements.Find(c).Tile
-				playedWord.Score += position.Type.ModifyTileScore(*tile)
+				playedWord.Score += position.Type.ModifyTileScore(tile.Points)
+				wordScoreModifiers = append(wordScoreModifiers, position.Type)
 			}
 
 			word.WriteRune(tile.Letter)
 
 			return nil
 		})
+
+		for _, m := range wordScoreModifiers {
+			playedWord.Score = m.ModifyWordScore(playedWord.Score)
+		}
 
 		totalScore += playedWord.Score
 

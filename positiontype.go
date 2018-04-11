@@ -4,6 +4,7 @@ package scrubble
 // position, or a position with a score bonus, etc.
 type PositionType interface {
 	CountsAsConnected() bool
-	ModifyTileScore(t Tile) int
+	ModifyTileScore(score int) int
+	ModifyWordScore(score int) int
 	Name() string
 }

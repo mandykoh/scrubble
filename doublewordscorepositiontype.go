@@ -7,8 +7,12 @@ func (p *doubleWordScorePositionType) CountsAsConnected() bool {
 	return false
 }
 
-func (p *doubleWordScorePositionType) ModifyTileScore(t Tile) int {
-	return t.Points
+func (p *doubleWordScorePositionType) ModifyTileScore(score int) int {
+	return score
+}
+
+func (p *doubleWordScorePositionType) ModifyWordScore(score int) int {
+	return score * 2
 }
 
 func (p *doubleWordScorePositionType) Name() string {
