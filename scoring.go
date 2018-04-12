@@ -4,7 +4,7 @@ import "strings"
 
 // ScoreWords determines the scoring from a set of proposed tile placements.
 // This assumes that the tiles are being placed in valid positions according to
-// the game rules.
+// the game rules. This implements standard scoring rules.
 //
 // If a score cannot be determined because not all formed words are valid, an
 // InvalidWordError is returned containing the invalid words.
