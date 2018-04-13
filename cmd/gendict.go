@@ -31,6 +31,7 @@ func main() {
 	defer outFile.Close()
 
 	fmt.Fprintf(outFile, "package scrubble\n\n")
+	fmt.Fprintf(outFile, "// This file was generated using cmd/gendict.go\n\n")
 	fmt.Fprintf(outFile, "var %s = map[string]bool {\n", dictName)
 
 	scanner := bufio.NewScanner(wordFile)

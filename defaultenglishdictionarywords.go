@@ -1,5 +1,7 @@
 package scrubble
 
+// This file was generated using cmd/gendict.go
+
 var defaultEnglishDictionaryWords = map[string]bool {
 	"aa": true,
 	"aah": true,
