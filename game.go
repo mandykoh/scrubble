@@ -28,7 +28,8 @@ func (g *Game) AddPlayer(p *Player) error {
 }
 
 // Play attempts to place tiles from the current player's rack on the board. On
-// success, the words formed by the play are returned.
+// success, the words formed by the play are returned, the game is updated, and
+// play moves to the next player in turn.
 //
 // If the game is not in the Main phase, GameOutOfPhaseError is returned.
 //
