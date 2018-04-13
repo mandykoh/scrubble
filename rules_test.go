@@ -10,6 +10,43 @@ func TestRules(t *testing.T) {
 
 	t.Run("zero-value", func(t *testing.T) {
 
+		t.Run("uses a default dictionary", func(t *testing.T) {
+			_, _, err := rules.ScoreWords(TilePlacements{
+				{Tile{'A', 1}, Coord{0, 0}},
+				{Tile{'A', 1}, Coord{1, 0}},
+				{Tile{'R', 1}, Coord{2, 0}},
+				{Tile{'D', 1}, Coord{3, 0}},
+				{Tile{'V', 1}, Coord{4, 0}},
+				{Tile{'A', 1}, Coord{5, 0}},
+				{Tile{'R', 1}, Coord{6, 0}},
+				{Tile{'K', 1}, Coord{7, 0}},
+			}, &board)
+
+			if err != nil {
+				t.Errorf("Expected success but got error %v", err)
+			}
+
+			_, _, err = rules.ScoreWords(TilePlacements{
+				{Tile{'V', 1}, Coord{0, 0}},
+				{Tile{'X', 1}, Coord{1, 0}},
+				{Tile{'T', 1}, Coord{2, 0}},
+				{Tile{'Q', 1}, Coord{3, 0}},
+				{Tile{'R', 1}, Coord{4, 0}},
+				{Tile{'P', 1}, Coord{5, 0}},
+			}, &board)
+
+			if err == nil {
+				t.Errorf("Expected an error due to an invalid word but succeeded")
+			} else {
+				switch e := err.(type) {
+				case InvalidWordError:
+
+				default:
+					t.Errorf("Expected InvalidWordError but got %v", e)
+				}
+			}
+		})
+
 		t.Run("can score words", func(t *testing.T) {
 			defer func() {
 				if r := recover(); r != nil {

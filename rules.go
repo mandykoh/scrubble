@@ -2,7 +2,7 @@ package scrubble
 
 // Rules is an immutable struct representing the rules used by the game to check
 // and validate various conditions for legality. The zero-value Rules uses
-// default game play rules with a permissive dictionary that allows any word.
+// default game play rules with a default English dictionary of words.
 type Rules struct {
 	dictionary         Dictionary
 	placementValidator PlacementValidator
@@ -24,7 +24,7 @@ type Rules struct {
 func (r *Rules) ScoreWords(placements TilePlacements, board *Board) (score int, words []PlayedWord, err error) {
 	dictionary := r.dictionary
 	if dictionary == nil {
-		dictionary = func(string) bool { return true }
+		dictionary = DefaultEnglishDictionary
 	}
 
 	wordScorer := r.wordScorer
