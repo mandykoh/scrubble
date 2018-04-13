@@ -59,7 +59,7 @@ func (r *Rules) ValidatePlacements(placements TilePlacements, board *Board) erro
 // field if the rack doesn't contain sufficient tiles to make the play.
 //
 // Otherwise, the remainder (after the placed tiles have been removed from the
-// rack is returned with no error, indicating that it would be safe to update
+// rack) is returned with no error, indicating that it would be safe to update
 // the rack for placement.
 func (r *Rules) ValidateTilesFromRack(rack Rack, placements TilePlacements) (remaining Rack, err error) {
 	rackValidator := r.rackValidator

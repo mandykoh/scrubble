@@ -66,7 +66,7 @@ func ValidatePlacements(placements TilePlacements, board *Board) error {
 // Missing field.
 //
 // Otherwise, the remainder (after the placed tiles have been removed from the
-// rack is returned with no error, indicating that it would be safe to update
+// rack) is returned with no error, indicating that it would be safe to update
 // the rack for placement.
 func ValidateTilesFromRack(rack Rack, placements TilePlacements) (remaining Rack, err error) {
 	var missing []Tile
