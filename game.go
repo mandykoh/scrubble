@@ -69,11 +69,8 @@ func (g *Game) Play(placements TilePlacements) (playedWords []PlayedWord, err er
 
 		g.Board.placeTiles(placements)
 
-		if g.Rules.GameEnds(seat, score, g) {
-			g.Phase = EndPhase
-		} else {
-			g.CurrentSeatIndex = (g.CurrentSeatIndex + 1) % len(g.Seats)
-		}
+		g.CurrentSeatIndex = (g.CurrentSeatIndex + 1) % len(g.Seats)
+		g.Phase = g.Rules.NextGamePhase(seat, score, g)
 
 		return nil
 	})

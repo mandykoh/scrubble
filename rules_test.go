@@ -47,14 +47,14 @@ func TestRules(t *testing.T) {
 			}
 		})
 
-		t.Run("can check for end-of-game", func(t *testing.T) {
+		t.Run("can check for next phase", func(t *testing.T) {
 			defer func() {
 				if r := recover(); r != nil {
-					t.Errorf("Expected GameEnds to succeed without panic but got %v", r)
+					t.Errorf("Expected NextGamePhase to succeed without panic but got %v", r)
 				}
 			}()
 
-			rules.GameEnds(&Seat{}, 0, &Game{})
+			rules.NextGamePhase(&Seat{}, 0, &Game{})
 		})
 
 		t.Run("can score words", func(t *testing.T) {
@@ -116,26 +116,26 @@ func TestRules(t *testing.T) {
 		})
 	})
 
-	t.Run(".WithGameEndChecker()", func(t *testing.T) {
-		checkerCalled := 0
-		checker := func(*Seat, int, *Game) bool {
-			checkerCalled++
-			return true
+	t.Run(".WithGamePhaseController()", func(t *testing.T) {
+		controllerCalled := 0
+		controller := func(*Seat, int, *Game) GamePhase {
+			controllerCalled++
+			return MainPhase
 		}
 
-		overriddenRules := Rules{}.WithGameEndChecker(checker)
+		overriddenRules := Rules{}.WithGamePhaseController(controller)
 
-		t.Run("sets the function to use for end-of-game checking", func(t *testing.T) {
-			overriddenRules.GameEnds(nil, 0, nil)
+		t.Run("sets the function to use for game phase progression", func(t *testing.T) {
+			overriddenRules.NextGamePhase(nil, 0, nil)
 
-			if actual, expected := checkerCalled, 1; actual != expected {
+			if actual, expected := controllerCalled, 1; actual != expected {
 				t.Errorf("Expected overridden end-of-game checker to be called once but got %d invocations", actual)
 			}
 		})
 
 		t.Run("leaves the original rules unmodified", func(t *testing.T) {
-			if actual := rules.gameEndChecker; actual != nil {
-				t.Errorf("Expected original end-of-game checker to be unmodified but wasn't")
+			if actual := rules.gamePhaseController; actual != nil {
+				t.Errorf("Expected original game phase controller  to be unmodified but wasn't")
 			}
 		})
 	})

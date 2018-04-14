@@ -2,7 +2,7 @@ package scrubble
 
 import "testing"
 
-func TestGameEnds(t *testing.T) {
+func TestNextGamePhase(t *testing.T) {
 	game := &Game{}
 
 	t.Run("allows the game to continue when the rack can be replenished with at least one tile", func(t *testing.T) {
@@ -12,20 +12,20 @@ func TestGameEnds(t *testing.T) {
 			},
 		}
 
-		shouldEnd := GameEnds(seat, 123, game)
+		next := NextGamePhase(seat, 123, game)
 
-		if shouldEnd {
-			t.Errorf("Expected that the game should continue but it would end")
+		if next != MainPhase {
+			t.Errorf("Expected that the game should continue but got %#v", next)
 		}
 	})
 
 	t.Run("ends the game when the rack is emptied and can't be replenished from the bag", func(t *testing.T) {
 		seat := &Seat{}
 
-		shouldEnd := GameEnds(seat, 123, game)
+		next := NextGamePhase(seat, 123, game)
 
-		if !shouldEnd {
-			t.Errorf("Expected that the game should end but it would continue")
+		if next != EndPhase {
+			t.Errorf("Expected that the game should end but got %#v", next)
 		}
 	})
 }

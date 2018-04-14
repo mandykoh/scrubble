@@ -4,22 +4,22 @@ package scrubble
 // and validate various conditions for legality. The zero-value Rules uses
 // default game play rules with a default English dictionary of words.
 type Rules struct {
-	dictionary         Dictionary
-	gameEndChecker     GameEndChecker
-	placementValidator PlacementValidator
-	rackValidator      RackValidator
-	wordScorer         WordScorer
+	dictionary          Dictionary
+	gamePhaseController GamePhaseController
+	placementValidator  PlacementValidator
+	rackValidator       RackValidator
+	wordScorer          WordScorer
 }
 
-// GameEnds determines whether the game should end given the last player's turn
-// and score. Unless overridden by WithGameEndChecker, this uses the default
-// implementation provided by the GameEnds function.
-func (r *Rules) GameEnds(lastSeat *Seat, lastScore int, game *Game) bool {
-	gameEndChecker := r.gameEndChecker
-	if gameEndChecker == nil {
-		gameEndChecker = GameEnds
+// NextGamePhase determines the next game phase given the last turn and the
+// game's current state. Unless overridden by WithGamePhaseController, this uses
+// the default implementation provided by the NextGamePhase function.
+func (r *Rules) NextGamePhase(lastSeat *Seat, lastScore int, game *Game) GamePhase {
+	nextGamePhase := r.gamePhaseController
+	if nextGamePhase == nil {
+		nextGamePhase = NextGamePhase
 	}
-	return gameEndChecker(lastSeat, lastScore, game)
+	return nextGamePhase(lastSeat, lastScore, game)
 }
 
 // ScoreWords determines the scoring from a set of proposed tile placements.
@@ -88,10 +88,11 @@ func (r Rules) WithDictionary(dict Dictionary) Rules {
 	return r
 }
 
-// WithGameEndChecker returns a copy of these Rules which uses the specified
-// function for end-of-game checking.
-func (r Rules) WithGameEndChecker(checker GameEndChecker) Rules {
-	r.gameEndChecker = checker
+// WithGamePhaseController returns a copy of these Rules which uses the
+// specified function for determining the progression of the game, and the
+// conditions under which the game ends.
+func (r Rules) WithGamePhaseController(controller GamePhaseController) Rules {
+	r.gamePhaseController = controller
 	return r
 }
 
