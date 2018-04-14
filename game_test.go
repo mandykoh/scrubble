@@ -105,7 +105,7 @@ func TestGame(t *testing.T) {
 						placementsValidated++
 						return nil
 					},
-					rackValidator: func(rack Rack, placements TilePlacements) (Rack, error) {
+					rackValidator: func(rack Rack, placements TilePlacements) ([]Tile, error) {
 						tilesFromRackValidated++
 						return ValidateTilesFromRack(rack, placements)
 					},
@@ -137,7 +137,7 @@ func TestGame(t *testing.T) {
 		t.Run("with insufficient tiles on the rack", func(t *testing.T) {
 			game := setupGame()
 
-			game.Rules.rackValidator = func(rack Rack, placements TilePlacements) (Rack, error) {
+			game.Rules.rackValidator = func(rack Rack, placements TilePlacements) ([]Tile, error) {
 				return rack, errors.New("some error")
 			}
 

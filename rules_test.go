@@ -132,7 +132,7 @@ func TestRules(t *testing.T) {
 
 	t.Run(".WithRackValidator()", func(t *testing.T) {
 		validatorCalled := 0
-		validator := func(Rack, TilePlacements) (Rack, error) {
+		validator := func(Rack, TilePlacements) ([]Tile, error) {
 			validatorCalled++
 			return nil, nil
 		}

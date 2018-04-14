@@ -73,7 +73,7 @@ func ValidatePlacements(placements TilePlacements, board *Board) error {
 // matches any zero-point tile in the rack regardless of letter. This implies
 // that wildcards need to have their letters replaced with the desired letter
 // when being placed (so that any resulting words are valid).
-func ValidateTilesFromRack(rack Rack, placements TilePlacements) (remaining Rack, err error) {
+func ValidateTilesFromRack(rack Rack, placements TilePlacements) (remaining []Tile, err error) {
 	var missing []Tile
 	remaining = append(remaining, rack...)
 
