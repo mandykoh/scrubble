@@ -311,6 +311,33 @@ func TestGame(t *testing.T) {
 				}
 			})
 		})
+
+		t.Run("with a game-ending play", func(t *testing.T) {
+			game := setupGame()
+			game.Rules = game.Rules.WithGameEndChecker(func(*Seat, int, *Game) bool {
+				return true
+			})
+
+			game.Board.Position(Coord{0, 1}).Tile = &Tile{'A', 1}
+
+			placements := TilePlacements{
+				{Tile{'B', 1}, Coord{0, 0}},
+				{Tile{'D', 1}, Coord{0, 2}},
+			}
+			game.Play(placements)
+
+			t.Run("moves the game into the End phase", func(t *testing.T) {
+				if actual, expected := game.Phase, EndPhase; actual != expected {
+					t.Errorf("Expected game to be in %v phase but was %v", expected, actual)
+				}
+			})
+
+			t.Run("doesn't advance to the next player", func(t *testing.T) {
+				if actual, expected := game.CurrentSeatIndex, 1; actual != expected {
+					t.Errorf("Expected turn not to advance to next player but current seat is %d", game.CurrentSeatIndex)
+				}
+			})
+		})
 	})
 
 	t.Run(".RemovePlayer()", func(t *testing.T) {

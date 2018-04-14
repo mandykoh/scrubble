@@ -56,7 +56,7 @@ func (g *Game) Play(placements TilePlacements) (playedWords []PlayedWord, err er
 			return err
 		}
 
-		var score = 0
+		var score int
 		score, playedWords, err = g.Rules.ScoreWords(placements, &g.Board)
 		if err != nil {
 			return err
@@ -68,7 +68,12 @@ func (g *Game) Play(placements TilePlacements) (playedWords []PlayedWord, err er
 		seat.Rack.FillFromBag(&g.Bag)
 
 		g.Board.placeTiles(placements)
-		g.CurrentSeatIndex = (g.CurrentSeatIndex + 1) % len(g.Seats)
+
+		if g.Rules.GameEnds(seat, score, g) {
+			g.Phase = EndPhase
+		} else {
+			g.CurrentSeatIndex = (g.CurrentSeatIndex + 1) % len(g.Seats)
+		}
 
 		return nil
 	})

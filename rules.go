@@ -5,9 +5,21 @@ package scrubble
 // default game play rules with a default English dictionary of words.
 type Rules struct {
 	dictionary         Dictionary
+	gameEndChecker     GameEndChecker
 	placementValidator PlacementValidator
 	rackValidator      RackValidator
 	wordScorer         WordScorer
+}
+
+// GameEnds determines whether the game should end given the last player's turn
+// and score. Unless overridden by WithGameEndChecker, this uses the default
+// implementation provided by the GameEnds function.
+func (r *Rules) GameEnds(lastSeat *Seat, lastScore int, game *Game) bool {
+	gameEndChecker := r.gameEndChecker
+	if gameEndChecker == nil {
+		gameEndChecker = GameEnds
+	}
+	return gameEndChecker(lastSeat, lastScore, game)
 }
 
 // ScoreWords determines the scoring from a set of proposed tile placements.
@@ -73,6 +85,13 @@ func (r *Rules) ValidateTilesFromRack(rack Rack, placements TilePlacements) (rem
 // dictionary for word validation.
 func (r Rules) WithDictionary(dict Dictionary) Rules {
 	r.dictionary = dict
+	return r
+}
+
+// WithGameEndChecker returns a copy of these Rules which uses the specified
+// function for end-of-game checking.
+func (r Rules) WithGameEndChecker(checker GameEndChecker) Rules {
+	r.gameEndChecker = checker
 	return r
 }
 
