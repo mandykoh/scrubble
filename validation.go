@@ -68,6 +68,11 @@ func ValidatePlacements(placements TilePlacements, board *Board) error {
 // Otherwise, the remainder (after the placed tiles have been removed from the
 // rack) is returned with no error, indicating that it would be safe to update
 // the rack for placement.
+//
+// Zero-point tiles are treated as wildcards: a zero-point tile being placed
+// matches any zero-point tile in the rack regardless of letter. This implies
+// that wildcards need to have their letters replaced with the desired letter
+// when being placed (so that any resulting words are valid).
 func ValidateTilesFromRack(rack Rack, placements TilePlacements) (remaining Rack, err error) {
 	var missing []Tile
 	remaining = append(remaining, rack...)
@@ -75,7 +80,7 @@ func ValidateTilesFromRack(rack Rack, placements TilePlacements) (remaining Rack
 Placements:
 	for _, p := range placements {
 		for i, t := range remaining {
-			if t == p.Tile {
+			if (t.Points == 0 && p.Tile.Points == 0) || t == p.Tile {
 				remaining = append(remaining[:i], remaining[i+1:]...)
 				continue Placements
 			}

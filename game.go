@@ -31,6 +31,11 @@ func (g *Game) AddPlayer(p *Player) error {
 // success, the words formed by the play are returned, the game is updated, and
 // play moves to the next player in turn.
 //
+// Wildcard tiles (tiles with a zero-point tile value) can be played by passing
+// a TilePlacement with the letter replaced by any desired letter (but keeping
+// the point value at zero). The wildcard will be correctly deducted from the
+// player's rack.
+//
 // If the game is not in the Main phase, GameOutOfPhaseError is returned.
 //
 // If the current player doesn't have the tiles required to make the play, an

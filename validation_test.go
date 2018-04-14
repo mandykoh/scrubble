@@ -198,4 +198,27 @@ func TestValidateTilesFromRack(t *testing.T) {
 			expectRackContains(t, r, 'A', 'O', 'M', 'B', 'O')
 		}
 	})
+
+	t.Run("treats zero-point tiles as wildcard tiles", func(t *testing.T) {
+		r := Rack{
+			{'A', 1},
+			{' ', 0},
+			{'M', 1},
+			{'B', 1},
+			{'O', 1},
+		}
+
+		remaining, err := ValidateTilesFromRack(r, TilePlacements{
+			{Tile{'B', 1}, Coord{0, 0}},
+			{Tile{'O', 1}, Coord{0, 1}},
+			{Tile{'O', 0}, Coord{0, 2}},
+			{Tile{'M', 1}, Coord{0, 3}},
+		})
+
+		if err != nil {
+			t.Errorf("Expected success but got error %v", err)
+		} else {
+			expectRackContains(t, remaining, 'A')
+		}
+	})
 }
