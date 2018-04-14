@@ -516,6 +516,35 @@ func TestScoreWords(t *testing.T) {
 		}
 	})
 
+	t.Run("awards an extra point bonus if a full rack's worth of tiles is played", func(t *testing.T) {
+		board := setupBoard()
+		board.Position(Coord{2, 6}).Tile = &Tile{'P', 3}
+		board.Position(Coord{2, 8}).Tile = &Tile{'A', 1}
+		board.Position(Coord{3, 3}).Tile = &Tile{'E', 1}
+		board.Position(Coord{4, 3}).Tile = &Tile{'L', 1}
+
+		score, words, err := ScoreWords(TilePlacements{
+			{Tile{'E', 1}, Coord{2, 3}},
+			{Tile{'L', 1}, Coord{2, 4}},
+			{Tile{'E', 1}, Coord{2, 5}},
+			{Tile{'H', 4}, Coord{2, 7}},
+			{Tile{'N', 1}, Coord{2, 9}},
+			{Tile{'T', 1}, Coord{2, 10}},
+			{Tile{'S', 1}, Coord{2, 11}},
+		}, board, dictionary)
+
+		if err != nil {
+			t.Errorf("Expected success but got error %v", err)
+		} else {
+			if actual, expected := score, 14+3+MaxRackTilesBonus; actual != expected {
+				t.Errorf("Expected a total score of %d but got %d", expected, actual)
+			}
+			expectFormedWords(t, words,
+				PlayedWord{"ELEPHANTS", 14, CoordRange{Coord{2, 3}, Coord{2, 11}}},
+				PlayedWord{"EEL", 3, CoordRange{Coord{2, 3}, Coord{4, 3}}})
+		}
+	})
+
 	t.Run("awards stacked word score bonuses", func(t *testing.T) {
 		board := setupBoard()
 		board.Position(Coord{0, 8}).Tile = &Tile{'S', 1}
@@ -531,15 +560,16 @@ func TestScoreWords(t *testing.T) {
 			{Tile{'T', 1}, Coord{0, 7}},
 		}, board, dictionary)
 
-		expectedScore := 3 * 3 * (1 + 1 + 1 + 2*3 + 4 + 1 + 1 + 1 + 1)
+		expectedWordScore := 3 * 3 * (1 + 1 + 1 + 2*3 + 4 + 1 + 1 + 1 + 1)
+		expectedTotalScore := expectedWordScore + MaxRackTilesBonus
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
 		} else {
-			if actual, expected := score, expectedScore; actual != expected {
+			if actual, expected := score, expectedTotalScore; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
-			expectFormedWords(t, words, PlayedWord{"ELEPHANTS", expectedScore, CoordRange{Coord{0, 0}, Coord{0, 8}}})
+			expectFormedWords(t, words, PlayedWord{"ELEPHANTS", expectedWordScore, CoordRange{Coord{0, 0}, Coord{0, 8}}})
 		}
 	})
 }

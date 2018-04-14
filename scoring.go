@@ -2,6 +2,10 @@ package scrubble
 
 import "strings"
 
+// MaxRackTilesBonus is the number of bonus points awarded for playing all the
+// tiles on a full rack in one turn.
+const MaxRackTilesBonus = 50
+
 // ScoreWords determines the scoring from a set of proposed tile placements.
 // This assumes that the tiles are being placed in valid positions according to
 // the game rules. This implements standard scoring rules.
@@ -30,6 +34,10 @@ func ScoreWords(placements TilePlacements, board *Board, isWordValid Dictionary)
 
 	if len(invalidWords) > 0 {
 		return 0, nil, InvalidWordError{invalidWords}
+	}
+
+	if len(placements) >= MaxRackTiles {
+		score += MaxRackTilesBonus
 	}
 
 	return
