@@ -1,5 +1,6 @@
 package scrubble
 
+// MaxRackTiles is the maximum number of tiles a Rack should hold.
 const MaxRackTiles = 7
 
 // Rack represents a player’s rack of tiles which are available to play. The
