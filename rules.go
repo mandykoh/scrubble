@@ -14,6 +14,8 @@ type Rules struct {
 // NextGamePhase determines the next game phase given the last turn and the
 // game's current state. Unless overridden by WithGamePhaseController, this uses
 // the default implementation provided by the NextGamePhase function.
+//
+// This is called at the end of each turn to determine the phase of the game.
 func (r *Rules) NextGamePhase(lastSeat *Seat, lastScore int, game *Game) GamePhase {
 	nextGamePhase := r.gamePhaseController
 	if nextGamePhase == nil {
