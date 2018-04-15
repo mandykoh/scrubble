@@ -11,17 +11,17 @@ type Rules struct {
 	wordScorer          WordScorer
 }
 
-// NextGamePhase determines the next game phase given the last turn and the
-// game's current state. Unless overridden by WithGamePhaseController, this uses
-// the default implementation provided by the NextGamePhase function.
+// NextGamePhase determines the next game phase given the game's current state.
+// Unless overridden by WithGamePhaseController, this uses the default
+// implementation provided by the NextGamePhase function.
 //
 // This is called at the end of each turn to determine the phase of the game.
-func (r *Rules) NextGamePhase(lastSeat *Seat, lastScore int, game *Game) GamePhase {
+func (r *Rules) NextGamePhase(game *Game) GamePhase {
 	nextGamePhase := r.gamePhaseController
 	if nextGamePhase == nil {
 		nextGamePhase = NextGamePhase
 	}
-	return nextGamePhase(lastSeat, lastScore, game)
+	return nextGamePhase(game)
 }
 
 // ScoreWords determines the scoring from a set of proposed tile placements.

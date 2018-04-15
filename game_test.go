@@ -314,7 +314,7 @@ func TestGame(t *testing.T) {
 
 		t.Run("with a game-ending play", func(t *testing.T) {
 			game := setupGame()
-			game.Rules = game.Rules.WithGamePhaseController(func(*Seat, int, *Game) GamePhase {
+			game.Rules = game.Rules.WithGamePhaseController(func(*Game) GamePhase {
 				return EndPhase
 			})
 

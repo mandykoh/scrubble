@@ -54,7 +54,14 @@ func TestRules(t *testing.T) {
 				}
 			}()
 
-			rules.NextGamePhase(&Seat{}, 0, &Game{})
+			rules.NextGamePhase(&Game{
+				Seats: []Seat{
+					{},
+				},
+				History: History{
+					{0, 123, TilePlacements{}, []PlayedWord{}},
+				},
+			})
 		})
 
 		t.Run("can score words", func(t *testing.T) {
@@ -118,7 +125,7 @@ func TestRules(t *testing.T) {
 
 	t.Run(".WithGamePhaseController()", func(t *testing.T) {
 		controllerCalled := 0
-		controller := func(*Seat, int, *Game) GamePhase {
+		controller := func(*Game) GamePhase {
 			controllerCalled++
 			return MainPhase
 		}
@@ -126,7 +133,7 @@ func TestRules(t *testing.T) {
 		overriddenRules := Rules{}.WithGamePhaseController(controller)
 
 		t.Run("sets the function to use for game phase progression", func(t *testing.T) {
-			overriddenRules.NextGamePhase(nil, 0, nil)
+			overriddenRules.NextGamePhase(nil)
 
 			if actual, expected := controllerCalled, 1; actual != expected {
 				t.Errorf("Expected overridden end-of-game checker to be called once but got %d invocations", actual)

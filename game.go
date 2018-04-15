@@ -15,6 +15,7 @@ type Game struct {
 	Board            Board
 	CurrentSeatIndex int
 	Rules            Rules
+	History          History
 }
 
 // AddPlayer adds a seat for a new player to the game.
@@ -69,8 +70,9 @@ func (g *Game) Play(placements TilePlacements) (playedWords []PlayedWord, err er
 
 		g.Board.placeTiles(placements)
 
+		g.History.AppendPlay(g.CurrentSeatIndex, score, placements, playedWords)
 		g.CurrentSeatIndex = (g.CurrentSeatIndex + 1) % len(g.Seats)
-		g.Phase = g.Rules.NextGamePhase(seat, score, g)
+		g.Phase = g.Rules.NextGamePhase(g)
 
 		return nil
 	})
