@@ -1,5 +1,9 @@
 package scrubble
 
+// MaxScorelessTurns represents the maximum number of consecutive scoreless
+// turns for the game to end.
+const MaxScorelessTurns = 6
+
 // GamePhaseController represents a function which determines the next game
 // phase after a turn is played. This is called by Game at the end of each turn.
 type GamePhaseController func(game *Game) (next GamePhase)
@@ -9,8 +13,21 @@ type GamePhaseController func(game *Game) (next GamePhase)
 func NextGamePhase(game *Game) GamePhase {
 	lastTurn := game.History.Last()
 
+	// Last player's rack was empty, which means they played out
 	if len(game.Seats[lastTurn.SeatIndex].Rack) == 0 {
 		return EndPhase
+	}
+
+	scoreless := 0
+	for i := len(game.History) - 1; i >= 0; i-- {
+		if game.History[i].Score > 0 {
+			break
+		}
+
+		scoreless++
+		if scoreless >= MaxScorelessTurns {
+			return EndPhase
+		}
 	}
 
 	return MainPhase

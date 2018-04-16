@@ -19,7 +19,7 @@ func TestNextGamePhase(t *testing.T) {
 		next := NextGamePhase(game)
 
 		if next != MainPhase {
-			t.Errorf("Expected that the game should continue but got %#v", next)
+			t.Errorf("Expected that the game should continue but got %#v next", next)
 		}
 	})
 
@@ -34,7 +34,36 @@ func TestNextGamePhase(t *testing.T) {
 		next := NextGamePhase(game)
 
 		if next != EndPhase {
-			t.Errorf("Expected that the game should end but got %#v", next)
+			t.Errorf("Expected that the game should end but got %#v next", next)
+		}
+	})
+
+	t.Run("ends the game after six consecutive scoreless turns", func(t *testing.T) {
+		game := &Game{
+			Seats: []Seat{
+				{Rack: []Tile{{'A', 1}}},
+				{Rack: []Tile{{'B', 2}}},
+			},
+			History: History{
+				{0, 0, TilePlacements{}, []PlayedWord{}},
+				{1, 0, TilePlacements{}, []PlayedWord{}},
+				{0, 0, TilePlacements{}, []PlayedWord{}},
+				{1, 0, TilePlacements{}, []PlayedWord{}},
+				{0, 0, TilePlacements{}, []PlayedWord{}},
+			},
+		}
+
+		next := NextGamePhase(game)
+
+		if next == EndPhase {
+			t.Errorf("Expected that the game should still continue for one turn but got %#v next", next)
+		}
+
+		game.History.AppendPlay(1, 0, TilePlacements{}, []PlayedWord{})
+		next = NextGamePhase(game)
+
+		if next != EndPhase {
+			t.Errorf("Expected that the game should end but got %#v next", next)
 		}
 	})
 }
