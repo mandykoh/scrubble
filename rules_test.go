@@ -10,7 +10,7 @@ func TestRules(t *testing.T) {
 
 	t.Run("zero-value", func(t *testing.T) {
 
-		t.Run("uses a default dictionary", func(t *testing.T) {
+		t.Run("allows any word for scoring", func(t *testing.T) {
 			_, _, err := rules.ScoreWords(TilePlacements{
 				{Tile{'A', 1}, Coord{0, 0}},
 				{Tile{'A', 1}, Coord{1, 0}},
@@ -35,15 +35,8 @@ func TestRules(t *testing.T) {
 				{Tile{'P', 1}, Coord{5, 0}},
 			}, &board)
 
-			if err == nil {
-				t.Errorf("Expected an error due to an invalid word but succeeded")
-			} else {
-				switch e := err.(type) {
-				case InvalidWordError:
-
-				default:
-					t.Errorf("Expected InvalidWordError but got %v", e)
-				}
+			if err != nil {
+				t.Errorf("Expected success but got error %v", err)
 			}
 		})
 
@@ -105,7 +98,10 @@ func TestRules(t *testing.T) {
 		overriddenRules := Rules{}.WithDictionary(dictionary)
 
 		t.Run("sets the dictionary to use for word scoring", func(t *testing.T) {
-			overriddenRules.ScoreWords(TilePlacements{
+			dictionaryCalled = 0
+
+			r := overriddenRules.WithDictionaryForScoring(true)
+			r.ScoreWords(TilePlacements{
 				{Tile{'C', 1}, Coord{0, 0}},
 				{Tile{'A', 1}, Coord{1, 0}},
 				{Tile{'T', 1}, Coord{2, 0}},
@@ -113,6 +109,25 @@ func TestRules(t *testing.T) {
 
 			if actual, expected := dictionaryCalled, 1; actual != expected {
 				t.Errorf("Expected overridden dictionary to be called once but got %d invocations", actual)
+			}
+		})
+
+		t.Run("continues to allow any word if the dictionary for word scoring is disabled", func(t *testing.T) {
+			dictionaryCalled = 0
+
+			r := overriddenRules.WithDictionaryForScoring(false)
+			_, _, err := r.ScoreWords(TilePlacements{
+				{Tile{'D', 1}, Coord{0, 0}},
+				{Tile{'J', 1}, Coord{1, 0}},
+				{Tile{'K', 1}, Coord{2, 0}},
+			}, &board)
+
+			if err != nil {
+				t.Errorf("Expected success but got error %v", err)
+			}
+
+			if actual, expected := dictionaryCalled, 0; actual != expected {
+				t.Errorf("Expected overridden dictionary to remain unused but got %d invocations", actual)
 			}
 		})
 

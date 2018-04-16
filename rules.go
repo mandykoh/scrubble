@@ -2,13 +2,16 @@ package scrubble
 
 // Rules is an immutable struct representing the rules used by the game to check
 // and validate various conditions for legality. The zero-value Rules uses
-// default game play rules with a default English dictionary of words.
+// default game play rules with a default English dictionary of words, without
+// automatic word validation (words are only validated against the dictionary
+// when a play is challenged, rather than automatically upon word scoring).
 type Rules struct {
 	dictionary          Dictionary
 	gamePhaseController GamePhaseController
 	placementValidator  PlacementValidator
 	rackValidator       RackValidator
 	wordScorer          WordScorer
+	useDictForScoring   bool
 }
 
 // NextGamePhase determines the next game phase given the game's current state.
@@ -27,8 +30,9 @@ func (r *Rules) NextGamePhase(game *Game) GamePhase {
 // ScoreWords determines the scoring from a set of proposed tile placements.
 // This assumes that the tiles are being placed in valid positions according to
 // placement validation. Unless overridden by WithWordScorer, this uses the
-// default implementation provided by the ScoreWords function, with the current
-// dictionary.
+// default implementation provided by the ScoreWords function. If
+// WithDictionaryForScoring is set to true, words are validated against the
+// current dictionary.
 //
 // If a score cannot be determined because not all formed words are valid, an
 // InvalidWordError is returned containing the invalid words.
@@ -37,7 +41,9 @@ func (r *Rules) NextGamePhase(game *Game) GamePhase {
 // formed on the board should the tiles be placed.
 func (r *Rules) ScoreWords(placements TilePlacements, board *Board) (score int, words []PlayedWord, err error) {
 	dictionary := r.dictionary
-	if dictionary == nil {
+	if !r.useDictForScoring {
+		dictionary = func(string) bool { return true }
+	} else if dictionary == nil {
 		dictionary = DefaultEnglishDictionary
 	}
 
@@ -87,6 +93,16 @@ func (r *Rules) ValidateTilesFromRack(rack Rack, placements TilePlacements) (rem
 // dictionary for word validation.
 func (r Rules) WithDictionary(dict Dictionary) Rules {
 	r.dictionary = dict
+	return r
+}
+
+// WithDictionaryForScoring returns a copy of these Rules which optionally uses
+// the current dictionary for word scoring. The default is to only use the
+// dictionary when a play is challenged. Setting this to true will check all
+// words against the dictionary and cause an InvalidWordError on scoring if any
+// aren't valid.
+func (r Rules) WithDictionaryForScoring(use bool) Rules {
+	r.useDictForScoring = use
 	return r
 }
 
