@@ -28,6 +28,16 @@ func (g *Game) AddPlayer(p *Player) error {
 	})
 }
 
+// Pass forfeits the current player's turn.
+//
+// If the game is not in the Main phase, GameOutOfPhaseError is returned.
+func (g *Game) Pass() error {
+	return g.requirePhase(MainPhase, func() error {
+		g.endTurn(0, nil, nil)
+		return nil
+	})
+}
+
 // Play attempts to place tiles from the current player's rack on the board. On
 // success, the words formed by the play are returned, the game is updated, and
 // play moves to the next player in turn.
@@ -70,9 +80,7 @@ func (g *Game) Play(placements TilePlacements) (playedWords []PlayedWord, err er
 
 		g.Board.placeTiles(placements)
 
-		g.History.AppendPlay(g.CurrentSeatIndex, score, placements, playedWords)
-		g.CurrentSeatIndex = (g.CurrentSeatIndex + 1) % len(g.Seats)
-		g.Phase = g.Rules.NextGamePhase(g)
+		g.endTurn(score, placements, playedWords)
 
 		return nil
 	})
@@ -125,6 +133,16 @@ func (g *Game) Start(r *rand.Rand) error {
 
 func (g *Game) currentSeat() *Seat {
 	return &g.Seats[g.CurrentSeatIndex]
+}
+
+func (g *Game) endTurn(score int, tilesPlayed TilePlacements, wordsFormed []PlayedWord) {
+	g.History.AppendPlay(g.CurrentSeatIndex, score, tilesPlayed, wordsFormed)
+	g.CurrentSeatIndex = g.nextSeatIndex()
+	g.Phase = g.Rules.NextGamePhase(g)
+}
+
+func (g *Game) nextSeatIndex() int {
+	return (g.CurrentSeatIndex + 1) % len(g.Seats)
 }
 
 func (g *Game) requirePhase(phase GamePhase, action func() error) error {

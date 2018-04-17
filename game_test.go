@@ -69,6 +69,96 @@ func TestGame(t *testing.T) {
 		})
 	})
 
+	t.Run(".Pass()", func(t *testing.T) {
+
+		setupGame := func() Game {
+			game := Game{
+				Phase: MainPhase,
+				Bag:   BagWithStandardEnglishTiles(),
+				Board: BoardWithStandardLayout(),
+				Seats: []Seat{
+					{},
+					{},
+				},
+				CurrentSeatIndex: 1,
+			}
+
+			return game
+		}
+
+		t.Run("returns an error when the game is not in the Main phase", func(t *testing.T) {
+			game := Game{
+				Phase: SetupPhase,
+			}
+
+			err := game.Pass()
+
+			if actual, expected := err, (GameOutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
+				t.Fatalf("Expected error %v but was %v", expected, err)
+			}
+		})
+
+		t.Run("records a history entry", func(t *testing.T) {
+			game := setupGame()
+
+			err := game.Pass()
+
+			if err != nil {
+				t.Errorf("Expected success but got error %v", err)
+			}
+			if actual, expected := len(game.History), 1; actual != expected {
+				t.Errorf("Expected a single history entry to be recorded but found %d", actual)
+			} else {
+				if actual, expected := game.History[0].SeatIndex, 1; actual != expected {
+					t.Errorf("Expected history entry to record seat index %d but was %d", expected, actual)
+				}
+				if actual, expected := game.History[0].Score, 0; actual != expected {
+					t.Errorf("Expected history entry to record score of %d but was %d", expected, actual)
+				}
+				if actual, expected := len(game.History[0].TilesPlayed), 0; actual != expected {
+					t.Errorf("Expected history entry to record no tiles played but got %d", actual)
+				}
+				if actual, expected := len(game.History[0].WordsFormed), 0; actual != expected {
+					t.Errorf("Expected history entry to record no words formed but got %d", actual)
+				}
+			}
+		})
+
+		t.Run("moves to next player's turn", func(t *testing.T) {
+			game := setupGame()
+
+			err := game.Pass()
+
+			if err != nil {
+				t.Errorf("Expected success but got error %v", err)
+			}
+			if actual, expected := game.CurrentSeatIndex, 0; actual != expected {
+				t.Errorf("Expected turn to move to next player but current seat is %d", game.CurrentSeatIndex)
+			}
+		})
+
+		t.Run("with a game-ending play (eg final consecutive scoreless turn)", func(t *testing.T) {
+			game := setupGame()
+			game.Rules = game.Rules.WithGamePhaseController(func(*Game) GamePhase {
+				return EndPhase
+			})
+
+			err := game.Pass()
+
+			t.Run("succeeds", func(t *testing.T) {
+				if err != nil {
+					t.Errorf("Expected success but got error %v", err)
+				}
+			})
+
+			t.Run("moves the game into the End phase", func(t *testing.T) {
+				if actual, expected := game.Phase, EndPhase; actual != expected {
+					t.Errorf("Expected game to be in %v phase but was %v", expected, actual)
+				}
+			})
+		})
+	})
+
 	t.Run(".Play()", func(t *testing.T) {
 		placementsValidated := 0
 		tilesFromRackValidated := 0
