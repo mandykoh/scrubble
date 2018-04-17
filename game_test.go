@@ -386,6 +386,36 @@ func TestGame(t *testing.T) {
 				}
 			})
 
+			t.Run("records a history entry", func(t *testing.T) {
+				if actual, expected := len(game.History), 1; actual != expected {
+					t.Errorf("Expected a single history entry to be recorded but found %d", actual)
+				} else {
+					if actual, expected := game.History[0].SeatIndex, 1; actual != expected {
+						t.Errorf("Expected history entry to record seat index %d but was %d", expected, actual)
+					}
+					if actual, expected := game.History[0].Score, 123; actual != expected {
+						t.Errorf("Expected history entry to record score of %d but was %d", expected, actual)
+					}
+					if actual, expected := len(game.History[0].TilesPlayed), len(placements); actual != expected {
+						t.Errorf("Expected history entry to record %d tiles played but got %d", expected, actual)
+					} else {
+						if actual, expected := game.History[0].TilesPlayed[0], placements[0]; actual != expected {
+							t.Errorf("Expected tile placement %v but got %v", expected, actual)
+						}
+						if actual, expected := game.History[0].TilesPlayed[1], placements[1]; actual != expected {
+							t.Errorf("Expected tile placement %v but got %v", expected, actual)
+						}
+					}
+					if actual, expected := len(game.History[0].WordsFormed), 1; actual != expected {
+						t.Errorf("Expected history entry to record one word formed but got %d", actual)
+					} else {
+						if actual, expected := game.History[0].WordsFormed[0], (PlayedWord{"SOMEWORD", 123, placements.Bounds()}); actual != expected {
+							t.Errorf("Expected word formed %v but got %v", expected, actual)
+						}
+					}
+				}
+			})
+
 			t.Run("returns the words formed from scoring using the set rules", func(t *testing.T) {
 				if actual, expected := len(playedWords), 1; actual != expected {
 					t.Errorf("Expected one played word but got %d", actual)
