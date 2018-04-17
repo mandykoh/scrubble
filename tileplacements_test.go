@@ -62,6 +62,39 @@ func TestTilePlacements(t *testing.T) {
 		})
 	})
 
+	t.Run(".Tiles()", func(t *testing.T) {
+
+		placements := TilePlacements{
+			{Tile{'Z', 1}, Coord{2, 5}},
+			{Tile{'A', 1}, Coord{3, 7}},
+			{Tile{'B', 1}, Coord{3, 2}},
+			{Tile{'C', 1}, Coord{3, 7}},
+			{Tile{'D', 1}, Coord{1, 7}},
+		}
+
+		t.Run("returns just the tiles being placed", func(t *testing.T) {
+			tiles := placements.Tiles()
+
+			if actual, expected := len(tiles), len(placements); actual != expected {
+				t.Errorf("Expected %d tiles but got %d", expected, actual)
+			} else {
+				for i := 0; i < len(tiles); i++ {
+					if actual, expected := tiles[i], placements[i].Tile; actual != expected {
+						t.Errorf("Expected to find tile %c(%d) but instead found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+					}
+				}
+			}
+		})
+
+		t.Run("returns nil if none match", func(t *testing.T) {
+			p := placements.Find(Coord{3, 99})
+
+			if p != nil {
+				t.Errorf("Expected not to find a placement but got one for tile %c(%d) at position %d,%d", p.Tile.Letter, p.Tile.Points, p.Row, p.Column)
+			}
+		})
+	})
+
 	t.Run(".take()", func(t *testing.T) {
 
 		t.Run("removes and returns the specified placement", func(t *testing.T) {

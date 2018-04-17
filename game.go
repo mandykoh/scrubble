@@ -28,6 +28,24 @@ func (g *Game) AddPlayer(p *Player) error {
 	})
 }
 
+// ExchangeTiles exchanges tiles from the current player's rack with tiles from
+// the bag, ending the turn.
+//
+// If the game is not in the Main phase, GameOutOfPhaseError is returned.
+//
+// If the current player doesn't have the required tiles to exchange, an
+// InsufficientTilesError is returned.
+//
+// If an attempt is made to exchange zero tiles, or there are fewer than
+// MaxRackTiles in the bag, tile exchange is illegal and an
+// InvalidTileExchangeError is returned.
+func (g *Game) ExchangeTiles(tiles []Tile) error {
+	return g.requirePhase(MainPhase, func() error {
+		g.endTurn(0, nil, nil)
+		return nil
+	})
+}
+
 // Pass forfeits the current player's turn.
 //
 // If the game is not in the Main phase, GameOutOfPhaseError is returned.
@@ -57,7 +75,7 @@ func (g *Game) Pass() error {
 // If any formed words are invalid, an InvalidWordError is returned.
 func (g *Game) Play(placements TilePlacements) (playedWords []PlayedWord, err error) {
 	return playedWords, g.requirePhase(MainPhase, func() error {
-		remaining, err := g.Rules.ValidateTilesFromRack(g.currentSeat().Rack, placements)
+		remaining, err := g.Rules.ValidateTilesFromRack(g.currentSeat().Rack, placements.Tiles())
 		if err != nil {
 			return err
 		}

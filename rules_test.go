@@ -84,7 +84,7 @@ func TestRules(t *testing.T) {
 				}
 			}()
 
-			rules.ValidateTilesFromRack(Rack{}, TilePlacements{})
+			rules.ValidateTilesFromRack(Rack{}, []Tile{})
 		})
 	})
 
@@ -188,7 +188,7 @@ func TestRules(t *testing.T) {
 
 	t.Run(".WithRackValidator()", func(t *testing.T) {
 		validatorCalled := 0
-		validator := func(Rack, TilePlacements) ([]Tile, error) {
+		validator := func(Rack, []Tile) ([]Tile, error) {
 			validatorCalled++
 			return nil, nil
 		}
@@ -196,7 +196,7 @@ func TestRules(t *testing.T) {
 		overriddenRules := Rules{}.WithRackValidator(validator)
 
 		t.Run("sets the validator to use for rack validation", func(t *testing.T) {
-			overriddenRules.ValidateTilesFromRack(Rack{}, TilePlacements{})
+			overriddenRules.ValidateTilesFromRack(Rack{}, []Tile{})
 
 			if actual, expected := validatorCalled, 1; actual != expected {
 				t.Errorf("Expected overridden validator to be called once but got %d invocations", actual)

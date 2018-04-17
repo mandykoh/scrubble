@@ -30,6 +30,15 @@ func (tp TilePlacements) Find(c Coord) *TilePlacement {
 	return nil
 }
 
+// Tiles returns the collection of tiles being placed.
+func (tp TilePlacements) Tiles() []Tile {
+	tiles := make([]Tile, len(tp))
+	for i, p := range tp {
+		tiles[i] = p.Tile
+	}
+	return tiles
+}
+
 func (tp *TilePlacements) take(c Coord) *TilePlacement {
 	for i := range *tp {
 		p := (*tp)[i]
