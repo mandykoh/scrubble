@@ -153,6 +153,9 @@ func TestGame(t *testing.T) {
 		t.Run("with a valid exchange", func(t *testing.T) {
 			game := setupGame()
 
+			originalBagSize := len(game.Bag)
+			originalRackSize := len(game.currentSeat().Rack)
+
 			nextBagTiles := []Tile{
 				game.Bag[len(game.Bag)-1],
 				game.Bag[len(game.Bag)-2],
@@ -207,6 +210,12 @@ func TestGame(t *testing.T) {
 					if actual, expected := rack[6], nextBagTiles[3]; actual != expected {
 						t.Errorf("Expected seventh remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
 					}
+				}
+			})
+
+			t.Run("returns the exchanged tiles to the bag", func(t *testing.T) {
+				if actual, expected := len(game.Bag), originalBagSize-(MaxRackTiles-originalRackSize); actual != expected {
+					t.Errorf("Expected %d tiles to still be in bag but found %d", expected, actual)
 				}
 			})
 

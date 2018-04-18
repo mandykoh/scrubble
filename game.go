@@ -48,7 +48,11 @@ func (g *Game) ExchangeTiles(tiles []Tile) error {
 			return err
 		}
 
+		seat.Rack = remaining
+		bag := append(Bag{}, used...)
+		g.Bag = append(bag, g.Bag...)
 		g.endTurn(0, used, remaining, nil, nil)
+
 		return nil
 	})
 }
@@ -100,8 +104,8 @@ func (g *Game) Play(placements TilePlacements) (playedWords []PlayedWord, err er
 			return err
 		}
 
+		seat.Rack = remaining
 		g.Board.placeTiles(placements)
-
 		g.endTurn(score, used, remaining, placements, playedWords)
 
 		return nil
@@ -160,7 +164,6 @@ func (g *Game) currentSeat() *Seat {
 func (g *Game) endTurn(score int, tilesSpent []Tile, tilesRemaining []Tile, tilesPlayed TilePlacements, wordsFormed []PlayedWord) {
 	seat := g.currentSeat()
 	seat.Score += score
-	seat.Rack = tilesRemaining
 	seat.Rack.FillFromBag(&g.Bag)
 
 	g.History.AppendPlay(g.CurrentSeatIndex, score, tilesSpent, tilesPlayed, wordsFormed)
