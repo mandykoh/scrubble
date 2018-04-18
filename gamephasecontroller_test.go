@@ -13,7 +13,7 @@ func TestNextGamePhase(t *testing.T) {
 					},
 				},
 			},
-			History: History{{0, 123, TilePlacements{}, []PlayedWord{}}},
+			History: History{{0, 123, nil, nil, nil}},
 		}
 
 		next := NextGamePhase(game)
@@ -28,7 +28,7 @@ func TestNextGamePhase(t *testing.T) {
 			Seats: []Seat{
 				{Rack: []Tile{}},
 			},
-			History: History{{0, 123, TilePlacements{}, []PlayedWord{}}},
+			History: History{{0, 123, nil, nil, nil}},
 		}
 
 		next := NextGamePhase(game)
@@ -45,11 +45,11 @@ func TestNextGamePhase(t *testing.T) {
 				{Rack: []Tile{{'B', 2}}},
 			},
 			History: History{
-				{0, 0, TilePlacements{}, []PlayedWord{}},
-				{1, 0, TilePlacements{}, []PlayedWord{}},
-				{0, 0, TilePlacements{}, []PlayedWord{}},
-				{1, 0, TilePlacements{}, []PlayedWord{}},
-				{0, 0, TilePlacements{}, []PlayedWord{}},
+				{0, 0, nil, nil, nil},
+				{1, 0, nil, nil, nil},
+				{0, 0, nil, nil, nil},
+				{1, 0, nil, nil, nil},
+				{0, 0, nil, nil, nil},
 			},
 		}
 
@@ -59,7 +59,7 @@ func TestNextGamePhase(t *testing.T) {
 			t.Errorf("Expected that the game should still continue for one turn but got %#v next", next)
 		}
 
-		game.History.AppendPlay(1, 0, TilePlacements{}, []PlayedWord{})
+		game.History.AppendPlay(1, 0, nil, nil, nil)
 		next = NextGamePhase(game)
 
 		if next != EndPhase {

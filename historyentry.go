@@ -4,6 +4,7 @@ package scrubble
 type HistoryEntry struct {
 	SeatIndex   int
 	Score       int
+	TilesSpent  []Tile
 	TilesPlayed TilePlacements
 	WordsFormed []PlayedWord
 }

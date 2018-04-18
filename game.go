@@ -41,7 +41,7 @@ func (g *Game) AddPlayer(p *Player) error {
 // InvalidTileExchangeError is returned.
 func (g *Game) ExchangeTiles(tiles []Tile) error {
 	return g.requirePhase(MainPhase, func() error {
-		g.endTurn(0, nil, nil)
+		g.endTurn(0, nil, nil, nil)
 		return nil
 	})
 }
@@ -51,7 +51,7 @@ func (g *Game) ExchangeTiles(tiles []Tile) error {
 // If the game is not in the Main phase, GameOutOfPhaseError is returned.
 func (g *Game) Pass() error {
 	return g.requirePhase(MainPhase, func() error {
-		g.endTurn(0, nil, nil)
+		g.endTurn(0, nil, nil, nil)
 		return nil
 	})
 }
@@ -75,7 +75,7 @@ func (g *Game) Pass() error {
 // If any formed words are invalid, an InvalidWordError is returned.
 func (g *Game) Play(placements TilePlacements) (playedWords []PlayedWord, err error) {
 	return playedWords, g.requirePhase(MainPhase, func() error {
-		remaining, err := g.Rules.ValidateTilesFromRack(g.currentSeat().Rack, placements.Tiles())
+		used, remaining, err := g.Rules.ValidateTilesFromRack(g.currentSeat().Rack, placements.Tiles())
 		if err != nil {
 			return err
 		}
@@ -98,7 +98,7 @@ func (g *Game) Play(placements TilePlacements) (playedWords []PlayedWord, err er
 
 		g.Board.placeTiles(placements)
 
-		g.endTurn(score, placements, playedWords)
+		g.endTurn(score, used, placements, playedWords)
 
 		return nil
 	})
@@ -153,8 +153,8 @@ func (g *Game) currentSeat() *Seat {
 	return &g.Seats[g.CurrentSeatIndex]
 }
 
-func (g *Game) endTurn(score int, tilesPlayed TilePlacements, wordsFormed []PlayedWord) {
-	g.History.AppendPlay(g.CurrentSeatIndex, score, tilesPlayed, wordsFormed)
+func (g *Game) endTurn(score int, tilesSpent []Tile, tilesPlayed TilePlacements, wordsFormed []PlayedWord) {
+	g.History.AppendPlay(g.CurrentSeatIndex, score, tilesSpent, tilesPlayed, wordsFormed)
 	g.CurrentSeatIndex = g.nextSeatIndex()
 	g.Phase = g.Rules.NextGamePhase(g)
 }

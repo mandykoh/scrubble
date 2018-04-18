@@ -81,7 +81,7 @@ func (r *Rules) ValidatePlacements(placements TilePlacements, board *Board) erro
 // Otherwise, the remainder (after the placed tiles have been removed from the
 // rack) is returned with no error, indicating that it would be safe to update
 // the rack for placement.
-func (r *Rules) ValidateTilesFromRack(rack Rack, toPlay []Tile) (remaining Rack, err error) {
+func (r *Rules) ValidateTilesFromRack(rack Rack, toPlay []Tile) (used, remaining []Tile, err error) {
 	rackValidator := r.rackValidator
 	if rackValidator == nil {
 		rackValidator = ValidateTilesFromRack

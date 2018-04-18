@@ -52,7 +52,7 @@ func TestRules(t *testing.T) {
 					{},
 				},
 				History: History{
-					{0, 123, TilePlacements{}, []PlayedWord{}},
+					{0, 123, []Tile{}, TilePlacements{}, []PlayedWord{}},
 				},
 			})
 		})
@@ -188,9 +188,9 @@ func TestRules(t *testing.T) {
 
 	t.Run(".WithRackValidator()", func(t *testing.T) {
 		validatorCalled := 0
-		validator := func(Rack, []Tile) ([]Tile, error) {
+		validator := func(Rack, []Tile) ([]Tile, []Tile, error) {
 			validatorCalled++
-			return nil, nil
+			return nil, nil, nil
 		}
 
 		overriddenRules := Rules{}.WithRackValidator(validator)

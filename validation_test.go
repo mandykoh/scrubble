@@ -145,7 +145,7 @@ func TestValidateTilesFromRack(t *testing.T) {
 			{'M', 1},
 		}
 
-		remaining, err := ValidateTilesFromRack(r, []Tile{
+		used, remaining, err := ValidateTilesFromRack(r, []Tile{
 			{'B', 1},
 			{'O', 1},
 			{'O', 1},
@@ -171,6 +171,7 @@ func TestValidateTilesFromRack(t *testing.T) {
 			t.Errorf("Expected an InsufficientTilesError but got %v", err)
 		}
 
+		expectRackContains(t, used, 'B', 'O', 'M')
 		expectRackContains(t, remaining, 'A')
 		expectRackContains(t, r, 'A', 'B', 'O', 'M')
 	})
@@ -184,7 +185,7 @@ func TestValidateTilesFromRack(t *testing.T) {
 			{'O', 1},
 		}
 
-		remaining, err := ValidateTilesFromRack(r, []Tile{
+		used, remaining, err := ValidateTilesFromRack(r, []Tile{
 			{'B', 1},
 			{'O', 1},
 			{'O', 1},
@@ -194,6 +195,7 @@ func TestValidateTilesFromRack(t *testing.T) {
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
 		} else {
+			expectRackContains(t, used, 'B', 'O', 'O', 'M')
 			expectRackContains(t, remaining, 'A')
 			expectRackContains(t, r, 'A', 'O', 'M', 'B', 'O')
 		}
@@ -208,7 +210,7 @@ func TestValidateTilesFromRack(t *testing.T) {
 			{'O', 1},
 		}
 
-		remaining, err := ValidateTilesFromRack(r, []Tile{
+		used, remaining, err := ValidateTilesFromRack(r, []Tile{
 			{'B', 1},
 			{'O', 1},
 			{'O', 0},
@@ -218,6 +220,7 @@ func TestValidateTilesFromRack(t *testing.T) {
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
 		} else {
+			expectRackContains(t, used, 'B', 'O', ' ', 'M')
 			expectRackContains(t, remaining, 'A')
 		}
 	})

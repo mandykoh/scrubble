@@ -5,10 +5,11 @@ type History []HistoryEntry
 
 // AppendPlay adds an entry to the history representing a turn where tiles were
 // successfully played.
-func (h *History) AppendPlay(seatIndex int, score int, tilesPlayed TilePlacements, wordsFormed []PlayedWord) {
+func (h *History) AppendPlay(seatIndex int, score int, tilesSpent []Tile, tilesPlayed TilePlacements, wordsFormed []PlayedWord) {
 	*h = append(*h, HistoryEntry{
 		SeatIndex:   seatIndex,
 		Score:       score,
+		TilesSpent:  tilesSpent,
 		TilesPlayed: tilesPlayed,
 		WordsFormed: wordsFormed,
 	})
