@@ -43,12 +43,12 @@ func (g *Game) ExchangeTiles(tiles []Tile) error {
 	return g.requirePhase(MainPhase, func() error {
 		seat := g.currentSeat()
 
-		used, _, err := g.Rules.ValidateTilesFromRack(seat.Rack, tiles)
+		used, remaining, err := g.Rules.ValidateTilesFromRack(seat.Rack, tiles)
 		if err != nil {
 			return err
 		}
 
-		g.endTurn(0, used, seat.Rack, nil, nil)
+		g.endTurn(0, used, remaining, nil, nil)
 		return nil
 	})
 }
