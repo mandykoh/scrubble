@@ -78,7 +78,13 @@ func TestGame(t *testing.T) {
 				Board: BoardWithStandardLayout(),
 				Seats: []Seat{
 					{},
-					{},
+					{
+						Rack: Rack{
+							{'B', 1},
+							{'O', 1},
+							{'M', 1},
+						},
+					},
 				},
 				CurrentSeatIndex: 1,
 			}
@@ -98,43 +104,80 @@ func TestGame(t *testing.T) {
 			}
 		})
 
-		t.Run("records a history entry", func(t *testing.T) {
+		t.Run("with insufficient tiles on the rack", func(t *testing.T) {
 			game := setupGame()
 
-			err := game.ExchangeTiles(nil)
+			game.Rules.rackValidator = func(rack Rack, toPlay []Tile) ([]Tile, []Tile, error) {
+				return nil, rack, errors.New("some error")
+			}
 
-			if err != nil {
-				t.Errorf("Expected success but got error %v", err)
+			tiles := []Tile{
+				{'B', 1},
+				{'O', 1},
+				{'O', 1},
+				{'M', 1},
+				{'S', 1},
 			}
-			if actual, expected := len(game.History), 1; actual != expected {
-				t.Errorf("Expected a single history entry to be recorded but found %d", actual)
-			} else {
-				if actual, expected := game.History[0].SeatIndex, 1; actual != expected {
-					t.Errorf("Expected history entry to record seat index %d but was %d", expected, actual)
+
+			err := game.ExchangeTiles(tiles)
+
+			t.Run("returns an error", func(t *testing.T) {
+				if err == nil {
+					t.Errorf("Expected an error but didn't get one")
+				} else {
+					if actual, expected := err.Error(), "some error"; actual != expected {
+						t.Errorf("Expected an error from tile rack validation but got %v", actual)
+					}
 				}
-				if actual, expected := game.History[0].Score, 0; actual != expected {
-					t.Errorf("Expected history entry to record score of %d but was %d", expected, actual)
+			})
+
+			t.Run("does not remove tiles from the player's rack", func(t *testing.T) {
+				if actual, expected := len(game.currentSeat().Rack), 3; actual != expected {
+					t.Errorf("Expected player to still have %d tiles but found %d", expected, actual)
 				}
-				if actual, expected := len(game.History[0].TilesPlayed), 0; actual != expected {
-					t.Errorf("Expected history entry to record no tiles played but got %d", actual)
-				}
-				if actual, expected := len(game.History[0].WordsFormed), 0; actual != expected {
-					t.Errorf("Expected history entry to record no words formed but got %d", actual)
-				}
-			}
+			})
 		})
 
-		t.Run("moves to next player's turn", func(t *testing.T) {
-			game := setupGame()
+		t.Run("with a valid play", func(t *testing.T) {
 
-			err := game.ExchangeTiles(nil)
+			t.Run("records a history entry", func(t *testing.T) {
+				game := setupGame()
 
-			if err != nil {
-				t.Errorf("Expected success but got error %v", err)
-			}
-			if actual, expected := game.CurrentSeatIndex, 0; actual != expected {
-				t.Errorf("Expected turn to move to next player but current seat is %d", game.CurrentSeatIndex)
-			}
+				err := game.ExchangeTiles(nil)
+
+				if err != nil {
+					t.Errorf("Expected success but got error %v", err)
+				}
+				if actual, expected := len(game.History), 1; actual != expected {
+					t.Errorf("Expected a single history entry to be recorded but found %d", actual)
+				} else {
+					if actual, expected := game.History[0].SeatIndex, 1; actual != expected {
+						t.Errorf("Expected history entry to record seat index %d but was %d", expected, actual)
+					}
+					if actual, expected := game.History[0].Score, 0; actual != expected {
+						t.Errorf("Expected history entry to record score of %d but was %d", expected, actual)
+					}
+					if actual, expected := len(game.History[0].TilesPlayed), 0; actual != expected {
+						t.Errorf("Expected history entry to record no tiles played but got %d", actual)
+					}
+					if actual, expected := len(game.History[0].WordsFormed), 0; actual != expected {
+						t.Errorf("Expected history entry to record no words formed but got %d", actual)
+					}
+				}
+			})
+
+			t.Run("moves to next player's turn", func(t *testing.T) {
+				game := setupGame()
+
+				err := game.ExchangeTiles(nil)
+
+				if err != nil {
+					t.Errorf("Expected success but got error %v", err)
+				}
+				if actual, expected := game.CurrentSeatIndex, 0; actual != expected {
+					t.Errorf("Expected turn to move to next player but current seat is %d", game.CurrentSeatIndex)
+				}
+			})
 		})
 
 		t.Run("with a game-ending play (eg final consecutive scoreless turn)", func(t *testing.T) {
@@ -347,7 +390,7 @@ func TestGame(t *testing.T) {
 			})
 
 			t.Run("does not remove tiles from the player's rack", func(t *testing.T) {
-				if actual, expected := len(game.Seats[1].Rack), 6; actual != expected {
+				if actual, expected := len(game.currentSeat().Rack), 6; actual != expected {
 					t.Errorf("Expected player to still have %d tiles but found %d", expected, actual)
 				}
 			})
@@ -423,7 +466,7 @@ func TestGame(t *testing.T) {
 				if actual, expected := wordsScored, 1; actual != expected {
 					t.Errorf("Expected word scoring to have been invoked once but was called %d times", actual)
 				}
-				if actual, expected := game.Seats[1].Score, 123; actual != expected {
+				if actual, expected := game.prevSeat().Score, 123; actual != expected {
 					t.Errorf("Expected word score of %d to have been added to player total but was %d", expected, actual)
 				}
 			})
@@ -441,7 +484,7 @@ func TestGame(t *testing.T) {
 			})
 
 			t.Run("replenishes the player's rack from the bag", func(t *testing.T) {
-				rack := game.Seats[1].Rack
+				rack := game.prevSeat().Rack
 
 				if actual, expected := len(rack), MaxRackTiles; actual != expected {
 					t.Errorf("Expected player's rack to have been replenished to %d tiles but found %d", expected, actual)

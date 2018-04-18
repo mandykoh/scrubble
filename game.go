@@ -41,7 +41,14 @@ func (g *Game) AddPlayer(p *Player) error {
 // InvalidTileExchangeError is returned.
 func (g *Game) ExchangeTiles(tiles []Tile) error {
 	return g.requirePhase(MainPhase, func() error {
-		g.endTurn(0, nil, nil, nil)
+		seat := g.currentSeat()
+
+		used, _, err := g.Rules.ValidateTilesFromRack(seat.Rack, tiles)
+		if err != nil {
+			return err
+		}
+
+		g.endTurn(0, used, seat.Rack, nil, nil)
 		return nil
 	})
 }
@@ -51,7 +58,7 @@ func (g *Game) ExchangeTiles(tiles []Tile) error {
 // If the game is not in the Main phase, GameOutOfPhaseError is returned.
 func (g *Game) Pass() error {
 	return g.requirePhase(MainPhase, func() error {
-		g.endTurn(0, nil, nil, nil)
+		g.endTurn(0, nil, g.currentSeat().Rack, nil, nil)
 		return nil
 	})
 }
@@ -75,7 +82,9 @@ func (g *Game) Pass() error {
 // If any formed words are invalid, an InvalidWordError is returned.
 func (g *Game) Play(placements TilePlacements) (playedWords []PlayedWord, err error) {
 	return playedWords, g.requirePhase(MainPhase, func() error {
-		used, remaining, err := g.Rules.ValidateTilesFromRack(g.currentSeat().Rack, placements.Tiles())
+		seat := g.currentSeat()
+
+		used, remaining, err := g.Rules.ValidateTilesFromRack(seat.Rack, placements.Tiles())
 		if err != nil {
 			return err
 		}
@@ -91,14 +100,9 @@ func (g *Game) Play(placements TilePlacements) (playedWords []PlayedWord, err er
 			return err
 		}
 
-		seat := g.currentSeat()
-		seat.Score += score
-		seat.Rack = remaining
-		seat.Rack.FillFromBag(&g.Bag)
-
 		g.Board.placeTiles(placements)
 
-		g.endTurn(score, used, placements, playedWords)
+		g.endTurn(score, used, remaining, placements, playedWords)
 
 		return nil
 	})
@@ -153,7 +157,12 @@ func (g *Game) currentSeat() *Seat {
 	return &g.Seats[g.CurrentSeatIndex]
 }
 
-func (g *Game) endTurn(score int, tilesSpent []Tile, tilesPlayed TilePlacements, wordsFormed []PlayedWord) {
+func (g *Game) endTurn(score int, tilesSpent []Tile, tilesRemaining []Tile, tilesPlayed TilePlacements, wordsFormed []PlayedWord) {
+	seat := g.currentSeat()
+	seat.Score += score
+	seat.Rack = tilesRemaining
+	seat.Rack.FillFromBag(&g.Bag)
+
 	g.History.AppendPlay(g.CurrentSeatIndex, score, tilesSpent, tilesPlayed, wordsFormed)
 	g.CurrentSeatIndex = g.nextSeatIndex()
 	g.Phase = g.Rules.NextGamePhase(g)
@@ -161,6 +170,14 @@ func (g *Game) endTurn(score int, tilesSpent []Tile, tilesPlayed TilePlacements,
 
 func (g *Game) nextSeatIndex() int {
 	return (g.CurrentSeatIndex + 1) % len(g.Seats)
+}
+
+func (g *Game) prevSeat() *Seat {
+	return &g.Seats[g.prevSeatIndex()]
+}
+
+func (g *Game) prevSeatIndex() int {
+	return (g.CurrentSeatIndex + (len(g.Seats) - 1)) % len(g.Seats)
 }
 
 func (g *Game) requirePhase(phase GamePhase, action func() error) error {
