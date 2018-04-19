@@ -9,6 +9,18 @@ import (
 
 func TestGame(t *testing.T) {
 
+	expectTiles := func(t *testing.T, tiles []Tile, expected ...Tile) {
+		if actual, expected := len(tiles), len(expected); actual != expected {
+			t.Fatalf("Expected there to be %d tiles but found %d", expected, actual)
+		}
+
+		for i, e := range expected {
+			if actual := tiles[i]; actual != e {
+				t.Errorf("Expected tile %v but found %v instead", expected, actual)
+			}
+		}
+	}
+
 	t.Run("zero-value", func(t *testing.T) {
 		var game Game
 
@@ -77,7 +89,17 @@ func TestGame(t *testing.T) {
 				Bag:   BagWithStandardEnglishTiles(),
 				Board: BoardWithStandardLayout(),
 				Seats: []Seat{
-					{},
+					{
+						Rack: Rack{
+							{'K', 1},
+							{'P', 1},
+							{'Q', 1},
+							{'Z', 1},
+							{'T', 1},
+							{'R', 1},
+							{'W', 1},
+						},
+					},
 					{
 						Rack: Rack{
 							{'D', 1},
@@ -90,6 +112,16 @@ func TestGame(t *testing.T) {
 					},
 				},
 				CurrentSeatIndex: 1,
+				History: History{
+					{
+						SeatIndex:   0,
+						Score:       123,
+						TilesSpent:  []Tile{{'A', 1}, {'D', 1}},
+						TilesPlayed: TilePlacements{{Tile{'A', 1}, Coord{0, 0}}, {Tile{'D', 1}, Coord{0, 1}}},
+						TilesDrawn:  []Tile{{'R', 1}, {'W', 1}},
+						WordsFormed: nil,
+					},
+				},
 			}
 
 			return game
@@ -99,11 +131,34 @@ func TestGame(t *testing.T) {
 			game := setupGame()
 			game.Phase = SetupPhase
 
-			err := game.Challenge(game.CurrentSeatIndex)
+			err := game.Challenge(game.CurrentSeatIndex, nil)
 
 			if actual, expected := err, (GameOutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
+		})
+
+		t.Run("when successful", func(t *testing.T) {
+			game := setupGame()
+
+			err := game.Challenge(game.CurrentSeatIndex, nil)
+
+			t.Run("doesn't return an error", func(t *testing.T) {
+				if err != nil {
+					t.Errorf("Expected success but got error %v", err)
+				}
+			})
+
+			t.Run("restores the player's rack to how it was before the play", func(t *testing.T) {
+				expectTiles(t, game.prevSeat().Rack,
+					Tile{'K', 1},
+					Tile{'P', 1},
+					Tile{'Q', 1},
+					Tile{'Z', 1},
+					Tile{'T', 1},
+					Tile{'A', 1},
+					Tile{'D', 1})
+			})
 		})
 	})
 
@@ -304,19 +359,14 @@ func TestGame(t *testing.T) {
 						t.Errorf("Expected history entry to record score of %d but was %d", expected, actual)
 					}
 
-					if actual, expected := len(game.History[0].TilesSpent), 3; actual != expected {
-						t.Errorf("Expected history entry to record %d tiles spent but got %d", expected, actual)
-					} else {
-						for i := 0; i < len(tilesExchanged); i++ {
-							if actual, expected := game.History[0].TilesSpent[i], tilesExchanged[i]; actual != expected {
-								t.Errorf("Expected tile %v spent but got %v", expected, actual)
-							}
-						}
-					}
+					expectTiles(t, game.History[0].TilesSpent, tilesExchanged...)
 
 					if actual, expected := len(game.History[0].TilesPlayed), 0; actual != expected {
 						t.Errorf("Expected history entry to record no tiles played but got %d", actual)
 					}
+
+					expectTiles(t, game.History[0].TilesDrawn, nextBagTiles[len(nextBagTiles)-1])
+
 					if actual, expected := len(game.History[0].WordsFormed), 0; actual != expected {
 						t.Errorf("Expected history entry to record no words formed but got %d", actual)
 					}
@@ -379,6 +429,15 @@ func TestGame(t *testing.T) {
 
 		t.Run("records a history entry", func(t *testing.T) {
 			game := setupGame()
+			game.currentSeat().Rack = Rack{
+				{'A', 1},
+				{'B', 1},
+				{'C', 1},
+				{'D', 1},
+				{'E', 1},
+				{'F', 1},
+				{'G', 1},
+			}
 
 			err := game.Pass()
 
@@ -399,6 +458,9 @@ func TestGame(t *testing.T) {
 				}
 				if actual, expected := len(game.History[0].TilesPlayed), 0; actual != expected {
 					t.Errorf("Expected history entry to record no tiles played but got %d", actual)
+				}
+				if actual, expected := len(game.History[0].TilesDrawn), 0; actual != expected {
+					t.Errorf("Expected history entry to record no tiles drawn but got %d", actual)
 				}
 				if actual, expected := len(game.History[0].WordsFormed), 0; actual != expected {
 					t.Errorf("Expected history entry to record no words formed but got %d", actual)
@@ -679,15 +741,7 @@ func TestGame(t *testing.T) {
 						t.Errorf("Expected history entry to record score of %d but was %d", expected, actual)
 					}
 
-					if actual, expected := len(game.History[0].TilesSpent), len(placements); actual != expected {
-						t.Errorf("Expected history entry to record %d tiles spent but got %d", expected, actual)
-					} else {
-						for i := 0; i < len(placements); i++ {
-							if actual, expected := game.History[0].TilesSpent[i], placements[i].Tile; actual != expected {
-								t.Errorf("Expected tile %v spent but got %v", expected, actual)
-							}
-						}
-					}
+					expectTiles(t, game.History[0].TilesSpent, placements.Tiles()...)
 
 					if actual, expected := len(game.History[0].TilesPlayed), len(placements); actual != expected {
 						t.Errorf("Expected history entry to record %d tiles played but got %d", expected, actual)
@@ -698,6 +752,8 @@ func TestGame(t *testing.T) {
 							}
 						}
 					}
+
+					expectTiles(t, game.History[0].TilesDrawn, nextBagTiles...)
 
 					if actual, expected := len(game.History[0].WordsFormed), 1; actual != expected {
 						t.Errorf("Expected history entry to record one word formed but got %d", actual)

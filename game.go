@@ -47,8 +47,17 @@ func (g *Game) AddPlayer(p *Player) error {
 // which then causes the play to be withdrawn and play to proceed (with the
 // challenged player effectively losing their turn). If all words are found to
 // be valid, the challenge fails and the challenger is penalised.
-func (g *Game) Challenge(challengerSeatIndex int) error {
+//
+// The supplied random number generator is used to reshuffle drawn tiles back
+// into the bag upon a successful challenge.
+func (g *Game) Challenge(challengerSeatIndex int, r *rand.Rand) error {
 	return g.requirePhase(MainPhase, func() error {
+		play := g.History.Last()
+
+		challenged := g.prevSeat()
+		challenged.Rack.Remove(play.TilesDrawn...)
+		challenged.Rack = append(challenged.Rack, play.TilesSpent...)
+
 		return nil
 	})
 }
@@ -96,7 +105,7 @@ func (g *Game) ExchangeTiles(tiles []Tile, r *rand.Rand) error {
 		g.Bag = append(g.Bag, used...)
 		g.Bag.Shuffle(r)
 
-		g.endTurn(0, used, remaining, nil, nil)
+		g.endTurn(0, used, nil, nil)
 
 		return nil
 	})
@@ -107,7 +116,7 @@ func (g *Game) ExchangeTiles(tiles []Tile, r *rand.Rand) error {
 // If the game is not in the Main phase, GameOutOfPhaseError is returned.
 func (g *Game) Pass() error {
 	return g.requirePhase(MainPhase, func() error {
-		g.endTurn(0, nil, g.CurrentSeat().Rack, nil, nil)
+		g.endTurn(0, nil, nil, nil)
 		return nil
 	})
 }
@@ -151,7 +160,7 @@ func (g *Game) Play(placements TilePlacements) (playedWords []PlayedWord, err er
 
 		seat.Rack = remaining
 		g.Board.placeTiles(placements)
-		g.endTurn(score, used, remaining, placements, playedWords)
+		g.endTurn(score, used, placements, playedWords)
 
 		return nil
 	})
@@ -202,12 +211,12 @@ func (g *Game) Start(r *rand.Rand) error {
 	})
 }
 
-func (g *Game) endTurn(score int, tilesSpent []Tile, tilesRemaining []Tile, tilesPlayed TilePlacements, wordsFormed []PlayedWord) {
+func (g *Game) endTurn(score int, tilesSpent []Tile, tilesPlayed TilePlacements, wordsFormed []PlayedWord) {
 	seat := g.CurrentSeat()
 	seat.Score += score
-	seat.Rack.FillFromBag(&g.Bag)
+	tilesDrawn := seat.Rack.FillFromBag(&g.Bag)
 
-	g.History.AppendPlay(g.CurrentSeatIndex, score, tilesSpent, tilesPlayed, wordsFormed)
+	g.History.AppendPlay(g.CurrentSeatIndex, score, tilesSpent, tilesPlayed, tilesDrawn, wordsFormed)
 	g.CurrentSeatIndex = g.nextSeatIndex()
 	g.Phase = g.Rules.NextGamePhase(g)
 }

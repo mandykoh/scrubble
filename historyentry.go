@@ -6,5 +6,6 @@ type HistoryEntry struct {
 	Score       int
 	TilesSpent  []Tile
 	TilesPlayed TilePlacements
+	TilesDrawn  []Tile
 	WordsFormed []PlayedWord
 }

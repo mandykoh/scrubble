@@ -52,7 +52,7 @@ func TestRules(t *testing.T) {
 					{},
 				},
 				History: History{
-					{0, 123, []Tile{}, TilePlacements{}, []PlayedWord{}},
+					{0, 123, nil, nil, nil, nil},
 				},
 			})
 		})
