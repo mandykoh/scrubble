@@ -42,6 +42,17 @@ func (g *Game) AddPlayer(p *Player) error {
 	})
 }
 
+// Challenge challenges the last turn's play. A challenge succeeds if any of the
+// words formed in the play are invalid according to the dictionary in use,
+// which then causes the play to be withdrawn and play to proceed (with the
+// challenged player effectively losing their turn). If all words are found to
+// be valid, the challenge fails and the challenger is penalised.
+func (g *Game) Challenge(challengerSeatIndex int) error {
+	return g.requirePhase(MainPhase, func() error {
+		return nil
+	})
+}
+
 // CurrentSeat returns the seat for the player whose turn it currently is.
 func (g *Game) CurrentSeat() *Seat {
 	return &g.Seats[g.CurrentSeatIndex]

@@ -69,6 +69,44 @@ func TestGame(t *testing.T) {
 		})
 	})
 
+	t.Run(".Challenge()", func(t *testing.T) {
+
+		setupGame := func() Game {
+			game := Game{
+				Phase: MainPhase,
+				Bag:   BagWithStandardEnglishTiles(),
+				Board: BoardWithStandardLayout(),
+				Seats: []Seat{
+					{},
+					{
+						Rack: Rack{
+							{'D', 1},
+							{'A', 1},
+							{'B', 1},
+							{'E', 1},
+							{'O', 1},
+							{'M', 1},
+						},
+					},
+				},
+				CurrentSeatIndex: 1,
+			}
+
+			return game
+		}
+
+		t.Run("returns an error when the game is not in the Main phase", func(t *testing.T) {
+			game := setupGame()
+			game.Phase = SetupPhase
+
+			err := game.Challenge(game.CurrentSeatIndex)
+
+			if actual, expected := err, (GameOutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
+				t.Fatalf("Expected error %v but was %v", expected, err)
+			}
+		})
+	})
+
 	t.Run(".ExchangeTiles()", func(t *testing.T) {
 		tilesFromRackValidated := 0
 
