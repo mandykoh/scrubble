@@ -109,7 +109,7 @@ func TestGame(t *testing.T) {
 				Phase: SetupPhase,
 			}
 
-			err := game.ExchangeTiles(nil)
+			err := game.ExchangeTiles(nil, nil)
 
 			if actual, expected := err, (GameOutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
@@ -131,7 +131,7 @@ func TestGame(t *testing.T) {
 				{'S', 1},
 			}
 
-			err := game.ExchangeTiles(tiles)
+			err := game.ExchangeTiles(tiles, nil)
 
 			t.Run("returns an error", func(t *testing.T) {
 				if err == nil {
@@ -151,16 +151,18 @@ func TestGame(t *testing.T) {
 		})
 
 		t.Run("with a valid exchange", func(t *testing.T) {
+			seed := time.Now().UnixNano()
+
 			game := setupGame()
 
 			originalBagSize := len(game.Bag)
 			originalRackSize := len(game.currentSeat().Rack)
 
+			expectedBag := append(Bag{}, game.Bag...)
 			nextBagTiles := []Tile{
-				game.Bag[len(game.Bag)-1],
-				game.Bag[len(game.Bag)-2],
-				game.Bag[len(game.Bag)-3],
-				game.Bag[len(game.Bag)-4],
+				expectedBag.DrawTile(),
+				expectedBag.DrawTile(),
+				expectedBag.DrawTile(),
 			}
 
 			tilesExchanged := []Tile{
@@ -169,7 +171,11 @@ func TestGame(t *testing.T) {
 				{'D', 1},
 			}
 
-			err := game.ExchangeTiles(tilesExchanged)
+			expectedBag = append(expectedBag, tilesExchanged...)
+			expectedBag.Shuffle(rand.New(rand.NewSource(seed)))
+			nextBagTiles = append(nextBagTiles, expectedBag.DrawTile())
+
+			err := game.ExchangeTiles(tilesExchanged, rand.New(rand.NewSource(seed)))
 
 			t.Run("doesn't return an error", func(t *testing.T) {
 				if err != nil {
@@ -262,7 +268,7 @@ func TestGame(t *testing.T) {
 				return EndPhase
 			})
 
-			err := game.ExchangeTiles(nil)
+			err := game.ExchangeTiles(nil, rand.New(rand.NewSource(0)))
 
 			t.Run("succeeds", func(t *testing.T) {
 				if err != nil {

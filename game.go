@@ -31,6 +31,9 @@ func (g *Game) AddPlayer(p *Player) error {
 // ExchangeTiles exchanges tiles from the current player's rack with tiles from
 // the bag, ending the turn.
 //
+// The supplied random number generator is used to reshuffle the bag after
+// replacing the exchanged tiles.
+//
 // If the game is not in the Main phase, GameOutOfPhaseError is returned.
 //
 // If the current player doesn't have the required tiles to exchange, an
@@ -39,7 +42,7 @@ func (g *Game) AddPlayer(p *Player) error {
 // If an attempt is made to exchange zero tiles, or there are fewer than
 // MaxRackTiles in the bag, tile exchange is illegal and an
 // InvalidTileExchangeError is returned.
-func (g *Game) ExchangeTiles(tiles []Tile) error {
+func (g *Game) ExchangeTiles(tiles []Tile, r *rand.Rand) error {
 	return g.requirePhase(MainPhase, func() error {
 		seat := g.currentSeat()
 
@@ -49,8 +52,13 @@ func (g *Game) ExchangeTiles(tiles []Tile) error {
 		}
 
 		seat.Rack = remaining
-		bag := append(Bag{}, used...)
-		g.Bag = append(bag, g.Bag...)
+		for i := 0; i < len(used); i++ {
+			seat.Rack = append(seat.Rack, g.Bag.DrawTile())
+		}
+
+		g.Bag = append(g.Bag, used...)
+		g.Bag.Shuffle(r)
+
 		g.endTurn(0, used, remaining, nil, nil)
 
 		return nil
