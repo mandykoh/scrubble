@@ -105,13 +105,37 @@ func TestGame(t *testing.T) {
 		}
 
 		t.Run("returns an error when the game is not in the Main phase", func(t *testing.T) {
-			game := Game{
-				Phase: SetupPhase,
+			game := setupGame()
+			game.Phase = SetupPhase
+
+			err := game.ExchangeTiles([]Tile{
+				game.currentSeat().Rack[0],
+			}, nil)
+
+			if actual, expected := err, (GameOutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
+				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
+		})
+
+		t.Run("returns an error when no tiles are being exchanged", func(t *testing.T) {
+			game := setupGame()
 
 			err := game.ExchangeTiles(nil, nil)
 
-			if actual, expected := err, (GameOutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
+			if actual, expected := err, (InvalidTileExchangeError{NoTilesExchangedReason}); actual != expected {
+				t.Fatalf("Expected error %v but was %v", expected, err)
+			}
+		})
+
+		t.Run("returns an error when insufficient tiles are in the bag", func(t *testing.T) {
+			game := setupGame()
+			game.Bag = game.Bag[:MaxRackTiles-1]
+
+			err := game.ExchangeTiles([]Tile{
+				game.currentSeat().Rack[0],
+			}, nil)
+
+			if actual, expected := err, (InvalidTileExchangeError{InsufficientTilesInBagReason}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
 		})
@@ -268,7 +292,9 @@ func TestGame(t *testing.T) {
 				return EndPhase
 			})
 
-			err := game.ExchangeTiles(nil, rand.New(rand.NewSource(0)))
+			err := game.ExchangeTiles([]Tile{
+				game.currentSeat().Rack[0],
+			}, rand.New(rand.NewSource(0)))
 
 			t.Run("succeeds", func(t *testing.T) {
 				if err != nil {

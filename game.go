@@ -44,6 +44,13 @@ func (g *Game) AddPlayer(p *Player) error {
 // InvalidTileExchangeError is returned.
 func (g *Game) ExchangeTiles(tiles []Tile, r *rand.Rand) error {
 	return g.requirePhase(MainPhase, func() error {
+		if len(tiles) == 0 {
+			return InvalidTileExchangeError{NoTilesExchangedReason}
+		}
+		if len(g.Bag) < MaxRackTiles {
+			return InvalidTileExchangeError{InsufficientTilesInBagReason}
+		}
+
 		seat := g.currentSeat()
 
 		used, remaining, err := g.Rules.ValidateTilesFromRack(seat.Rack, tiles)
