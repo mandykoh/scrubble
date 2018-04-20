@@ -59,7 +59,7 @@ func TestBoard(t *testing.T) {
 				pos := b.Position(Coord{row, col})
 
 				if tile := pos.Tile; tile != nil {
-					t.Errorf("Expected position %d,%d to be empty but found tile %c(%d)", row, col, tile.Letter, tile.Points)
+					t.Errorf("Expected position %d,%d to be empty but found tile %v", row, col, tile)
 				}
 
 				if actual, expected := pos.Type, posType; actual != expected {
@@ -163,16 +163,16 @@ func TestBoard(t *testing.T) {
 				t.Errorf("Expected %d neighbours but got %d instead", expected, actual)
 			} else {
 				if actual := neighbours[0]; actual != nil {
-					t.Errorf("Expected north position to be nil but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
+					t.Errorf("Expected north position to be nil but found tile %v", actual.Tile)
 				}
 				if actual, expected := neighbours[1], b.Position(Coord{1, 0}); actual != expected {
-					t.Errorf("Expected south position to be returned but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
+					t.Errorf("Expected south position to be returned but found tile %v", actual.Tile)
 				}
 				if actual, expected := neighbours[2], b.Position(Coord{0, 1}); actual != expected {
-					t.Errorf("Expected east position to be returned but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
+					t.Errorf("Expected east position to be returned but found tile %v", actual.Tile)
 				}
 				if actual := neighbours[3]; actual != nil {
-					t.Errorf("Expected west position to be nil but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
+					t.Errorf("Expected west position to be nil but found tile %v", actual.Tile)
 				}
 			}
 
@@ -182,16 +182,16 @@ func TestBoard(t *testing.T) {
 				t.Errorf("Expected %d neighbours but got %d instead", expected, actual)
 			} else {
 				if actual, expected := neighbours[0], b.Position(Coord{1, 2}); actual != expected {
-					t.Errorf("Expected north position to be returned but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
+					t.Errorf("Expected north position to be returned but found tile %v", actual.Tile)
 				}
 				if actual := neighbours[1]; actual != nil {
-					t.Errorf("Expected south position to be nil but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
+					t.Errorf("Expected south position to be nil but found tile %v", actual.Tile)
 				}
 				if actual := neighbours[2]; actual != nil {
-					t.Errorf("Expected east position to be nil but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
+					t.Errorf("Expected east position to be nil but found tile %v", actual.Tile)
 				}
 				if actual, expected := neighbours[3], b.Position(Coord{2, 1}); actual != expected {
-					t.Errorf("Expected west position to be returned but found tile %c(%d)", actual.Tile.Letter, actual.Tile.Points)
+					t.Errorf("Expected west position to be returned but found tile %v", actual.Tile)
 				}
 			}
 		})

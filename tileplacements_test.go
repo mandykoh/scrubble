@@ -2,6 +2,21 @@ package scrubble
 
 import "testing"
 
+func expectTilePlacements(t *testing.T, placements TilePlacements, expected ...TilePlacement) {
+	t.Helper()
+
+	if actual, expectedLen := len(placements), len(expected); actual != expectedLen {
+		t.Errorf("Expected there to be %d tiles placed but found %d", expectedLen, actual)
+
+	} else {
+		for i, e := range expected {
+			if placements[i] != e {
+				t.Errorf("Expected tile placement %v in position %d but found %v instead", e, i, placements[i])
+			}
+		}
+	}
+}
+
 func TestTilePlacements(t *testing.T) {
 
 	t.Run(".Bounds()", func(t *testing.T) {
@@ -48,7 +63,7 @@ func TestTilePlacements(t *testing.T) {
 				t.Errorf("Expected to find a placement but got nil")
 			} else {
 				if actual, expected := p.Tile, (Tile{'A', 1}); actual != expected {
-					t.Errorf("Expected to find tile %c(%d) but instead found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+					t.Errorf("Expected to find tile %v but instead found %v", expected, actual)
 				}
 			}
 		})
@@ -57,7 +72,7 @@ func TestTilePlacements(t *testing.T) {
 			p := placements.Find(Coord{3, 99})
 
 			if p != nil {
-				t.Errorf("Expected not to find a placement but got one for tile %c(%d) at position %d,%d", p.Tile.Letter, p.Tile.Points, p.Row, p.Column)
+				t.Errorf("Expected not to find a placement but got one for tile %v at position %d,%d", p.Tile, p.Row, p.Column)
 			}
 		})
 	})
@@ -80,7 +95,7 @@ func TestTilePlacements(t *testing.T) {
 			} else {
 				for i := 0; i < len(tiles); i++ {
 					if actual, expected := tiles[i], placements[i].Tile; actual != expected {
-						t.Errorf("Expected to find tile %c(%d) but instead found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+						t.Errorf("Expected to find tile %v but instead found %v", expected, actual)
 					}
 				}
 			}
@@ -90,7 +105,7 @@ func TestTilePlacements(t *testing.T) {
 			p := placements.Find(Coord{3, 99})
 
 			if p != nil {
-				t.Errorf("Expected not to find a placement but got one for tile %c(%d) at position %d,%d", p.Tile.Letter, p.Tile.Points, p.Row, p.Column)
+				t.Errorf("Expected not to find a placement but got one for tile %v at position %d,%d", p.Tile, p.Row, p.Column)
 			}
 		})
 	})

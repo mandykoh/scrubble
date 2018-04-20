@@ -2,24 +2,13 @@ package scrubble
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 	"testing"
 	"time"
 )
 
 func TestGame(t *testing.T) {
-
-	expectTiles := func(t *testing.T, tiles []Tile, expected ...Tile) {
-		if actual, expected := len(tiles), len(expected); actual != expected {
-			t.Fatalf("Expected there to be %d tiles but found %d", expected, actual)
-		}
-
-		for i, e := range expected {
-			if actual := tiles[i]; actual != e {
-				t.Errorf("Expected tile %v but found %v instead", expected, actual)
-			}
-		}
-	}
 
 	t.Run("zero-value", func(t *testing.T) {
 		var game Game
@@ -150,7 +139,7 @@ func TestGame(t *testing.T) {
 			})
 
 			t.Run("restores the player's rack to how it was before the play", func(t *testing.T) {
-				expectTiles(t, game.prevSeat().Rack,
+				expectTiles(t, "racked", game.prevSeat().Rack,
 					Tile{'K', 1},
 					Tile{'P', 1},
 					Tile{'Q', 1},
@@ -312,27 +301,15 @@ func TestGame(t *testing.T) {
 				if actual, expected := len(rack), MaxRackTiles; actual != expected {
 					t.Errorf("Expected player's rack to have been replenished to %d tiles but found %d", expected, actual)
 				} else {
-					if actual, expected := rack[0], (Tile{'A', 1}); actual != expected {
-						t.Errorf("Expected first remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-					}
-					if actual, expected := rack[1], (Tile{'E', 1}); actual != expected {
-						t.Errorf("Expected second remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-					}
-					if actual, expected := rack[2], (Tile{'O', 1}); actual != expected {
-						t.Errorf("Expected third remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-					}
-					if actual, expected := rack[3], nextBagTiles[0]; actual != expected {
-						t.Errorf("Expected fourth remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-					}
-					if actual, expected := rack[4], nextBagTiles[1]; actual != expected {
-						t.Errorf("Expected fifth remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-					}
-					if actual, expected := rack[5], nextBagTiles[2]; actual != expected {
-						t.Errorf("Expected sixth remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-					}
-					if actual, expected := rack[6], nextBagTiles[3]; actual != expected {
-						t.Errorf("Expected seventh remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-					}
+					expectTiles(t, "racked", rack,
+						Tile{'A', 1},
+						Tile{'E', 1},
+						Tile{'O', 1},
+						nextBagTiles[0],
+						nextBagTiles[1],
+						nextBagTiles[2],
+						nextBagTiles[3],
+					)
 				}
 			})
 
@@ -349,28 +326,9 @@ func TestGame(t *testing.T) {
 			})
 
 			t.Run("records a history entry", func(t *testing.T) {
-				if actual, expected := len(game.History), 1; actual != expected {
-					t.Errorf("Expected a single history entry to be recorded but found %d", actual)
-				} else {
-					if actual, expected := game.History[0].SeatIndex, 1; actual != expected {
-						t.Errorf("Expected history entry to record seat index %d but was %d", expected, actual)
-					}
-					if actual, expected := game.History[0].Score, 0; actual != expected {
-						t.Errorf("Expected history entry to record score of %d but was %d", expected, actual)
-					}
-
-					expectTiles(t, game.History[0].TilesSpent, tilesExchanged...)
-
-					if actual, expected := len(game.History[0].TilesPlayed), 0; actual != expected {
-						t.Errorf("Expected history entry to record no tiles played but got %d", actual)
-					}
-
-					expectTiles(t, game.History[0].TilesDrawn, nextBagTiles[len(nextBagTiles)-1])
-
-					if actual, expected := len(game.History[0].WordsFormed), 0; actual != expected {
-						t.Errorf("Expected history entry to record no words formed but got %d", actual)
-					}
-				}
+				expectHistory(t, game.History,
+					HistoryEntry{1, 0, tilesExchanged, nil, nextBagTiles[len(nextBagTiles)-1:], nil},
+				)
 			})
 		})
 
@@ -429,7 +387,7 @@ func TestGame(t *testing.T) {
 
 		t.Run("records a history entry", func(t *testing.T) {
 			game := setupGame()
-			game.currentSeat().Rack = Rack{
+			game.CurrentSeat().Rack = Rack{
 				{'A', 1},
 				{'B', 1},
 				{'C', 1},
@@ -444,28 +402,10 @@ func TestGame(t *testing.T) {
 			if err != nil {
 				t.Errorf("Expected success but got error %v", err)
 			}
-			if actual, expected := len(game.History), 1; actual != expected {
-				t.Errorf("Expected a single history entry to be recorded but found %d", actual)
-			} else {
-				if actual, expected := game.History[0].SeatIndex, 1; actual != expected {
-					t.Errorf("Expected history entry to record seat index %d but was %d", expected, actual)
-				}
-				if actual, expected := game.History[0].Score, 0; actual != expected {
-					t.Errorf("Expected history entry to record score of %d but was %d", expected, actual)
-				}
-				if actual, expected := len(game.History[0].TilesSpent), 0; actual != expected {
-					t.Errorf("Expected history entry to record no tiles spent but got %d", actual)
-				}
-				if actual, expected := len(game.History[0].TilesPlayed), 0; actual != expected {
-					t.Errorf("Expected history entry to record no tiles played but got %d", actual)
-				}
-				if actual, expected := len(game.History[0].TilesDrawn), 0; actual != expected {
-					t.Errorf("Expected history entry to record no tiles drawn but got %d", actual)
-				}
-				if actual, expected := len(game.History[0].WordsFormed), 0; actual != expected {
-					t.Errorf("Expected history entry to record no words formed but got %d", actual)
-				}
-			}
+
+			expectHistory(t, game.History,
+				HistoryEntry{1, 0, nil, nil, nil, nil},
+			)
 		})
 
 		t.Run("moves to next player's turn", func(t *testing.T) {
@@ -601,9 +541,14 @@ func TestGame(t *testing.T) {
 			})
 
 			t.Run("does not remove tiles from the player's rack", func(t *testing.T) {
-				if actual, expected := len(game.CurrentSeat().Rack), 6; actual != expected {
-					t.Errorf("Expected player to still have %d tiles but found %d", expected, actual)
-				}
+				expectTiles(t, "racked", game.CurrentSeat().Rack,
+					Tile{'A', 1},
+					Tile{'B', 1},
+					Tile{'E', 1},
+					Tile{'O', 1},
+					Tile{'D', 1},
+					Tile{'M', 1},
+				)
 			})
 		})
 
@@ -633,7 +578,7 @@ func TestGame(t *testing.T) {
 			t.Run("does not place tiles on the board", func(t *testing.T) {
 				for _, p := range placements {
 					if actual := game.Board.Position(p.Coord).Tile; actual != nil {
-						t.Errorf("Expected no tiles to be placed but found %c(%d) in position %d,%d", actual.Letter, actual.Points, p.Row, p.Column)
+						t.Errorf("Expected no tiles to be placed but found %v in position %d,%d", actual, p.Row, p.Column)
 					}
 				}
 			})
@@ -685,11 +630,7 @@ func TestGame(t *testing.T) {
 			t.Run("places tiles on the board", func(t *testing.T) {
 				for _, p := range placements {
 					if actual := game.Board.Position(p.Coord).Tile; actual == nil || *actual != p.Tile {
-						if actual == nil {
-							t.Errorf("Expected tile %c(%d) to be in position %d,%d but got <nil>", p.Tile.Letter, p.Tile.Points, p.Row, p.Column)
-						} else {
-							t.Errorf("Expected tile %c(%d) to be in position %d,%d but got %c(%d)", p.Tile.Letter, p.Tile.Points, p.Row, p.Column, actual.Letter, actual.Points)
-						}
+						t.Errorf("Expected tile %v to be in position %d,%d but got %v", p.Tile, p.Row, p.Column, actual)
 					}
 				}
 			})
@@ -697,31 +638,15 @@ func TestGame(t *testing.T) {
 			t.Run("replenishes the player's rack from the bag", func(t *testing.T) {
 				rack := game.prevSeat().Rack
 
-				if actual, expected := len(rack), MaxRackTiles; actual != expected {
-					t.Errorf("Expected player's rack to have been replenished to %d tiles but found %d", expected, actual)
-				} else {
-					if actual, expected := rack[0], (Tile{'A', 1}); actual != expected {
-						t.Errorf("Expected first remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-					}
-					if actual, expected := rack[1], (Tile{'E', 1}); actual != expected {
-						t.Errorf("Expected second remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-					}
-					if actual, expected := rack[2], (Tile{'O', 1}); actual != expected {
-						t.Errorf("Expected third remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-					}
-					if actual, expected := rack[3], (Tile{'M', 1}); actual != expected {
-						t.Errorf("Expected fourth remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-					}
-					if actual, expected := rack[4], nextBagTiles[0]; actual != expected {
-						t.Errorf("Expected fifth remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-					}
-					if actual, expected := rack[5], nextBagTiles[1]; actual != expected {
-						t.Errorf("Expected sixth remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-					}
-					if actual, expected := rack[6], nextBagTiles[2]; actual != expected {
-						t.Errorf("Expected seventh remaining tile in rack to be %c(%d) but found %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-					}
-				}
+				expectTiles(t, "racked", rack,
+					Tile{'A', 1},
+					Tile{'E', 1},
+					Tile{'O', 1},
+					Tile{'M', 1},
+					nextBagTiles[0],
+					nextBagTiles[1],
+					nextBagTiles[2],
+				)
 			})
 
 			t.Run("moves to next player's turn", func(t *testing.T) {
@@ -731,53 +656,15 @@ func TestGame(t *testing.T) {
 			})
 
 			t.Run("records a history entry", func(t *testing.T) {
-				if actual, expected := len(game.History), 1; actual != expected {
-					t.Errorf("Expected a single history entry to be recorded but found %d", actual)
-				} else {
-					if actual, expected := game.History[0].SeatIndex, 1; actual != expected {
-						t.Errorf("Expected history entry to record seat index %d but was %d", expected, actual)
-					}
-					if actual, expected := game.History[0].Score, 123; actual != expected {
-						t.Errorf("Expected history entry to record score of %d but was %d", expected, actual)
-					}
-
-					expectTiles(t, game.History[0].TilesSpent, placements.Tiles()...)
-
-					if actual, expected := len(game.History[0].TilesPlayed), len(placements); actual != expected {
-						t.Errorf("Expected history entry to record %d tiles played but got %d", expected, actual)
-					} else {
-						for i := 0; i < len(placements); i++ {
-							if actual, expected := game.History[0].TilesPlayed[i], placements[i]; actual != expected {
-								t.Errorf("Expected tile placement %v but got %v", expected, actual)
-							}
-						}
-					}
-
-					expectTiles(t, game.History[0].TilesDrawn, nextBagTiles...)
-
-					if actual, expected := len(game.History[0].WordsFormed), 1; actual != expected {
-						t.Errorf("Expected history entry to record one word formed but got %d", actual)
-					} else {
-						if actual, expected := game.History[0].WordsFormed[0], (PlayedWord{"SOMEWORD", 123, placements.Bounds()}); actual != expected {
-							t.Errorf("Expected word formed %v but got %v", expected, actual)
-						}
-					}
-				}
+				expectHistory(t, game.History,
+					HistoryEntry{1, 123, placements.Tiles(), placements, nextBagTiles, []PlayedWord{
+						{"SOMEWORD", 123, placements.Bounds()},
+					}},
+				)
 			})
 
 			t.Run("returns the words formed from scoring using the set rules", func(t *testing.T) {
-				if actual, expected := len(playedWords), 1; actual != expected {
-					t.Errorf("Expected one played word but got %d", actual)
-				} else {
-					expected := PlayedWord{
-						Word:       "SOMEWORD",
-						Score:      123,
-						CoordRange: placements.Bounds(),
-					}
-					if actual := playedWords[0]; actual != expected {
-						t.Errorf("Expected played word %v but got %v", expected, actual)
-					}
-				}
+				expectPlayedWords(t, playedWords, PlayedWord{"SOMEWORD", 123, placements.Bounds()})
 			})
 		})
 
@@ -945,28 +832,14 @@ func TestGame(t *testing.T) {
 		})
 
 		t.Run("shuffles the bag", func(t *testing.T) {
-			for i, expected := range expectedBag {
-				if actual := game.Bag[i]; actual != expected {
-					t.Errorf("Expected tile %d to be %c(%d) but was %c(%d)", i, expected.Letter, expected.Points, actual.Letter, actual.Points)
-				}
-			}
+			expectTiles(t, "bagged", game.Bag, expectedBag...)
 		})
 
 		t.Run("fills the players' racks from the bag", func(t *testing.T) {
 			for i := 0; i < 3; i++ {
-				if actual, expected := len(game.Seats[i].Rack), len(expectedRacks[i]); actual != expected {
-					t.Fatalf("Expected player '%s' to have a full rack of %d tiles but found %d", game.Seats[i].OccupiedBy.Name, expected, actual)
-				}
-				for j, expected := range expectedRacks[i] {
-					if actual := game.Seats[i].Rack[j]; actual != expected {
-						t.Errorf("Expected tile %d of %s's rack to be %c(%d) but was %c(%d)", j, game.Seats[i].OccupiedBy.Name, expected.Letter, expected.Points, actual.Letter, actual.Points)
-					}
-				}
-
-				if actual, expected := len(game.Bag), len(expectedBag); actual != expected {
-					t.Errorf("Expected bag to have %d tiles after filling racks but found %d", expected, actual)
-				}
+				expectTiles(t, fmt.Sprintf("racked (player %d)", i), game.Seats[i].Rack, expectedRacks[i]...)
 			}
+			expectTiles(t, "bagged", game.Bag, expectedBag...)
 		})
 
 		t.Run("returns an error if not in Setup phase", func(t *testing.T) {
@@ -981,9 +854,7 @@ func TestGame(t *testing.T) {
 				t.Errorf("Expected %v but got %v", expected, actual)
 			}
 
-			if actual, expected := len(game.Bag), len(BagWithStandardEnglishTiles()); actual != expected {
-				t.Errorf("Expected bag to still have %d tiles after error but found %d", expected, actual)
-			}
+			expectTiles(t, "bagged", game.Bag, BagWithStandardEnglishTiles()...)
 		})
 
 		t.Run("returns an error if there are no players", func(t *testing.T) {

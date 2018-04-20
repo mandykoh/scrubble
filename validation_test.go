@@ -156,16 +156,10 @@ func TestValidateTilesFromRack(t *testing.T) {
 		switch e := err.(type) {
 
 		case InsufficientTilesError:
-			if actual, expected := len(e.Missing), 2; actual != expected {
-				t.Errorf("Expected %d missing tile but found %d", expected, actual)
-			} else {
-				if actual, expected := e.Missing[0], (Tile{'O', 1}); actual != expected {
-					t.Errorf("Expected missing tile to be %c(%d) but was %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-				}
-				if actual, expected := e.Missing[1], (Tile{'S', 1}); actual != expected {
-					t.Errorf("Expected missing tile to be %c(%d) but was %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
-				}
-			}
+			expectTiles(t, "missing", e.Missing,
+				Tile{'O', 1},
+				Tile{'S', 1},
+			)
 
 		default:
 			t.Errorf("Expected an InsufficientTilesError but got %v", err)

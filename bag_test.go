@@ -50,7 +50,7 @@ func TestBag(t *testing.T) {
 
 			for _, d := range dist {
 				if actual, expected := tileCount(d.Tile, bag), d.Count; actual != expected {
-					t.Errorf("Expected %d of tile %c(%d) but found %d", expected, d.Tile.Letter, d.Tile.Points, actual)
+					t.Errorf("Expected %d of tile %v but found %d", expected, d.Tile, actual)
 				}
 			}
 		})
@@ -69,7 +69,7 @@ func TestBag(t *testing.T) {
 			for _, d := range dist {
 				for i := 0; i < d.Count; i++ {
 					if actual, expected := bag[tileNum], d.Tile; actual != expected {
-						t.Errorf("Expected tile %c(%d) in position %d but found %c(%d) instead", expected.Letter, expected.Points, tileNum, actual.Letter, actual.Points)
+						t.Errorf("Expected tile %v in position %d but found %v instead", expected, tileNum, actual)
 					}
 					tileNum++
 				}
@@ -131,7 +131,7 @@ func TestBag(t *testing.T) {
 
 			for _, d := range expectedDist {
 				if actual, expected := tileCount(d.Tile, bag), d.Count; actual != expected {
-					t.Errorf("Expected %d of tile %c(%d) but found %d", expected, d.Tile.Letter, d.Tile.Points, actual)
+					t.Errorf("Expected %d of tile %v but found %d", expected, d.Tile, actual)
 				}
 			}
 		})
@@ -148,19 +148,19 @@ func TestBag(t *testing.T) {
 			bag := BagWithDistribution(dist)
 
 			if actual, expected := bag.DrawTile(), dist[2].Tile; actual != expected {
-				t.Errorf("Expected first tile drawn to be %c(%d) but got %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+				t.Errorf("Expected first tile drawn to be %v but got %v", expected, actual)
 			}
 			if actual, expected := len(bag), 2; actual != expected {
 				t.Errorf("Expected %d tiles remaining in bag but found %d", expected, actual)
 			}
 			if actual, expected := bag.DrawTile(), dist[1].Tile; actual != expected {
-				t.Errorf("Expected second tile drawn to be %c(%d) but got %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+				t.Errorf("Expected second tile drawn to be %v but got %v", expected, actual)
 			}
 			if actual, expected := len(bag), 1; actual != expected {
 				t.Errorf("Expected %d tiles remaining in bag but found %d", expected, actual)
 			}
 			if actual, expected := bag.DrawTile(), dist[0].Tile; actual != expected {
-				t.Errorf("Expected third tile drawn to be %c(%d) but got %c(%d)", expected.Letter, expected.Points, actual.Letter, actual.Points)
+				t.Errorf("Expected third tile drawn to be %v but got %v", expected, actual)
 			}
 			if actual, expected := len(bag), 0; actual != expected {
 				t.Errorf("Expected no tiles remaining in bag but found %d", actual)
@@ -204,11 +204,7 @@ func TestBag(t *testing.T) {
 				tiles[i], tiles[j] = tiles[j], tiles[i]
 			})
 
-			for i := 0; i < len(tiles); i++ {
-				if actual, expected := bag[i], tiles[i]; actual != expected {
-					t.Errorf("Expected tile %c(%d) to be shuffled into position %d but found %c(%d)", expected.Letter, expected.Points, i, actual.Letter, actual.Points)
-				}
-			}
+			expectTiles(t, "shuffled", bag, tiles...)
 		})
 	})
 }
