@@ -58,6 +58,9 @@ func (g *Game) Challenge(challengerSeatIndex int, r *rand.Rand) error {
 		challenged.Rack.Remove(play.TilesDrawn...)
 		challenged.Rack = append(challenged.Rack, play.TilesSpent...)
 
+		g.Bag = append(g.Bag, play.TilesDrawn...)
+		g.Bag.Shuffle(r)
+
 		return nil
 	})
 }

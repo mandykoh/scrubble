@@ -128,14 +128,25 @@ func TestGame(t *testing.T) {
 		})
 
 		t.Run("when successful", func(t *testing.T) {
-			game := setupGame()
+			seed := time.Now().UnixNano()
 
-			err := game.Challenge(game.CurrentSeatIndex, nil)
+			game := setupGame()
+			lastTurn := game.History.Last()
+
+			expectedBag := append(Bag{}, game.Bag...)
+			expectedBag = append(expectedBag, lastTurn.TilesDrawn...)
+			expectedBag.Shuffle(rand.New(rand.NewSource(seed)))
+
+			err := game.Challenge(game.CurrentSeatIndex, rand.New(rand.NewSource(seed)))
 
 			t.Run("doesn't return an error", func(t *testing.T) {
 				if err != nil {
 					t.Errorf("Expected success but got error %v", err)
 				}
+			})
+
+			t.Run("returns drawn tiles to the bag", func(t *testing.T) {
+				expectTiles(t, "bagged", game.Bag, expectedBag...)
 			})
 
 			t.Run("restores the player's rack to how it was before the play", func(t *testing.T) {
