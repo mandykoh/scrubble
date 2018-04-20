@@ -109,7 +109,7 @@ func TestGame(t *testing.T) {
 			game.Phase = SetupPhase
 
 			err := game.ExchangeTiles([]Tile{
-				game.currentSeat().Rack[0],
+				game.CurrentSeat().Rack[0],
 			}, nil)
 
 			if actual, expected := err, (GameOutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
@@ -132,7 +132,7 @@ func TestGame(t *testing.T) {
 			game.Bag = game.Bag[:MaxRackTiles-1]
 
 			err := game.ExchangeTiles([]Tile{
-				game.currentSeat().Rack[0],
+				game.CurrentSeat().Rack[0],
 			}, nil)
 
 			if actual, expected := err, (InvalidTileExchangeError{InsufficientTilesInBagReason}); actual != expected {
@@ -168,7 +168,7 @@ func TestGame(t *testing.T) {
 			})
 
 			t.Run("does not remove tiles from the player's rack", func(t *testing.T) {
-				if actual, expected := len(game.currentSeat().Rack), 6; actual != expected {
+				if actual, expected := len(game.CurrentSeat().Rack), 6; actual != expected {
 					t.Errorf("Expected player to still have %d tiles but found %d", expected, actual)
 				}
 			})
@@ -180,7 +180,7 @@ func TestGame(t *testing.T) {
 			game := setupGame()
 
 			originalBagSize := len(game.Bag)
-			originalRackSize := len(game.currentSeat().Rack)
+			originalRackSize := len(game.CurrentSeat().Rack)
 
 			expectedBag := append(Bag{}, game.Bag...)
 			nextBagTiles := []Tile{
@@ -293,7 +293,7 @@ func TestGame(t *testing.T) {
 			})
 
 			err := game.ExchangeTiles([]Tile{
-				game.currentSeat().Rack[0],
+				game.CurrentSeat().Rack[0],
 			}, rand.New(rand.NewSource(0)))
 
 			t.Run("succeeds", func(t *testing.T) {
@@ -501,7 +501,7 @@ func TestGame(t *testing.T) {
 			})
 
 			t.Run("does not remove tiles from the player's rack", func(t *testing.T) {
-				if actual, expected := len(game.currentSeat().Rack), 6; actual != expected {
+				if actual, expected := len(game.CurrentSeat().Rack), 6; actual != expected {
 					t.Errorf("Expected player to still have %d tiles but found %d", expected, actual)
 				}
 			})
