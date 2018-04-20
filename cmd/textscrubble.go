@@ -26,7 +26,7 @@ LetterSearch:
 		letter := []rune(l)[0]
 
 		for _, t := range rack {
-			if t.Letter == letter {
+			if (letter == '_' && t.Letter == ' ') || t.Letter == letter {
 				tiles = append(tiles, t)
 				continue LetterSearch
 			}
@@ -38,7 +38,7 @@ LetterSearch:
 }
 
 func main() {
-	cmdExchangePattern := regexp.MustCompile(`^exchange ([a-zA-Z]+)$`)
+	cmdExchangePattern := regexp.MustCompile(`^exchange ([a-zA-Z_]+)$`)
 
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 	game := &scrubble.Game{
@@ -88,8 +88,8 @@ func main() {
 			if err != nil {
 				gt.Println(gt.Color(err.Error(), gt.RED))
 			} else {
+				gt.Printf("Tiles exchanged")
 				textscrubble.DrawRack(seat.Rack)
-				gt.Printf("\n%s exchanged tiles", seat.OccupiedBy.Name)
 			}
 
 		} else if line == "?" {

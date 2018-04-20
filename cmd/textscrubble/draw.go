@@ -70,6 +70,10 @@ func DrawGame(g *scrubble.Game) {
 
 func DrawRack(r scrubble.Rack) {
 	for _, t := range r {
-		gt.Printf(gt.Color(" [%c %d]", gt.WHITE), t.Letter, t.Points)
+		letter := t.Letter
+		if letter == ' ' {
+			letter = '_'
+		}
+		gt.Printf(gt.Color(" [%c %d]", gt.WHITE), letter, t.Points)
 	}
 }
