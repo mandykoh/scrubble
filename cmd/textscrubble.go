@@ -81,6 +81,12 @@ func main() {
 				gt.Println(gt.Color(err.Error(), gt.RED))
 			}
 
+		} else if line == "shuffle" {
+			rng.Shuffle(len(seat.Rack), func(i, j int) {
+				seat.Rack[i], seat.Rack[j] = seat.Rack[j], seat.Rack[i]
+			})
+			textscrubble.DrawRack(seat.Rack)
+
 		} else if matches := cmdExchangePattern.FindStringSubmatch(line); matches != nil {
 			lettersToExchange := strings.Split(matches[1], "")
 			tiles := lettersToRackTiles(lettersToExchange, seat.Rack)
@@ -97,6 +103,7 @@ func main() {
 			gt.Println("    across - play tiles across, eg: across 1 3 DOG")
 			gt.Println("      down - play tiles down, eg: down 4 2 DOG")
 			gt.Println("      pass - forfeit turn")
+			gt.Println("   shuffle - shuffle rack")
 			gt.Println("  exchange - exchange tiles, eg: exchange DG")
 			gt.Println(" challenge - challenge the last play")
 		}
