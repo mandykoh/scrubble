@@ -4,18 +4,6 @@ import "testing"
 
 func TestRack(t *testing.T) {
 
-	expectRackContains := func(t *testing.T, r Rack, letters ...rune) {
-		if actual, expected := len(r), len(letters); actual != expected {
-			t.Fatalf("Expected rack to contain %d tiles but found %d", expected, actual)
-		}
-
-		for i, expected := range letters {
-			if actual := r[i].Letter; actual != expected {
-				t.Errorf("Expected letter '%c' on the rack but found '%c' instead", expected, actual)
-			}
-		}
-	}
-
 	t.Run(".FillFromBag()", func(t *testing.T) {
 
 		t.Run("moves MaxRackTiles from the bag to an empty rack", func(t *testing.T) {
@@ -36,8 +24,23 @@ func TestRack(t *testing.T) {
 				t.Errorf("Expected bag to contain %d tiles but found %d", expected, actual)
 			}
 
-			expectRackContains(t, r, 'C', 'C', 'C', 'B', 'B', 'B', 'A')
-			expectRackContains(t, drawn, 'C', 'C', 'C', 'B', 'B', 'B', 'A')
+			expectTiles(t, "racked", r,
+				Tile{'C', 1},
+				Tile{'C', 1},
+				Tile{'C', 1},
+				Tile{'B', 1},
+				Tile{'B', 1},
+				Tile{'B', 1},
+				Tile{'A', 1})
+
+			expectTiles(t, "drawn", drawn,
+				Tile{'C', 1},
+				Tile{'C', 1},
+				Tile{'C', 1},
+				Tile{'B', 1},
+				Tile{'B', 1},
+				Tile{'B', 1},
+				Tile{'A', 1})
 		})
 
 		t.Run("moves enough from the bag to a partially filled rack to reach MaxRackTiles", func(t *testing.T) {
@@ -65,8 +68,19 @@ func TestRack(t *testing.T) {
 				t.Errorf("Expected bag to contain %d tiles but found %d", expected, actual)
 			}
 
-			expectRackContains(t, r, 'F', 'G', 'H', 'I', 'E', 'D', 'C')
-			expectRackContains(t, drawn, 'E', 'D', 'C')
+			expectTiles(t, "racked", r,
+				Tile{'F', 1},
+				Tile{'G', 1},
+				Tile{'H', 1},
+				Tile{'I', 1},
+				Tile{'E', 1},
+				Tile{'D', 1},
+				Tile{'C', 1})
+
+			expectTiles(t, "drawn", drawn,
+				Tile{'E', 1},
+				Tile{'D', 1},
+				Tile{'C', 1})
 		})
 
 		t.Run("moves all tiles from the bag when not enough to reach MaxRackTiles", func(t *testing.T) {
@@ -87,8 +101,15 @@ func TestRack(t *testing.T) {
 				t.Errorf("Expected bag to be empty but found %d tiles", actual)
 			}
 
-			expectRackContains(t, r, 'C', 'B', 'A')
-			expectRackContains(t, drawn, 'C', 'B', 'A')
+			expectTiles(t, "racked", r,
+				Tile{'C', 1},
+				Tile{'B', 1},
+				Tile{'A', 1})
+
+			expectTiles(t, "drawn", drawn,
+				Tile{'C', 1},
+				Tile{'B', 1},
+				Tile{'A', 1})
 		})
 	})
 
@@ -104,7 +125,10 @@ func TestRack(t *testing.T) {
 
 			r.Remove(Tile{'F', 1}, Tile{'H', 1})
 
-			expectRackContains(t, r, 'G', 'I')
+			expectTiles(t, "racked", r,
+				Tile{'G', 1},
+				Tile{'I', 1},
+			)
 		})
 
 		t.Run("ignores nonexistent tiles", func(t *testing.T) {
@@ -116,7 +140,10 @@ func TestRack(t *testing.T) {
 
 			r.Remove(Tile{'G', 1}, Tile{'X', 1})
 
-			expectRackContains(t, r, 'F', 'H')
+			expectTiles(t, "racked", r,
+				Tile{'F', 1},
+				Tile{'H', 1},
+			)
 		})
 	})
 }
