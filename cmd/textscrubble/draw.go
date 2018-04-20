@@ -55,9 +55,9 @@ func DrawBoard(b *scrubble.Board) {
 func DrawGame(g *scrubble.Game) {
 	gt.Clear()
 	DrawBoard(&g.Board)
+	DrawStats(g)
 
-	gt.Println()
-	gt.Println()
+	gt.MoveCursor(0, g.Board.Rows*2+3)
 
 	if g.Phase == scrubble.EndPhase {
 		gt.Println("Game over")
@@ -75,5 +75,12 @@ func DrawRack(r scrubble.Rack) {
 			letter = '_'
 		}
 		gt.Printf(gt.Color(" [%c %d]", gt.WHITE), letter, t.Points)
+	}
+}
+
+func DrawStats(g *scrubble.Game) {
+	for i, s := range g.Seats {
+		gt.MoveCursor(g.Board.Columns*4+7, i+1)
+		gt.Printf("%s %d", s.OccupiedBy.Name, s.Score)
 	}
 }
