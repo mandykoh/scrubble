@@ -22,22 +22,33 @@ func DrawBoard(b *scrubble.Board) {
 
 			pos := b.Position(scrubble.Coord{Row: r, Column: c})
 
+			bg := gt.BLACK
+			if pos.Tile != nil {
+				bg = gt.WHITE
+			}
+
 			gt.MoveCursor(offsetX+1, offsetY+1)
 			switch pos.Type {
 			case st:
-				gt.Print(gt.Color("★", gt.WHITE))
+				gt.Print(gt.Background(gt.Color("★", gt.WHITE), bg))
 			case dl:
-				gt.Print(gt.Color("dl", gt.BLUE))
+				gt.Print(gt.Background(gt.Color("dl", gt.BLUE), bg))
 			case dw:
-				gt.Print(gt.Color("dw", gt.RED))
+				gt.Print(gt.Background(gt.Color("dw", gt.RED), bg))
 			case tl:
-				gt.Print(gt.Color("tl", gt.GREEN))
+				gt.Print(gt.Background(gt.Color("tl", gt.GREEN), bg))
 			case tw:
-				gt.Print(gt.Color("tw", gt.YELLOW))
+				gt.Print(gt.Background(gt.Color("tw", gt.YELLOW), bg))
+			default:
+				gt.Print(gt.Background(" ", bg))
 			}
 
-			//if pos.Tile == nil {
-			//}
+			if pos.Tile != nil {
+				gt.MoveCursor(offsetX+1, offsetY)
+				gt.Printf(gt.Bold(gt.Background(gt.Color("%c  ", gt.BLACK), gt.WHITE)), pos.Tile.Letter)
+				gt.MoveCursor(offsetX+2, offsetY+1)
+				gt.Printf(gt.Background(gt.Color("%2d", gt.BLACK), gt.WHITE), pos.Tile.Points)
+			}
 		}
 
 		gt.MoveCursor(b.Columns*4+1, offsetY)
@@ -69,18 +80,29 @@ func DrawGame(g *scrubble.Game) {
 }
 
 func DrawRack(r scrubble.Rack) {
+	gt.Println()
+
 	for _, t := range r {
 		letter := t.Letter
 		if letter == ' ' {
 			letter = '_'
 		}
-		gt.Printf(gt.Color(" [%c %d]", gt.WHITE), letter, t.Points)
+
+		gt.MoveCursorUp(1)
+		gt.MoveCursorForward(2)
+		gt.Printf(gt.Bold(gt.Background(gt.Color("%c  ", gt.BLACK), gt.WHITE)), letter)
+		gt.MoveCursorDown(1)
+		gt.MoveCursorBackward(3)
+		gt.Printf(gt.Background(gt.Color("%3d", gt.BLACK), gt.WHITE), t.Points)
 	}
 }
 
 func DrawStats(g *scrubble.Game) {
+	gt.MoveCursor(g.Board.Columns*4+7, 1)
+	gt.Printf("%d tiles in bag", len(g.Bag))
+
 	for i, s := range g.Seats {
-		gt.MoveCursor(g.Board.Columns*4+7, i+1)
+		gt.MoveCursor(g.Board.Columns*4+7, i+3)
 		gt.Printf("%s %d", s.OccupiedBy.Name, s.Score)
 	}
 }
