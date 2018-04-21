@@ -11,6 +11,15 @@ import (
 	"github.com/mandykoh/scrubble"
 )
 
+func Challenge(game *scrubble.Game, rng *rand.Rand) {
+	challengerIndex := game.CurrentSeatIndex
+
+	err := game.Challenge(challengerIndex, rng)
+	if err != nil {
+		gt.Println(gt.Color(err.Error(), gt.RED))
+	}
+}
+
 func ExchangeTiles(letters string, game *scrubble.Game, rng *rand.Rand) {
 	seat := game.CurrentSeat()
 	tiles := LettersToRackTiles(letters, seat.Rack)

@@ -71,6 +71,9 @@ func main() {
 		} else if line == "shuffle" {
 			textscrubble.ShuffleRack(game, rng)
 
+		} else if challengeEnabled && line == "challenge" {
+			textscrubble.Challenge(game, rng)
+
 		} else if matches := cmdExchangePattern.FindStringSubmatch(line); matches != nil {
 			textscrubble.ExchangeTiles(matches[1], game, rng)
 
