@@ -30,7 +30,7 @@ func lettersToPlacements(rowDir, colDir, row, col int, letters string, rack scru
 
 	for _, tile := range tiles {
 		var pos *scrubble.BoardPosition
-		for pos == nil || pos.Tile != nil {
+		for pos != nil && pos.Tile != nil {
 			row += rowDir
 			col += colDir
 			pos = board.Position(scrubble.Coord{Row: row, Column: col})
