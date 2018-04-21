@@ -113,6 +113,11 @@ func TestGame(t *testing.T) {
 				},
 			}
 
+			for _, placement := range game.History.Last().TilesPlayed {
+				tile := placement.Tile
+				game.Board.Position(placement.Coord).Tile = &tile
+			}
+
 			return game
 		}
 
@@ -147,6 +152,16 @@ func TestGame(t *testing.T) {
 
 			t.Run("returns drawn tiles to the bag", func(t *testing.T) {
 				expectTiles(t, "bagged", game.Bag, expectedBag...)
+			})
+
+			t.Run("withdraws placed tiles from the board", func(t *testing.T) {
+				for _, placed := range lastTurn.TilesPlayed {
+					pos := game.Board.Position(placed.Coord)
+
+					if pos.Tile != nil {
+						t.Errorf("Expected tile in position %v to have been withdrawn but found %v there", placed.Coord, pos.Tile)
+					}
+				}
 			})
 
 			t.Run("restores the player's rack to how it was before the play", func(t *testing.T) {
