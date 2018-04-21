@@ -88,6 +88,7 @@ func TestGame(t *testing.T) {
 							{'R', 1},
 							{'W', 1},
 						},
+						Score: 123,
 					},
 					{
 						Rack: Rack{
@@ -98,6 +99,7 @@ func TestGame(t *testing.T) {
 							{'O', 1},
 							{'M', 1},
 						},
+						Score: 456,
 					},
 				},
 				CurrentSeatIndex: 1,
@@ -147,6 +149,12 @@ func TestGame(t *testing.T) {
 			t.Run("doesn't return an error", func(t *testing.T) {
 				if err != nil {
 					t.Errorf("Expected success but got error %v", err)
+				}
+			})
+
+			t.Run("reduces the challenged player's score", func(t *testing.T) {
+				if actual, expected := game.prevSeat().Score, 0; actual != expected {
+					t.Errorf("Expected challenged player's score to be reduced to %d but was %d", expected, actual)
 				}
 			})
 

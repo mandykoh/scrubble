@@ -57,6 +57,7 @@ func (g *Game) Challenge(challengerSeatIndex int, r *rand.Rand) error {
 		challenged := g.prevSeat()
 		challenged.Rack.Remove(play.TilesDrawn...)
 		challenged.Rack = append(challenged.Rack, play.TilesSpent...)
+		challenged.Score -= play.Score
 
 		for _, p := range play.TilesPlayed {
 			g.Board.Position(p.Coord).Tile = nil
