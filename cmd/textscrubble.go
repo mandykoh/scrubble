@@ -59,7 +59,7 @@ LetterSearch:
 			}
 		}
 
-		tiles = append(tiles, scrubble.Tile{Letter: letter, Points: 1})
+		tiles = append(tiles, scrubble.Tile{Letter: letter, Points: 0})
 	}
 	return
 }
@@ -121,8 +121,8 @@ func main() {
 			if err != nil {
 				gt.Println(gt.Color(err.Error(), gt.RED))
 			} else {
-				gt.Printf("Tiles exchanged")
 				textscrubble.DrawRack(seat.Rack)
+				gt.Printf("\n\nTiles exchanged")
 			}
 
 		} else if matches := cmdPlayPattern.FindStringSubmatch(line); matches != nil {
