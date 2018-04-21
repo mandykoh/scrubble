@@ -12,8 +12,6 @@ import (
 
 	"regexp"
 
-	"strings"
-
 	"strconv"
 
 	gt "github.com/buger/goterm"
@@ -21,60 +19,26 @@ import (
 	"github.com/mandykoh/scrubble/cmd/textscrubble"
 )
 
-func lettersToPlacements(rowDir, colDir, row, col int, letters string, rack scrubble.Rack, board *scrubble.Board) scrubble.TilePlacements {
-	var placements scrubble.TilePlacements
-	tiles := lettersToRackTiles(letters, rack)
-
-	row -= rowDir
-	col -= colDir
-
-	for _, tile := range tiles {
-		var pos *scrubble.BoardPosition
-		for pos != nil && pos.Tile != nil {
-			row += rowDir
-			col += colDir
-			pos = board.Position(scrubble.Coord{Row: row, Column: col})
-		}
-
-		placements = append(placements, scrubble.TilePlacement{
-			Tile:  tile,
-			Coord: scrubble.Coord{Row: row, Column: col},
-		})
-	}
-
-	return placements
-}
-
-func lettersToRackTiles(letters string, rack scrubble.Rack) (tiles []scrubble.Tile) {
-	lettersToFind := strings.Split(letters, "")
-
-LetterSearch:
-	for _, l := range lettersToFind {
-		letter := []rune(l)[0]
-
-		for _, t := range rack {
-			if (letter == '_' && t.Letter == ' ') || t.Letter == letter {
-				tiles = append(tiles, t)
-				continue LetterSearch
-			}
-		}
-
-		tiles = append(tiles, scrubble.Tile{Letter: letter, Points: 0})
-	}
-	return
-}
-
 func main() {
+	if len(os.Args) < 3 || (os.Args[1] != "simple" && os.Args[1] != "challenge") {
+		fmt.Fprintf(os.Stderr, "Usage: textscrubble <mode> <player1_name> [player2_name] ... [playerN_name]\n")
+		fmt.Fprintf(os.Stderr, "\n  <mode> can be:\n\n")
+		fmt.Fprintf(os.Stderr, "     simple - words are automatically validated against the dictionary (only valid words can be played)\n")
+		fmt.Fprintf(os.Stderr, "  challenge - players can manually challenge a play (which is then validated with a dictionary)\n")
+		os.Exit(1)
+	}
+
+	challengeEnabled := os.Args[1] == "challenge"
+
 	cmdExchangePattern := regexp.MustCompile(`^exchange ([a-zA-Z_]+)$`)
 	cmdPlayPattern := regexp.MustCompile(`^(across|down) (\d+) (\d+) ([a-zA-Z_]+)$`)
 
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
-	game := &scrubble.Game{
-		Board: scrubble.BoardWithStandardLayout(),
-		Bag:   scrubble.BagWithStandardEnglishTiles(),
-	}
 
-	for i := 1; i < len(os.Args); i++ {
+	game := scrubble.NewGameWithDefaults()
+	game.Rules = game.Rules.WithDictionaryForScoring(!challengeEnabled)
+
+	for i := 2; i < len(os.Args); i++ {
 		player := &scrubble.Player{Name: os.Args[i]}
 		game.AddPlayer(player)
 	}
@@ -116,7 +80,7 @@ func main() {
 			textscrubble.DrawRack(seat.Rack)
 
 		} else if matches := cmdExchangePattern.FindStringSubmatch(line); matches != nil {
-			tiles := lettersToRackTiles(matches[1], seat.Rack)
+			tiles := textscrubble.LettersToRackTiles(matches[1], seat.Rack)
 			err := game.ExchangeTiles(tiles, rng)
 			if err != nil {
 				gt.Println(gt.Color(err.Error(), gt.RED))
@@ -134,7 +98,7 @@ func main() {
 			row, _ := strconv.Atoi(matches[2])
 			col, _ := strconv.Atoi(matches[3])
 
-			placements := lettersToPlacements(rowDir, colDir, row, col, matches[4], seat.Rack, &game.Board)
+			placements := textscrubble.LettersToPlacements(rowDir, colDir, row, col, matches[4], seat.Rack, &game.Board)
 			_, err := game.Play(placements)
 			if err != nil {
 				gt.Println(gt.Color(err.Error(), gt.RED))
@@ -149,7 +113,10 @@ func main() {
 			gt.Println("      pass - forfeit turn")
 			gt.Println("   shuffle - shuffle rack")
 			gt.Println("  exchange - exchange tiles, eg: exchange DG")
-			gt.Println(" challenge - challenge the last play")
+
+			if challengeEnabled {
+				gt.Println(" challenge - challenge the last play")
+			}
 		}
 	}
 }

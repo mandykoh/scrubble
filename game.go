@@ -18,6 +18,20 @@ type Game struct {
 	History          History
 }
 
+// NewGame returns an initialised game in the SetupPhase with no players.
+func NewGame(bag Bag, board Board) *Game {
+	return &Game{
+		Bag:   bag,
+		Board: board,
+	}
+}
+
+// NewGameWithDefaults returns an initialised game in the SetupPhase with no
+// players, with a default bag and board layout.
+func NewGameWithDefaults() *Game {
+	return NewGame(BagWithStandardEnglishTiles(), BoardWithStandardLayout())
+}
+
 // AddPlayer adds a seat for a new player to the game.
 //
 // If the game is not in the Setup phase, GameOutOfPhaseError is returned.
