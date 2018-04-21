@@ -73,7 +73,7 @@ func DrawGame(g *scrubble.Game) {
 	if g.Phase == scrubble.EndPhase {
 		gt.Println("Game over")
 	} else {
-		gt.Printf("%s’s turn:", g.CurrentSeat().OccupiedBy.Name)
+		gt.Printf("%s’s turn (? for help, Enter to clear output):", g.CurrentSeat().OccupiedBy.Name)
 	}
 
 	gt.Flush()

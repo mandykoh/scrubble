@@ -79,15 +79,17 @@ func main() {
 
 		} else if line == "?" {
 			gt.Println("      rack - show rack")
-			gt.Println("    across - play tiles across, eg: across 1 3 DOG")
-			gt.Println("      down - play tiles down, eg: down 4 2 DOG")
+			gt.Println("    across - play tiles across from a starting row/col, eg: across 1 3 dg")
+			gt.Println("      down - play tiles down from a starting row/col, eg: down 4 2 dg")
 			gt.Println("      pass - forfeit turn")
 			gt.Println("   shuffle - shuffle rack")
-			gt.Println("  exchange - exchange tiles, eg: exchange DG")
+			gt.Println("  exchange - exchange tiles, eg: exchange dg")
 
 			if challengeEnabled {
 				gt.Println(" challenge - challenge the last play")
 			}
+
+			gt.Println("\n  When specifying tiles, blank tiles will be matched if no other tiles match")
 		}
 	}
 }

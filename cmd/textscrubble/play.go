@@ -49,7 +49,7 @@ func LettersToPlacements(rowDir, colDir, row, col int, letters string, rack scru
 }
 
 func LettersToRackTiles(letters string, rack scrubble.Rack) (tiles []scrubble.Tile) {
-	lettersToFind := strings.Split(letters, "")
+	lettersToFind := strings.Split(strings.ToUpper(letters), "")
 
 LetterSearch:
 	for _, l := range lettersToFind {
@@ -91,6 +91,9 @@ func PlayTiles(dir, row, col, letters string, game *scrubble.Game) {
 		gt.Println(gt.Color(err.Error(), gt.RED))
 	} else {
 		DrawRack(seat.Rack)
+		if len(game.History.Last().TilesDrawn) > 0 {
+			gt.Printf("\n\nTiles replenished from bag")
+		}
 	}
 }
 
