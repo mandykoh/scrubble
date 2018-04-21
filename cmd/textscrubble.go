@@ -12,8 +12,6 @@ import (
 
 	"regexp"
 
-	"strconv"
-
 	gt "github.com/buger/goterm"
 	"github.com/mandykoh/scrubble"
 	"github.com/mandykoh/scrubble/cmd/textscrubble"
@@ -68,43 +66,16 @@ func main() {
 			textscrubble.DrawRack(seat.Rack)
 
 		} else if line == "pass" {
-			err := game.Pass()
-			if err != nil {
-				gt.Println(gt.Color(err.Error(), gt.RED))
-			}
+			textscrubble.Pass(game)
 
 		} else if line == "shuffle" {
-			rng.Shuffle(len(seat.Rack), func(i, j int) {
-				seat.Rack[i], seat.Rack[j] = seat.Rack[j], seat.Rack[i]
-			})
-			textscrubble.DrawRack(seat.Rack)
+			textscrubble.ShuffleRack(game, rng)
 
 		} else if matches := cmdExchangePattern.FindStringSubmatch(line); matches != nil {
-			tiles := textscrubble.LettersToRackTiles(matches[1], seat.Rack)
-			err := game.ExchangeTiles(tiles, rng)
-			if err != nil {
-				gt.Println(gt.Color(err.Error(), gt.RED))
-			} else {
-				textscrubble.DrawRack(seat.Rack)
-				gt.Printf("\n\nTiles exchanged")
-			}
+			textscrubble.ExchangeTiles(matches[1], game, rng)
 
 		} else if matches := cmdPlayPattern.FindStringSubmatch(line); matches != nil {
-			rowDir, colDir := 1, 0
-			if matches[1] == "across" {
-				rowDir, colDir = 0, 1
-			}
-
-			row, _ := strconv.Atoi(matches[2])
-			col, _ := strconv.Atoi(matches[3])
-
-			placements := textscrubble.LettersToPlacements(rowDir, colDir, row, col, matches[4], seat.Rack, &game.Board)
-			_, err := game.Play(placements)
-			if err != nil {
-				gt.Println(gt.Color(err.Error(), gt.RED))
-			} else {
-				textscrubble.DrawRack(seat.Rack)
-			}
+			textscrubble.PlayTiles(matches[1], matches[2], matches[3], matches[4], game)
 
 		} else if line == "?" {
 			gt.Println("      rack - show rack")
