@@ -52,9 +52,20 @@ func (g *Game) AddPlayer(p *Player) error {
 // into the bag upon a successful challenge.
 func (g *Game) Challenge(challengerSeatIndex int, r *rand.Rand) error {
 	return g.requirePhase(MainPhase, func() error {
+		if len(g.History) == 0 {
+			return InvalidChallengeError{NoPlayToChallengeReason}
+		}
+
 		play := g.History.Last()
-		if play.Type == ChallengeFailHistoryEntryType || play.Type == ChallengeSuccessHistoryEntryType {
+		switch play.Type {
+		case ChallengeFailHistoryEntryType, ChallengeSuccessHistoryEntryType:
 			return InvalidChallengeError{PlayAlreadyChallengedReason}
+
+		case PlayHistoryEntryType:
+			break
+
+		default:
+			return InvalidChallengeError{NoPlayToChallengeReason}
 		}
 
 		challenged := g.prevSeat()

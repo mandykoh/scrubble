@@ -105,6 +105,7 @@ func TestGame(t *testing.T) {
 				CurrentSeatIndex: 1,
 				History: History{
 					{
+						Type:        PlayHistoryEntryType,
 						SeatIndex:   0,
 						Score:       123,
 						TilesSpent:  []Tile{{'A', 1}, {'D', 1}},
@@ -134,12 +135,28 @@ func TestGame(t *testing.T) {
 			}
 		})
 
+		t.Run("returns an error when there is no play to challenge", func(t *testing.T) {
+			game := setupGame()
+			game.History = nil
+
+			err := game.Challenge(game.CurrentSeatIndex, nil)
+			if actual, expected := err, (InvalidChallengeError{NoPlayToChallengeReason}); actual != expected {
+				t.Fatalf("Expected error %v but was %v", expected, err)
+			}
+
+			game.History.AppendPass(game.prevSeatIndex())
+
+			err = game.Challenge(game.CurrentSeatIndex, nil)
+			if actual, expected := err, (InvalidChallengeError{NoPlayToChallengeReason}); actual != expected {
+				t.Fatalf("Expected error %v but was %v", expected, err)
+			}
+		})
+
 		t.Run("returns an error when the last play was already challenged", func(t *testing.T) {
 			game := setupGame()
 			game.History.AppendChallengeSuccess(game.CurrentSeatIndex)
 
 			err := game.Challenge(game.CurrentSeatIndex, nil)
-
 			if actual, expected := err, (InvalidChallengeError{PlayAlreadyChallengedReason}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
@@ -147,7 +164,6 @@ func TestGame(t *testing.T) {
 			game.History.AppendChallengeFail(game.CurrentSeatIndex)
 
 			err = game.Challenge(game.CurrentSeatIndex, nil)
-
 			if actual, expected := err, (InvalidChallengeError{PlayAlreadyChallengedReason}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
