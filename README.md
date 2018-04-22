@@ -10,7 +10,8 @@ Key features include:
 
   * Complete and flexible game logic implementation, including support for tournament-style player initiated challenges or automatic word validation.
   * Solitaire (single player) support in case you want to practice alone.
-  * Replayable games—Turn history is automatically tracked, and all random number generation is externalised in case you want to use deterministic random sequences.
+  * Detailed error handling—To support rich UIs.
+  * Replayable games—Turn history is automatically tracked, and all random number generation is externalised in case you want to use deterministic random sequences (eg for replays).
   * Customisable board layouts—Want weirdly long rectangular boards with multiple start positions and score multipliers everywhere? You got it.
   * Customisable tile sets—Why limit yourself to the English alphabet? You know you always wanted to play with emoji phrases.
   * Customisable tile bags—Just specify the distribution of tiles you’d like.
@@ -87,6 +88,8 @@ var rng *rand.Rand
 err := game.Start(rng)
 ```
 
+All game operations which use randomness take a random number generator. This allows you to control the random generation as appropriate for your use case.
+
 
 ### Custom boards
 
@@ -133,6 +136,106 @@ bag := scrubble.BagWithDistribution(scrubble.TileDistribution{
 })
 ```
 
+If a tile is given a point value of zero, it is treated as a wildcard tile (a tile which may have its letter substituted for any other letter at the time of play).
+
+
+### Playing a turn
+
+Once started, a game begins at a random player’s turn, and proceeds around to each player in sequence. The current player can be determined from the game itself:
+
+```go
+seat := game.CurrentSeat()          // Points to seat of player whose turn it is
+seatIndex := game.CurrentSeatIndex  // Allows indexing game.Seats to the current seat
+```
+
+The current player may play some tiles from their rack, exchange any tiles on their rack with the bag, or pass.
+
+Tiles can be played as follows:
+
+```go
+playedWords, err := game.Play(TilePlacements{
+	{Tile{'B', 3}, Coord{5, 6}},
+	{Tile{'G', 2}, Coord{5, 8}},
+})
+```
+
+If there was a tile with the letter 'A' at coordinate 5,7 this play would form the word 'BAG'. The game verifies that the tiles being played are indeed available from the current player’s rack, and that they are being placed in legal positions.
+
+Tiles with different point values are treated as different tiles, with the exception of zero-point tiles:
+those are treated as wildcards, which can take on any letter when played. To play a wildcard, specify a tile of any letter but with a zero point value:
+
+```go
+playedWords, err := game.Play(TilePlacements{
+	{Tile{'B', 3}, Coord{5, 6}},
+	{Tile{'G', 0}, Coord{5, 8}},
+})
+```
+
+If the current player does indeed have a wildcard tile on their rack, the game will interpret this as playing it with a letter of 'G'.
+
+The words formed by the play, their positions on the board, and their individual scores are returned as a slice of [`PlayedWord`](https://godoc.org/github.com/mandykoh/scrubble#PlayedWord)s, so that any UI can display them, highlight them, etc:
+
+```go
+firstWordAsString := playedWords[0].Word
+scoreOfFirstWord := playedWords[0].Score
+boardCoordinateRangeOfFirstWord := playedWords[0].CoordRange
+```
+
+A player may also exchange any tiles from their rack with random tiles from the bag:
+
+```go
+err := game.ExchangeTiles([]Tile{
+	{'B', 3},
+	{'G', 2},
+}, rng)
+```
+
+Here, if the player possesses a 'B' and a 'G' tile, they will be removed from the player’s rack and replaced with two other tiles from the bag.
+
+And finally, a player may simply pass, forfeiting their turn to the next player:
+
+```go
+err := game.Pass()
+```
+
+After each turn, the player’s rack is replenished from the bag and their total score is updated. These can be determined from the player’s seat:
+
+```go
+totalScore := seat.Score
+tilesInRack := seat.Rack
+```
+
+### Ending a game
+
+After each turn, according to the game rules in play, the game may end. This can be determined from the game’s current phase:
+
+```go
+hasGameEnded := game.Phase == scrubble.EndPhase
+```
+
+When the game ends, scoring is finalised and no further turn actions may be made.
+
+
+### Challenges
+
+Games can be run either using player-initiated challenges (the default) or automatic word validation. This is controlled via the `Rules`:
+
+```go
+game.Rules = game.Rules.WithDictionaryForScoring(trueOrFalse)
+```
+
+When `WithDictionaryForScoring` is set to true, all words formed on every play are automatically validated against the current dictionary, and only valid words are allowed to be played.
+
+When set to false, any words may be played and it is up to players to initiate a challenge (via [`Game.Challenge`](https://godoc.org/github.com/mandykoh/scrubble#Game.Challenge)) if they believe some words formed may be illegal, at which point words from the last play will then be validated against the dictionary:
+
+```go
+err := game.Challenge(challengerSeatNum, rng)
+```
+
+A challenge can be made immediately after any successful play, and only affects that play. A play may only be challenged once. If the challenge succeeds, the last play is withdrawn and the challenged player effectively loses their turn. Otherwise, the challenger suffers a score penalty.
+
+If the last, game-ending play of a game can be challenged, it is possible for a challenge to cause the game phase to return from `EndPhase` back to `MainPhase` and thus being in play again. Once such a challenge is attempted, whether successful or not, the game is well and truly over.
+
 
 ### Custom rules
 
@@ -149,19 +252,6 @@ game.Rules = game.Rules.
 ```
 
 
-### Challenges
-
-Games can be run either using player-initiated challenges (the default) or automatic word validation. This is controlled via the `Rules`:
-
-```go
-game.Rules = game.Rules.WithDictionaryForScoring(trueOrFalse)
-```
-
-When `WithDictionaryForScoring` is set to true, all words formed on every play are automatically validated against the current dictionary, and only valid words are allowed to be played.
-
-When set to false, any word may be played and it is up to players to initiate a challenge (via [`Game.Challenge`](https://godoc.org/github.com/mandykoh/scrubble#Game.Challenge)), at which point words from the last play will then be validated against the dictionary. If the challenge succeeds, the play is withdrawn and the player effectively loses their turn. Otherwise, the challenger suffers a score penalty.
-
-
 ### Game history and replays
 
-Each turn and challenge for a game is recorded in its [`History`](https://godoc.org/github.com/mandykoh/scrubble#History). All operations requiring a random number generator accept one as a parameter. When the game is run consistently with a deterministic random number generator (such as a seeded pseudorandom generator), the history makes it possible to track and replay games.
+Each turn and challenge for a game is recorded in its [`History`](https://godoc.org/github.com/mandykoh/scrubble#History). All operations requiring a random number generator accept one as a parameter. When the game is run consistently with a deterministic random number generator (such as a seeded pseudorandom generator), the history makes it possible to track (and backtrack) and replay games.
