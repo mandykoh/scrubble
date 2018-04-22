@@ -20,7 +20,11 @@ func NextGamePhase(game *Game) GamePhase {
 
 	scoreless := 0
 	for i := len(game.History) - 1; i >= 0; i-- {
-		if game.History[i].Score > 0 {
+		entry := &game.History[i]
+
+		if entry.Type == ChallengeSuccessHistoryEntryType {
+			i--
+		} else if entry.Score > 0 {
 			break
 		}
 

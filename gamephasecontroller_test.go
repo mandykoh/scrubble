@@ -45,11 +45,11 @@ func TestNextGamePhase(t *testing.T) {
 				{Rack: []Tile{{'B', 2}}},
 			},
 			History: History{
-				{Type: UnknownHistoryEntryType},
-				{Type: UnknownHistoryEntryType, SeatIndex: 1},
-				{Type: UnknownHistoryEntryType},
-				{Type: UnknownHistoryEntryType, SeatIndex: 1},
-				{Type: UnknownHistoryEntryType},
+				{Type: PassHistoryEntryType},
+				{Type: PassHistoryEntryType, SeatIndex: 1},
+				{Type: PassHistoryEntryType},
+				{Type: PassHistoryEntryType, SeatIndex: 1},
+				{Type: PassHistoryEntryType},
 			},
 		}
 
@@ -59,7 +59,38 @@ func TestNextGamePhase(t *testing.T) {
 			t.Errorf("Expected that the game should still continue for one turn but got %#v next", next)
 		}
 
-		game.History.AppendPlay(1, 0, nil, nil, nil, nil)
+		game.History.AppendPass(1)
+		next = NextGamePhase(game)
+
+		if next != EndPhase {
+			t.Errorf("Expected that the game should end but got %#v next", next)
+		}
+	})
+
+	t.Run("treats successfully challenged plays as scoreless turns", func(t *testing.T) {
+		game := &Game{
+			Seats: []Seat{
+				{Rack: []Tile{{'A', 1}}},
+				{Rack: []Tile{{'B', 2}}},
+			},
+			History: History{
+				{Type: PlayHistoryEntryType, Score: 123},
+				{Type: ChallengeSuccessHistoryEntryType, SeatIndex: 1},
+				{Type: PlayHistoryEntryType, SeatIndex: 1, Score: 234},
+				{Type: ChallengeSuccessHistoryEntryType},
+				{Type: PassHistoryEntryType},
+				{Type: PassHistoryEntryType, SeatIndex: 1},
+				{Type: PassHistoryEntryType},
+			},
+		}
+
+		next := NextGamePhase(game)
+
+		if next == EndPhase {
+			t.Errorf("Expected that the game should still continue for one turn but got %#v next", next)
+		}
+
+		game.History.AppendPass(1)
 		next = NextGamePhase(game)
 
 		if next != EndPhase {
