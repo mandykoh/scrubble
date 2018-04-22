@@ -122,17 +122,6 @@ func TestGame(t *testing.T) {
 			return game
 		}
 
-		t.Run("returns an error when the game is not in the Main phase", func(t *testing.T) {
-			game := setupGame()
-			game.Phase = SetupPhase
-
-			_, err := game.Challenge(game.CurrentSeatIndex, nil)
-
-			if actual, expected := err, (GameOutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
-				t.Fatalf("Expected error %v but was %v", expected, err)
-			}
-		})
-
 		t.Run("returns an error when the specified challenger is invalid", func(t *testing.T) {
 			game := setupGame()
 
@@ -180,6 +169,7 @@ func TestGame(t *testing.T) {
 			seed := time.Now().UnixNano()
 
 			game := setupGame()
+			game.Phase = EndPhase
 			game.Rules = game.Rules.WithChallengeValidator(func([]PlayedWord, Dictionary) bool { return false })
 
 			lastTurn := game.History.Last()
@@ -212,6 +202,12 @@ func TestGame(t *testing.T) {
 				expectTiles(t, "bagged", game.Bag, expectedBag...)
 			})
 
+			t.Run("leaves the game in the End phase if already ended", func(t *testing.T) {
+				if actual, expected := game.Phase, EndPhase; actual != expected {
+					t.Errorf("Expected game to be in %v phase but was %v", expected, actual)
+				}
+			})
+
 			t.Run("leaves placed tiles on the board", func(t *testing.T) {
 				for _, placed := range lastTurn.TilesPlayed {
 					pos := game.Board.Position(placed.Coord)
@@ -238,6 +234,7 @@ func TestGame(t *testing.T) {
 			seed := time.Now().UnixNano()
 
 			game := setupGame()
+			game.Phase = EndPhase
 			game.Rules = game.Rules.WithChallengeValidator(func([]PlayedWord, Dictionary) bool { return true })
 
 			lastTurn := game.History.Last()
@@ -268,6 +265,12 @@ func TestGame(t *testing.T) {
 
 			t.Run("returns drawn tiles to the bag", func(t *testing.T) {
 				expectTiles(t, "bagged", game.Bag, expectedBag...)
+			})
+
+			t.Run("moves the game back into the Main phase if ended", func(t *testing.T) {
+				if actual, expected := game.Phase, MainPhase; actual != expected {
+					t.Errorf("Expected game to be in %v phase but was %v", expected, actual)
+				}
 			})
 
 			t.Run("withdraws placed tiles from the board", func(t *testing.T) {

@@ -56,50 +56,49 @@ func (g *Game) AddPlayer() (seat *Seat, err error) {
 // If a challenge is not allowed, an InvalidChallengeError is returned with the
 // reason. Otherwise, whether the challenge succeeded or failed is returned.
 func (g *Game) Challenge(challengerSeatIndex int, r *rand.Rand) (success bool, err error) {
-	return success, g.requirePhase(MainPhase, func() error {
-		if len(g.History) == 0 {
-			return InvalidChallengeError{NoPlayToChallengeReason}
-		}
-		if challengerSeatIndex < 0 || challengerSeatIndex >= len(g.Seats) {
-			return InvalidChallengeError{InvalidChallengerReason}
-		}
+	if len(g.History) == 0 {
+		return false, InvalidChallengeError{NoPlayToChallengeReason}
+	}
+	if challengerSeatIndex < 0 || challengerSeatIndex >= len(g.Seats) {
+		return false, InvalidChallengeError{InvalidChallengerReason}
+	}
 
-		play := g.History.Last()
-		switch play.Type {
-		case ChallengeFailHistoryEntryType, ChallengeSuccessHistoryEntryType:
-			return InvalidChallengeError{PlayAlreadyChallengedReason}
+	play := g.History.Last()
+	switch play.Type {
+	case ChallengeFailHistoryEntryType, ChallengeSuccessHistoryEntryType:
+		return false, InvalidChallengeError{PlayAlreadyChallengedReason}
 
-		case PlayHistoryEntryType:
-			break
+	case PlayHistoryEntryType:
+		break
 
-		default:
-			return InvalidChallengeError{NoPlayToChallengeReason}
-		}
+	default:
+		return false, InvalidChallengeError{NoPlayToChallengeReason}
+	}
 
-		success = g.Rules.IsChallengeSuccessful(play.WordsFormed)
-		if success {
-			challenged := g.prevSeat()
-			challenged.Rack.Remove(play.TilesDrawn...)
-			challenged.Rack = append(challenged.Rack, play.TilesSpent...)
-			challenged.Score -= play.Score
+	success = g.Rules.IsChallengeSuccessful(play.WordsFormed)
+	if success {
+		challenged := g.prevSeat()
+		challenged.Rack.Remove(play.TilesDrawn...)
+		challenged.Rack = append(challenged.Rack, play.TilesSpent...)
+		challenged.Score -= play.Score
 
-			for _, p := range play.TilesPlayed {
-				g.Board.Position(p.Coord).Tile = nil
-			}
-
-			g.Bag = append(g.Bag, play.TilesDrawn...)
-			g.Bag.Shuffle(r)
-
-			g.History.AppendChallengeSuccess(challengerSeatIndex)
-
-		} else {
-			challenger := &g.Seats[challengerSeatIndex]
-			challenger.Score -= ChallengeFailPenaltyPoints
-			g.History.AppendChallengeFail(challengerSeatIndex)
+		for _, p := range play.TilesPlayed {
+			g.Board.Position(p.Coord).Tile = nil
 		}
 
-		return nil
-	})
+		g.Bag = append(g.Bag, play.TilesDrawn...)
+		g.Bag.Shuffle(r)
+
+		g.History.AppendChallengeSuccess(challengerSeatIndex)
+		g.Phase = MainPhase
+
+	} else {
+		challenger := &g.Seats[challengerSeatIndex]
+		challenger.Score -= ChallengeFailPenaltyPoints
+		g.History.AppendChallengeFail(challengerSeatIndex)
+	}
+
+	return success, nil
 }
 
 // CurrentSeat returns the seat for the player whose turn it currently is.
