@@ -311,7 +311,11 @@ func TestGame(t *testing.T) {
 				Bag:   BagWithStandardEnglishTiles(),
 				Board: BoardWithStandardLayout(),
 				Seats: []Seat{
-					{},
+					{
+						Rack: Rack{
+							{'Z', 10},
+						},
+					},
 					{
 						Rack: Rack{
 							{'D', 1},
@@ -502,6 +506,21 @@ func TestGame(t *testing.T) {
 					t.Errorf("Expected game to be in %v phase but was %v", expected, actual)
 				}
 			})
+
+			t.Run("penalises all players by their unplayed tiles", func(t *testing.T) {
+				if actual, expected := game.Seats[0].Score, -10; actual != expected {
+					t.Errorf("Expected first player to have score of %d after unplayed tile penalty but was %d", expected, actual)
+				}
+
+				rackPoints := 0
+				for _, t := range game.Seats[1].Rack {
+					rackPoints += t.Points
+				}
+
+				if actual, expected := game.Seats[1].Score, -rackPoints; actual != expected {
+					t.Errorf("Expected second player to have score of %d after unplayed tile penalty but was %d", expected, actual)
+				}
+			})
 		})
 	})
 
@@ -510,11 +529,22 @@ func TestGame(t *testing.T) {
 		setupGame := func() Game {
 			game := Game{
 				Phase: MainPhase,
-				Bag:   BagWithStandardEnglishTiles(),
 				Board: BoardWithStandardLayout(),
 				Seats: []Seat{
-					{},
-					{},
+					{
+						Rack: Rack{
+							{'A', 1},
+							{'B', 1},
+							{'C', 1},
+						},
+					},
+					{
+						Rack: Rack{
+							{'E', 2},
+							{'F', 2},
+							{'G', 2},
+						},
+					},
 				},
 				CurrentSeatIndex: 1,
 			}
@@ -587,6 +617,15 @@ func TestGame(t *testing.T) {
 			t.Run("moves the game into the End phase", func(t *testing.T) {
 				if actual, expected := game.Phase, EndPhase; actual != expected {
 					t.Errorf("Expected game to be in %v phase but was %v", expected, actual)
+				}
+			})
+
+			t.Run("penalises all players by their unplayed tiles", func(t *testing.T) {
+				if actual, expected := game.Seats[0].Score, -3; actual != expected {
+					t.Errorf("Expected first player to have score of %d after unplayed tile penalty but was %d", expected, actual)
+				}
+				if actual, expected := game.Seats[1].Score, -6; actual != expected {
+					t.Errorf("Expected second player to have score of %d after unplayed tile penalty but was %d", expected, actual)
 				}
 			})
 		})
@@ -831,6 +870,20 @@ func TestGame(t *testing.T) {
 			t.Run("moves the game into the End phase", func(t *testing.T) {
 				if actual, expected := game.Phase, EndPhase; actual != expected {
 					t.Errorf("Expected game to be in %v phase but was %v", expected, actual)
+				}
+			})
+
+			t.Run("awards bonus of double the sum of all opponent's tiles", func(t *testing.T) {
+				totalOpponentTiles := 0
+				for _, t := range game.CurrentSeat().Rack {
+					totalOpponentTiles += t.Points
+				}
+
+				if actual, expected := game.prevSeat().Score, 123+totalOpponentTiles*2; actual != expected {
+					t.Errorf("Expected player's score after final play to be %d but was %d", expected, actual)
+				}
+				if actual, expected := game.History.Last().Score, 123+totalOpponentTiles*2; actual != expected {
+					t.Errorf("Expected history to record total score with bonus for playing out as %d but was %d", expected, actual)
 				}
 			})
 		})

@@ -263,6 +263,34 @@ func (g *Game) endTurn(score int, tilesSpent []Tile, tilesPlayed TilePlacements,
 
 	g.CurrentSeatIndex = g.nextSeatIndex()
 	g.Phase = g.Rules.NextGamePhase(g)
+
+	if g.Phase == EndPhase {
+		if len(tilesPlayed) > 0 {
+			playOutBonus := 0
+			for i, s := range g.Seats {
+				if i == g.prevSeatIndex() {
+					continue
+				}
+				for _, t := range s.Rack {
+					playOutBonus += t.Points
+				}
+			}
+			playOutBonus *= 2
+
+			seat.Score += playOutBonus
+			g.History.Last().Score += playOutBonus
+
+		} else {
+			for i := range g.Seats {
+				s := &g.Seats[i]
+				gameEndPenalty := 0
+				for _, t := range s.Rack {
+					gameEndPenalty += t.Points
+				}
+				s.Score -= gameEndPenalty
+			}
+		}
+	}
 }
 
 func (g *Game) nextSeatIndex() int {
