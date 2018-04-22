@@ -153,9 +153,9 @@ The current player may play some tiles from their rack, exchange any tiles on th
 Tiles can be played as follows:
 
 ```go
-playedWords, err := game.Play(TilePlacements{
-	{Tile{'B', 3}, Coord{5, 6}},
-	{Tile{'G', 2}, Coord{5, 8}},
+playedWords, err := game.Play(scrubble.TilePlacements{
+	{scrubble.Tile{'B', 3}, scrubble.Coord{5, 6}},
+	{scrubble.Tile{'G', 2}, scrubble.Coord{5, 8}},
 })
 ```
 
@@ -165,9 +165,9 @@ Tiles with different point values are treated as different tiles, with the excep
 those are treated as wildcards, which can take on any letter when played. To play a wildcard, specify a tile of any letter but with a zero point value:
 
 ```go
-playedWords, err := game.Play(TilePlacements{
-	{Tile{'B', 3}, Coord{5, 6}},
-	{Tile{'G', 0}, Coord{5, 8}},
+playedWords, err := game.Play(scrubble.TilePlacements{
+	{scrubble.Tile{'B', 3}, scrubble.Coord{5, 6}},
+	{scrubble.Tile{'G', 0}, scrubble.Coord{5, 8}},
 })
 ```
 
@@ -184,7 +184,7 @@ boardCoordinateRangeOfFirstWord := playedWords[0].CoordRange
 A player may also exchange any tiles from their rack with random tiles from the bag:
 
 ```go
-err := game.ExchangeTiles([]Tile{
+err := game.ExchangeTiles([]scrubble.Tile{
 	{'B', 3},
 	{'G', 2},
 }, rng)
