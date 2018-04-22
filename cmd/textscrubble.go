@@ -57,10 +57,6 @@ func main() {
 
 		gt.Println()
 
-		if game.Phase == scrubble.EndPhase {
-			break
-		}
-
 		scanner.Scan()
 		line := scanner.Text()
 
