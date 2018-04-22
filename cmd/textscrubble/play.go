@@ -14,9 +14,13 @@ import (
 func Challenge(game *scrubble.Game, rng *rand.Rand) {
 	challengerIndex := game.CurrentSeatIndex
 
-	err := game.Challenge(challengerIndex, rng)
+	success, err := game.Challenge(challengerIndex, rng)
 	if err != nil {
 		gt.Println(gt.Color(err.Error(), gt.RED))
+	} else if success {
+		gt.Printf(gt.Color("\n\nPlay successfully challenged!", gt.GREEN))
+	} else {
+		gt.Printf(gt.Color("\n\nChallenge failed! All words are valid", gt.RED))
 	}
 }
 
