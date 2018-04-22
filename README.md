@@ -132,3 +132,36 @@ bag := scrubble.BagWithDistribution(scrubble.TileDistribution{
     {Tile{'😃', 50}, 1},
 })
 ```
+
+
+### Custom rules
+
+Each game has a [`Rules`](https://godoc.org/github.com/mandykoh/scrubble#Rules) struct that it uses to run the core logic of the game, like how to determine what words were formed and how to score those words. This can be overridden to extend or completely replace game rules:
+
+```go
+game.Rules = game.Rules.
+	WithChallengeValidator(overridingChallengeValidator).
+	WithDictionary(overridingDictionary).
+	WithGamePhaseController(overridingGamePhaseController).
+	WithPlacementValidator(overridingPlacementValidator).
+	WithRackValidator(overridingRackValidator).
+	WithWordScorer(overridingWordScorer)
+```
+
+
+### Challenges
+
+Games can be run either using player-initiated challenges (the default) or automatic word validation. This is controlled via the `Rules`:
+
+```go
+game.Rules = game.Rules.WithDictionaryForScoring(trueOrFalse)
+```
+
+When `WithDictionaryForScoring` is set to true, all words formed on every play are automatically validated against the current dictionary, and only valid words are allowed to be played.
+
+When set to false, any word may be played and it is up to players to initiate a challenge (via [`Game.Challenge`](https://godoc.org/github.com/mandykoh/scrubble#Game.Challenge)), at which point words from the last play will then be validated against the dictionary. If the challenge succeeds, the play is withdrawn and the player effectively loses their turn. Otherwise, the challenger suffers a score penalty.
+
+
+### Game history and replays
+
+Each turn and challenge for a game is recorded in its [`History`](https://godoc.org/github.com/mandykoh/scrubble#History). All operations requiring a random number generator accept one as a parameter. When the game is run consistently with a deterministic random number generator (such as a seeded pseudorandom generator), the history makes it possible to track and replay games.
