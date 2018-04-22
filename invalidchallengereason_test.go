@@ -13,6 +13,7 @@ func TestInvalidChallengeReason(t *testing.T) {
 			}{
 				{NoPlayToChallengeReason, "NoPlayToChallengeReason"},
 				{PlayAlreadyChallengedReason, "PlayAlreadyChallengedReason"},
+				{InvalidChallengerReason, "InvalidChallengerReason"},
 				{UnknownInvalidChallengeReason, "UnknownInvalidChallengeReason"},
 			}
 
@@ -43,6 +44,7 @@ func TestInvalidChallengeReason(t *testing.T) {
 			}{
 				{NoPlayToChallengeReason, "NoPlayToChallenge"},
 				{PlayAlreadyChallengedReason, "PlayAlreadyChallenged"},
+				{InvalidChallengerReason, "InvalidChallenger"},
 			}
 
 			for _, c := range cases {

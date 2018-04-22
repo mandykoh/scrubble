@@ -10,8 +10,20 @@ type Rules struct {
 	gamePhaseController GamePhaseController
 	placementValidator  PlacementValidator
 	rackValidator       RackValidator
+	challengeValidator  ChallengeValidator
 	wordScorer          WordScorer
 	useDictForScoring   bool
+}
+
+// IsChallengeSuccessful determines if a challenge to a play is successful.
+// Unless overridden by WithChallengeValidator, this uses the default
+// implementation provided by the IsChallengeSuccessful function.
+func (r *Rules) IsChallengeSuccessful() bool {
+	isChallengeSuccessful := r.challengeValidator
+	if isChallengeSuccessful == nil {
+		isChallengeSuccessful = IsChallengeSuccessful
+	}
+	return isChallengeSuccessful()
 }
 
 // NextGamePhase determines the next game phase given the game's current state.
@@ -87,6 +99,13 @@ func (r *Rules) ValidateTilesFromRack(rack Rack, toPlay []Tile) (used, remaining
 		rackValidator = ValidateTilesFromRack
 	}
 	return rackValidator(rack, toPlay)
+}
+
+// WithChallengeValidator returns a copy of these Rules which uses the
+// specified function for determining the success or failure of challenges.
+func (r Rules) WithChallengeValidator(validator ChallengeValidator) Rules {
+	r.challengeValidator = validator
+	return r
 }
 
 // WithDictionary returns a copy of these Rules which uses the specified

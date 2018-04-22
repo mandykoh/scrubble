@@ -128,9 +128,18 @@ func TestGame(t *testing.T) {
 			game := setupGame()
 			game.Phase = SetupPhase
 
-			err := game.Challenge(game.CurrentSeatIndex, nil)
+			_, err := game.Challenge(game.CurrentSeatIndex, nil)
 
 			if actual, expected := err, (GameOutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
+				t.Fatalf("Expected error %v but was %v", expected, err)
+			}
+		})
+
+		t.Run("returns an error when the specified challenger is invalid", func(t *testing.T) {
+			game := setupGame()
+
+			_, err := game.Challenge(5, nil)
+			if actual, expected := err, (InvalidChallengeError{InvalidChallengerReason}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
 		})
@@ -139,14 +148,14 @@ func TestGame(t *testing.T) {
 			game := setupGame()
 			game.History = nil
 
-			err := game.Challenge(game.CurrentSeatIndex, nil)
+			_, err := game.Challenge(game.CurrentSeatIndex, nil)
 			if actual, expected := err, (InvalidChallengeError{NoPlayToChallengeReason}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
 
 			game.History.AppendPass(game.prevSeatIndex())
 
-			err = game.Challenge(game.CurrentSeatIndex, nil)
+			_, err = game.Challenge(game.CurrentSeatIndex, nil)
 			if actual, expected := err, (InvalidChallengeError{NoPlayToChallengeReason}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
@@ -156,34 +165,100 @@ func TestGame(t *testing.T) {
 			game := setupGame()
 			game.History.AppendChallengeSuccess(game.CurrentSeatIndex)
 
-			err := game.Challenge(game.CurrentSeatIndex, nil)
+			_, err := game.Challenge(game.CurrentSeatIndex, nil)
 			if actual, expected := err, (InvalidChallengeError{PlayAlreadyChallengedReason}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
 
 			game.History.AppendChallengeFail(game.CurrentSeatIndex)
 
-			err = game.Challenge(game.CurrentSeatIndex, nil)
+			_, err = game.Challenge(game.CurrentSeatIndex, nil)
 			if actual, expected := err, (InvalidChallengeError{PlayAlreadyChallengedReason}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
+		})
+
+		t.Run("when unsuccessful", func(t *testing.T) {
+			seed := time.Now().UnixNano()
+
+			game := setupGame()
+			game.Rules = game.Rules.WithChallengeValidator(func() bool { return false })
+
+			lastTurn := game.History.Last()
+
+			originalScore := game.CurrentSeat().Score
+			expectedBag := append(Bag{}, game.Bag...)
+			expectedRack := append(Rack{}, game.prevSeat().Rack...)
+
+			success, err := game.Challenge(game.CurrentSeatIndex, rand.New(rand.NewSource(seed)))
+
+			t.Run("doesn't return an error", func(t *testing.T) {
+				if err != nil {
+					t.Errorf("Expected no error but got error %v", err)
+				}
+			})
+
+			t.Run("returns an  unsuccessful indicator", func(t *testing.T) {
+				if success {
+					t.Errorf("Expected unsuccessful but was a successful challenge")
+				}
+			})
+
+			t.Run("reduces the challenger's score", func(t *testing.T) {
+				if actual, expected := game.CurrentSeat().Score, originalScore-ChallengeFailPenaltyPoints; actual != expected {
+					t.Errorf("Expected challenger's score to be penalised to %d but was %d", expected, actual)
+				}
+			})
+
+			t.Run("leaves bag unmodified", func(t *testing.T) {
+				expectTiles(t, "bagged", game.Bag, expectedBag...)
+			})
+
+			t.Run("leaves placed tiles on the board", func(t *testing.T) {
+				for _, placed := range lastTurn.TilesPlayed {
+					pos := game.Board.Position(placed.Coord)
+
+					if pos.Tile == nil || *pos.Tile != placed.Tile {
+						t.Errorf("Expected tile in position %v to remain on board but found %v there", placed.Coord, pos.Tile)
+					}
+				}
+			})
+
+			t.Run("leaves the challenged player's rack unmodified", func(t *testing.T) {
+				expectTiles(t, "racked", game.prevSeat().Rack, expectedRack...)
+			})
+
+			t.Run("records a history entry", func(t *testing.T) {
+				expectHistory(t, game.History,
+					game.History[0],
+					HistoryEntry{Type: ChallengeFailHistoryEntryType, SeatIndex: game.CurrentSeatIndex},
+				)
+			})
 		})
 
 		t.Run("when successful", func(t *testing.T) {
 			seed := time.Now().UnixNano()
 
 			game := setupGame()
+			game.Rules = game.Rules.WithChallengeValidator(func() bool { return true })
+
 			lastTurn := game.History.Last()
 
 			expectedBag := append(Bag{}, game.Bag...)
 			expectedBag = append(expectedBag, lastTurn.TilesDrawn...)
 			expectedBag.Shuffle(rand.New(rand.NewSource(seed)))
 
-			err := game.Challenge(game.CurrentSeatIndex, rand.New(rand.NewSource(seed)))
+			success, err := game.Challenge(game.CurrentSeatIndex, rand.New(rand.NewSource(seed)))
 
 			t.Run("doesn't return an error", func(t *testing.T) {
 				if err != nil {
-					t.Errorf("Expected success but got error %v", err)
+					t.Errorf("Expected no error but got error %v", err)
+				}
+			})
+
+			t.Run("returns a success indicator", func(t *testing.T) {
+				if !success {
+					t.Errorf("Expected success but was a failed challenge")
 				}
 			})
 

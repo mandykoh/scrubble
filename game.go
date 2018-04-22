@@ -5,6 +5,7 @@ import (
 )
 
 const GameMinPlayers = 1
+const ChallengeFailPenaltyPoints = 5
 
 // Game represents the rules and simulation for a single game. The zero-value of
 // a Game is a game in the SetupPhase with no players.
@@ -50,10 +51,16 @@ func (g *Game) AddPlayer(p *Player) error {
 //
 // The supplied random number generator is used to reshuffle drawn tiles back
 // into the bag upon a successful challenge.
-func (g *Game) Challenge(challengerSeatIndex int, r *rand.Rand) error {
-	return g.requirePhase(MainPhase, func() error {
+//
+// If a challenge is not allowed, an InvalidChallengeError is returned with the
+// reason. Otherwise, whether the challenge succeeded or failed is returned.
+func (g *Game) Challenge(challengerSeatIndex int, r *rand.Rand) (success bool, err error) {
+	return success, g.requirePhase(MainPhase, func() error {
 		if len(g.History) == 0 {
 			return InvalidChallengeError{NoPlayToChallengeReason}
+		}
+		if challengerSeatIndex < 0 || challengerSeatIndex >= len(g.Seats) {
+			return InvalidChallengeError{InvalidChallengerReason}
 		}
 
 		play := g.History.Last()
@@ -68,19 +75,27 @@ func (g *Game) Challenge(challengerSeatIndex int, r *rand.Rand) error {
 			return InvalidChallengeError{NoPlayToChallengeReason}
 		}
 
-		challenged := g.prevSeat()
-		challenged.Rack.Remove(play.TilesDrawn...)
-		challenged.Rack = append(challenged.Rack, play.TilesSpent...)
-		challenged.Score -= play.Score
+		success = g.Rules.IsChallengeSuccessful()
+		if success {
+			challenged := g.prevSeat()
+			challenged.Rack.Remove(play.TilesDrawn...)
+			challenged.Rack = append(challenged.Rack, play.TilesSpent...)
+			challenged.Score -= play.Score
 
-		for _, p := range play.TilesPlayed {
-			g.Board.Position(p.Coord).Tile = nil
+			for _, p := range play.TilesPlayed {
+				g.Board.Position(p.Coord).Tile = nil
+			}
+
+			g.Bag = append(g.Bag, play.TilesDrawn...)
+			g.Bag.Shuffle(r)
+
+			g.History.AppendChallengeSuccess(challengerSeatIndex)
+
+		} else {
+			challenger := &g.Seats[challengerSeatIndex]
+			challenger.Score -= ChallengeFailPenaltyPoints
+			g.History.AppendChallengeFail(challengerSeatIndex)
 		}
-
-		g.Bag = append(g.Bag, play.TilesDrawn...)
-		g.Bag.Shuffle(r)
-
-		g.History.AppendChallengeSuccess(g.CurrentSeatIndex)
 
 		return nil
 	})

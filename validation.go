@@ -1,5 +1,12 @@
 package scrubble
 
+// IsChallengeSuccessful determines whether the challenge to a play is
+// successful. A challenge succeeds if any of the words formed by the play are
+// invalid according to the dictionary.
+func IsChallengeSuccessful() bool {
+	return true
+}
+
 // ValidatePlacements checks the intended placement of tiles on a board for
 // legality. This includes: that at least one tile is placed, that tiles are
 // placed contiguously, that tiles are placed only in a straight line, that

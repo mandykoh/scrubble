@@ -67,6 +67,16 @@ func TestRules(t *testing.T) {
 			rules.ScoreWords(TilePlacements{}, &board)
 		})
 
+		t.Run("can validate challenges", func(t *testing.T) {
+			defer func() {
+				if r := recover(); r != nil {
+					t.Errorf("Expected IsChallengeSuccessful to succeed without panic but got %v", r)
+				}
+			}()
+
+			rules.IsChallengeSuccessful()
+		})
+
 		t.Run("can validate placements", func(t *testing.T) {
 			defer func() {
 				if r := recover(); r != nil {
@@ -85,6 +95,30 @@ func TestRules(t *testing.T) {
 			}()
 
 			rules.ValidateTilesFromRack(Rack{}, []Tile{})
+		})
+	})
+
+	t.Run(".WithChallengeValidator()", func(t *testing.T) {
+		validatorCalled := 0
+		validator := func() bool {
+			validatorCalled++
+			return false
+		}
+
+		overriddenRules := Rules{}.WithChallengeValidator(validator)
+
+		t.Run("sets the validator to use for challenge validation", func(t *testing.T) {
+			overriddenRules.IsChallengeSuccessful()
+
+			if actual, expected := validatorCalled, 1; actual != expected {
+				t.Errorf("Expected overridden validator to be called once but got %d invocations", actual)
+			}
+		})
+
+		t.Run("leaves the original rules unmodified", func(t *testing.T) {
+			if actual := rules.challengeValidator; actual != nil {
+				t.Errorf("Expected original challenge validator to be unmodified but wasn't")
+			}
 		})
 	})
 
