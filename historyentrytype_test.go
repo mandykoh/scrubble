@@ -14,6 +14,8 @@ func TestHistoryEntryType(t *testing.T) {
 				{PlayHistoryEntryType, "PlayHistoryEntryType"},
 				{PassHistoryEntryType, "PassHistoryEntryType"},
 				{ExchangeTilesHistoryEntryType, "ExchangeTilesHistoryEntryType"},
+				{ChallengeFailHistoryEntryType, "ChallengeFailHistoryEntryType"},
+				{ChallengeSuccessHistoryEntryType, "ChallengeSuccessHistoryEntryType"},
 				{UnknownHistoryEntryType, "UnknownHistoryEntryType"},
 			}
 
@@ -45,6 +47,8 @@ func TestHistoryEntryType(t *testing.T) {
 				{PlayHistoryEntryType, "Play"},
 				{PassHistoryEntryType, "Pass"},
 				{ExchangeTilesHistoryEntryType, "ExchangeTiles"},
+				{ChallengeFailHistoryEntryType, "ChallengeFail"},
+				{ChallengeSuccessHistoryEntryType, "ChallengeSuccess"},
 			}
 
 			for _, c := range cases {

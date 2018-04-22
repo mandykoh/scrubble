@@ -3,6 +3,22 @@ package scrubble
 // History represents a game's history of turns and scoring.
 type History []HistoryEntry
 
+// AppendChallengeFail adds an entry to the history representing an unsuccessful challenge.
+func (h *History) AppendChallengeFail(challengerSeatIndex int) {
+	*h = append(*h, HistoryEntry{
+		Type:      ChallengeFailHistoryEntryType,
+		SeatIndex: challengerSeatIndex,
+	})
+}
+
+// AppendChallengeSuccess adds an entry to the history representing a successful challenge.
+func (h *History) AppendChallengeSuccess(challengerSeatIndex int) {
+	*h = append(*h, HistoryEntry{
+		Type:      ChallengeSuccessHistoryEntryType,
+		SeatIndex: challengerSeatIndex,
+	})
+}
+
 // AppendExchange adds an entry to the history representing a turn where tiles
 // were successfully exchanged with the bag.
 func (h *History) AppendExchange(seatIndex int, tilesSpent []Tile, tilesDrawn []Tile) {

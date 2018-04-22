@@ -172,7 +172,7 @@ func TestGame(t *testing.T) {
 				}
 			})
 
-			t.Run("restores the player's rack to how it was before the play", func(t *testing.T) {
+			t.Run("restores the challenged player's rack to how it was before the play", func(t *testing.T) {
 				expectTiles(t, "racked", game.prevSeat().Rack,
 					Tile{'K', 1},
 					Tile{'P', 1},
@@ -181,6 +181,13 @@ func TestGame(t *testing.T) {
 					Tile{'T', 1},
 					Tile{'A', 1},
 					Tile{'D', 1})
+			})
+
+			t.Run("records a history entry", func(t *testing.T) {
+				expectHistory(t, game.History,
+					game.History[0],
+					HistoryEntry{Type: ChallengeSuccessHistoryEntryType, SeatIndex: game.CurrentSeatIndex},
+				)
 			})
 		})
 	})

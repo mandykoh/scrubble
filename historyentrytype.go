@@ -12,6 +12,12 @@ const (
 
 	// ExchangeTilesHistoryEntryType indicates that a history entry represents a tile exchange.
 	ExchangeTilesHistoryEntryType
+
+	// ChallengeFailHistoryEntryType indicates that a history entry represents an unsuccessful challenge.
+	ChallengeFailHistoryEntryType
+
+	// ChallengeSuccessHistoryEntryType indicates that a history entry represents a successful challenge.
+	ChallengeSuccessHistoryEntryType
 )
 
 // HistoryEntryType represents a type of history entry.
@@ -27,6 +33,10 @@ func (t HistoryEntryType) GoString() string {
 		return "PassHistoryEntryType"
 	case ExchangeTilesHistoryEntryType:
 		return "ExchangeTilesHistoryEntryType"
+	case ChallengeFailHistoryEntryType:
+		return "ChallengeFailHistoryEntryType"
+	case ChallengeSuccessHistoryEntryType:
+		return "ChallengeSuccessHistoryEntryType"
 	default:
 		return "UnknownHistoryEntryType"
 	}
@@ -42,6 +52,10 @@ func (t HistoryEntryType) String() string {
 		return "Pass"
 	case ExchangeTilesHistoryEntryType:
 		return "ExchangeTiles"
+	case ChallengeFailHistoryEntryType:
+		return "ChallengeFail"
+	case ChallengeSuccessHistoryEntryType:
+		return "ChallengeSuccess"
 	default:
 		return "Unknown"
 	}

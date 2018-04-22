@@ -66,6 +66,8 @@ func (g *Game) Challenge(challengerSeatIndex int, r *rand.Rand) error {
 		g.Bag = append(g.Bag, play.TilesDrawn...)
 		g.Bag.Shuffle(r)
 
+		g.History.AppendChallengeSuccess(g.CurrentSeatIndex)
+
 		return nil
 	})
 }
