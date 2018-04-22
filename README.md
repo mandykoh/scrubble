@@ -128,11 +128,11 @@ Bags can also be created with tiles different to those provided by [`BagWithStan
 // Creates a Bag with 9 x A tiles, 2 x B tiles, 2 x C tiles, 4 x D tiles, and
 // 1 x 😃 tile (that happens to be worth 50 points)
 bag := scrubble.BagWithDistribution(scrubble.TileDistribution{
-    {Tile{'A', 1}, 9},
-    {Tile{'B', 3}, 2},
-    {Tile{'C', 3}, 2},
-    {Tile{'D', 2}, 4},
-    {Tile{'😃', 50}, 1},
+    {scrubble.Tile{'A', 1}, 9},
+    {scrubble.Tile{'B', 3}, 2},
+    {scrubble.Tile{'C', 3}, 2},
+    {scrubble.Tile{'D', 2}, 4},
+    {scrubble.Tile{'😃', 50}, 1},
 })
 ```
 
