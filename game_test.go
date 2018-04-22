@@ -134,6 +134,25 @@ func TestGame(t *testing.T) {
 			}
 		})
 
+		t.Run("returns an error when the last play was already challenged", func(t *testing.T) {
+			game := setupGame()
+			game.History.AppendChallengeSuccess(game.CurrentSeatIndex)
+
+			err := game.Challenge(game.CurrentSeatIndex, nil)
+
+			if actual, expected := err, (InvalidChallengeError{PlayAlreadyChallengedReason}); actual != expected {
+				t.Fatalf("Expected error %v but was %v", expected, err)
+			}
+
+			game.History.AppendChallengeFail(game.CurrentSeatIndex)
+
+			err = game.Challenge(game.CurrentSeatIndex, nil)
+
+			if actual, expected := err, (InvalidChallengeError{PlayAlreadyChallengedReason}); actual != expected {
+				t.Fatalf("Expected error %v but was %v", expected, err)
+			}
+		})
+
 		t.Run("when successful", func(t *testing.T) {
 			seed := time.Now().UnixNano()
 

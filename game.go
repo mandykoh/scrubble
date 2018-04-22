@@ -53,6 +53,9 @@ func (g *Game) AddPlayer(p *Player) error {
 func (g *Game) Challenge(challengerSeatIndex int, r *rand.Rand) error {
 	return g.requirePhase(MainPhase, func() error {
 		play := g.History.Last()
+		if play.Type == ChallengeFailHistoryEntryType || play.Type == ChallengeSuccessHistoryEntryType {
+			return InvalidChallengeError{PlayAlreadyChallengedReason}
+		}
 
 		challenged := g.prevSeat()
 		challenged.Rack.Remove(play.TilesDrawn...)
