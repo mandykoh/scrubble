@@ -13,7 +13,7 @@ func TestNextGamePhase(t *testing.T) {
 					},
 				},
 			},
-			History: History{{0, 123, nil, nil, nil, nil}},
+			History: History{{Type: UnknownHistoryEntryType, Score: 123}},
 		}
 
 		next := NextGamePhase(game)
@@ -28,7 +28,7 @@ func TestNextGamePhase(t *testing.T) {
 			Seats: []Seat{
 				{Rack: []Tile{}},
 			},
-			History: History{{0, 123, nil, nil, nil, nil}},
+			History: History{{Type: UnknownHistoryEntryType, Score: 123}},
 		}
 
 		next := NextGamePhase(game)
@@ -45,11 +45,11 @@ func TestNextGamePhase(t *testing.T) {
 				{Rack: []Tile{{'B', 2}}},
 			},
 			History: History{
-				{0, 0, nil, nil, nil, nil},
-				{1, 0, nil, nil, nil, nil},
-				{0, 0, nil, nil, nil, nil},
-				{1, 0, nil, nil, nil, nil},
-				{0, 0, nil, nil, nil, nil},
+				{Type: UnknownHistoryEntryType},
+				{Type: UnknownHistoryEntryType, SeatIndex: 1},
+				{Type: UnknownHistoryEntryType},
+				{Type: UnknownHistoryEntryType, SeatIndex: 1},
+				{Type: UnknownHistoryEntryType},
 			},
 		}
 

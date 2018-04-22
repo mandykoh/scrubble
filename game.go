@@ -224,7 +224,14 @@ func (g *Game) endTurn(score int, tilesSpent []Tile, tilesPlayed TilePlacements,
 	seat.Score += score
 	tilesDrawn := seat.Rack.FillFromBag(&g.Bag)
 
-	g.History.AppendPlay(g.CurrentSeatIndex, score, tilesSpent, tilesPlayed, tilesDrawn, wordsFormed)
+	if len(tilesPlayed) > 0 {
+		g.History.AppendPlay(g.CurrentSeatIndex, score, tilesSpent, tilesPlayed, tilesDrawn, wordsFormed)
+	} else if len(tilesSpent) > 0 {
+		g.History.AppendExchange(g.CurrentSeatIndex, tilesSpent, tilesDrawn)
+	} else {
+		g.History.AppendPass(g.CurrentSeatIndex)
+	}
+
 	g.CurrentSeatIndex = g.nextSeatIndex()
 	g.Phase = g.Rules.NextGamePhase(g)
 }

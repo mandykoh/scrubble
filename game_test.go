@@ -361,7 +361,7 @@ func TestGame(t *testing.T) {
 
 			t.Run("records a history entry", func(t *testing.T) {
 				expectHistory(t, game.History,
-					HistoryEntry{1, 0, tilesExchanged, nil, nextBagTiles[len(nextBagTiles)-1:], nil},
+					HistoryEntry{Type: ExchangeTilesHistoryEntryType, SeatIndex: 1, TilesSpent: tilesExchanged, TilesDrawn: nextBagTiles[len(nextBagTiles)-1:]},
 				)
 			})
 		})
@@ -438,7 +438,7 @@ func TestGame(t *testing.T) {
 			}
 
 			expectHistory(t, game.History,
-				HistoryEntry{1, 0, nil, nil, nil, nil},
+				HistoryEntry{Type: PassHistoryEntryType, SeatIndex: 1},
 			)
 		})
 
@@ -691,8 +691,8 @@ func TestGame(t *testing.T) {
 
 			t.Run("records a history entry", func(t *testing.T) {
 				expectHistory(t, game.History,
-					HistoryEntry{1, 123, placements.Tiles(), placements, nextBagTiles, []PlayedWord{
-						{"SOMEWORD", 123, placements.Bounds()},
+					HistoryEntry{Type: PlayHistoryEntryType, SeatIndex: 1, Score: 123, TilesSpent: placements.Tiles(), TilesPlayed: placements, TilesDrawn: nextBagTiles, WordsFormed: []PlayedWord{
+						{Word: "SOMEWORD", Score: 123, CoordRange: placements.Bounds()},
 					}},
 				)
 			})
