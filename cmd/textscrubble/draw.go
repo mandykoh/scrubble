@@ -63,17 +63,17 @@ func DrawBoard(b *scrubble.Board) {
 	}
 }
 
-func DrawGame(g *scrubble.Game) {
+func DrawGame(g *scrubble.Game, players []Player) {
 	gt.Clear()
 	DrawBoard(&g.Board)
-	DrawStats(g)
+	DrawStats(g, players)
 
 	gt.MoveCursor(0, g.Board.Rows*2+3)
 
 	if g.Phase == scrubble.EndPhase {
 		gt.Println("Game over")
 	} else {
-		gt.Printf("%s’s turn (? for help, Enter to clear output):", g.CurrentSeat().OccupiedBy.Name)
+		gt.Printf("%s’s turn (? for help, Enter to clear output):", players[g.CurrentSeatIndex].Name)
 	}
 
 	gt.Flush()
@@ -97,12 +97,12 @@ func DrawRack(r scrubble.Rack) {
 	}
 }
 
-func DrawStats(g *scrubble.Game) {
+func DrawStats(g *scrubble.Game, players []Player) {
 	gt.MoveCursor(g.Board.Columns*4+7, 1)
 	gt.Printf("%d tiles in bag", len(g.Bag))
 
 	for i, s := range g.Seats {
 		gt.MoveCursor(g.Board.Columns*4+7, i+3)
-		gt.Printf("%s %d", s.OccupiedBy.Name, s.Score)
+		gt.Printf("%s %d", players[i].Name, s.Score)
 	}
 }

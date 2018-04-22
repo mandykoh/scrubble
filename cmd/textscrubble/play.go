@@ -11,6 +11,10 @@ import (
 	"github.com/mandykoh/scrubble"
 )
 
+type Player struct {
+	Name string
+}
+
 func Challenge(game *scrubble.Game, rng *rand.Rand) {
 	challengerIndex := game.CurrentSeatIndex
 

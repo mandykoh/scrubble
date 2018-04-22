@@ -30,8 +30,7 @@ func TestGame(t *testing.T) {
 				t.Errorf("Expected zero seats to begin with but found %d", actual)
 			}
 
-			p1 := &Player{"Alice"}
-			err := game.AddPlayer(p1)
+			seat1, err := game.AddPlayer()
 
 			if actual, expected := err, error(nil); actual != expected {
 				t.Fatalf("Expected adding a player to succeed but got error: %v", err)
@@ -39,12 +38,11 @@ func TestGame(t *testing.T) {
 			if actual, expected := len(game.Seats), 1; actual != expected {
 				t.Errorf("Expected one seat after adding a player but found %d", actual)
 			}
-			if actual, expected := game.Seats[0].OccupiedBy, p1; actual != expected {
-				t.Errorf("Expected first seat to be occupied by player %s but was %+v", expected.Name, actual)
+			if actual, expected := &game.Seats[0], seat1; actual != expected {
+				t.Errorf("Expected first seat to be created and returned but was different")
 			}
 
-			p2 := &Player{"Bob"}
-			err = game.AddPlayer(p2)
+			seat2, err := game.AddPlayer()
 
 			if actual, expected := err, error(nil); actual != expected {
 				t.Fatalf("Expected adding a player to succeed but got error: %v", err)
@@ -52,8 +50,8 @@ func TestGame(t *testing.T) {
 			if actual, expected := len(game.Seats), 2; actual != expected {
 				t.Errorf("Expected %d seats after adding another player but found %d", expected, actual)
 			}
-			if actual, expected := game.Seats[1].OccupiedBy, p2; actual != expected {
-				t.Errorf("Expected first seat to be occupied by player %s but was %+v", expected.Name, actual)
+			if actual, expected := &game.Seats[1], seat2; actual != expected {
+				t.Errorf("Expected second seat to be created and returned but was different")
 			}
 		})
 
@@ -62,7 +60,7 @@ func TestGame(t *testing.T) {
 				Phase: MainPhase,
 			}
 
-			err := game.AddPlayer(&Player{"Alice"})
+			_, err := game.AddPlayer()
 
 			if actual, expected := err, (GameOutOfPhaseError{SetupPhase, MainPhase}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
@@ -604,9 +602,6 @@ func TestGame(t *testing.T) {
 			tilesFromRackValidated = 0
 			wordsScored = 0
 
-			p1 := &Player{Name: "Alice"}
-			p2 := &Player{Name: "Bob"}
-
 			rackTiles := []Tile{
 				{'A', 1},
 				{'B', 1},
@@ -621,8 +616,8 @@ func TestGame(t *testing.T) {
 				Bag:   BagWithStandardEnglishTiles(),
 				Board: BoardWithStandardLayout(),
 				Seats: []Seat{
-					{OccupiedBy: p1, Rack: append(Rack{}, rackTiles...)},
-					{OccupiedBy: p2, Rack: append(Rack{}, rackTiles...)},
+					{Rack: append(Rack{}, rackTiles...)},
+					{Rack: append(Rack{}, rackTiles...)},
 				},
 				CurrentSeatIndex: 1,
 				Rules: Rules{
@@ -846,16 +841,16 @@ func TestGame(t *testing.T) {
 		t.Run("removes the seat for the specified player", func(t *testing.T) {
 			var game Game
 
-			p1 := &Player{"Alice"}
-			game.AddPlayer(p1)
+			seat1, _ := game.AddPlayer()
+			seat1.Score = 1
 
-			p2 := &Player{"Bob"}
-			game.AddPlayer(p2)
+			seat2, _ := game.AddPlayer()
+			seat2.Score = 2
 
-			p3 := &Player{"Carol"}
-			game.AddPlayer(p3)
+			seat3, _ := game.AddPlayer()
+			seat3.Score = 3
 
-			err := game.RemovePlayer(p2)
+			err := game.RemovePlayer(1)
 
 			if actual, expected := err, error(nil); actual != expected {
 				t.Fatalf("Expected removing a player to succeed but got error: %v", err)
@@ -863,14 +858,14 @@ func TestGame(t *testing.T) {
 			if actual, expected := len(game.Seats), 2; actual != expected {
 				t.Errorf("Expected two seats after removing a player but found %d", actual)
 			}
-			if actual, expected := game.Seats[0].OccupiedBy, p1; actual != expected {
-				t.Errorf("Expected remaining seat to be occupied by player %s but was %+v", expected.Name, actual)
+			if actual, expected := game.Seats[0].Score, seat1.Score; actual != expected {
+				t.Errorf("Expected remaining seat to have score of %d but was %d", expected, actual)
 			}
-			if actual, expected := game.Seats[1].OccupiedBy, p3; actual != expected {
-				t.Errorf("Expected remaining seat to be occupied by player %s but was %+v", expected.Name, actual)
+			if actual, expected := game.Seats[1].Score, seat3.Score; actual != expected {
+				t.Errorf("Expected remaining seat to have score of %d but was %d", expected, actual)
 			}
 
-			err = game.RemovePlayer(p1)
+			err = game.RemovePlayer(0)
 
 			if actual, expected := err, error(nil); actual != expected {
 				t.Fatalf("Expected removing a player to succeed but got error: %v", err)
@@ -878,11 +873,11 @@ func TestGame(t *testing.T) {
 			if actual, expected := len(game.Seats), 1; actual != expected {
 				t.Errorf("Expected one seat after removing a player but found %d", actual)
 			}
-			if actual, expected := game.Seats[0].OccupiedBy, p3; actual != expected {
-				t.Errorf("Expected remaining seat to be occupied by player %s but was %+v", expected.Name, actual)
+			if actual, expected := game.Seats[0].Score, seat3.Score; actual != expected {
+				t.Errorf("Expected remaining seat to have score of %d but was %d", expected, actual)
 			}
 
-			err = game.RemovePlayer(p3)
+			err = game.RemovePlayer(0)
 
 			if actual, expected := err, error(nil); actual != expected {
 				t.Fatalf("Expected removing a player to succeed but got error: %v", err)
@@ -895,13 +890,13 @@ func TestGame(t *testing.T) {
 		t.Run("has no effect if the specified player doesn't have a seat", func(t *testing.T) {
 			var game Game
 
-			p1 := &Player{"Alice"}
-			game.AddPlayer(p1)
+			seat1, _ := game.AddPlayer()
+			seat1.Score = 1
 
-			p2 := &Player{"Bob"}
-			game.AddPlayer(p2)
+			seat2, _ := game.AddPlayer()
+			seat2.Score = 2
 
-			err := game.RemovePlayer(&Player{"Carol"})
+			err := game.RemovePlayer(3)
 
 			if actual, expected := err, error(nil); actual != expected {
 				t.Fatalf("Expected removing a player to succeed but got error: %v", err)
@@ -909,11 +904,11 @@ func TestGame(t *testing.T) {
 			if actual, expected := len(game.Seats), 2; actual != expected {
 				t.Errorf("Expected %d seats to remain but found %d", expected, actual)
 			}
-			if actual, expected := game.Seats[0].OccupiedBy, p1; actual != expected {
-				t.Errorf("Expected seat to still be occupied by player %s but was %+v", expected.Name, actual)
+			if actual, expected := game.Seats[0].Score, seat1.Score; actual != expected {
+				t.Errorf("Expected first seat to still be the same but was %v", actual)
 			}
-			if actual, expected := game.Seats[1].OccupiedBy, p2; actual != expected {
-				t.Errorf("Expected seat to still be occupied by player %s but was %+v", expected.Name, actual)
+			if actual, expected := game.Seats[1].Score, seat2.Score; actual != expected {
+				t.Errorf("Expected second seat to still be the same but was %v", actual)
 			}
 		})
 
@@ -922,10 +917,8 @@ func TestGame(t *testing.T) {
 				Phase: MainPhase,
 			}
 
-			p := &Player{"Alice"}
-
-			game.AddPlayer(p)
-			err := game.RemovePlayer(p)
+			game.AddPlayer()
+			err := game.RemovePlayer(0)
 
 			if actual, expected := err, (GameOutOfPhaseError{SetupPhase, MainPhase}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
@@ -951,17 +944,13 @@ func TestGame(t *testing.T) {
 			expectedRacks = append(expectedRacks, rack)
 		}
 
-		p1 := &Player{"Alice"}
-		p2 := &Player{"Bob"}
-		p3 := &Player{"Carol"}
-
 		game := Game{
 			Bag:   BagWithStandardEnglishTiles(),
 			Board: BoardWithStandardLayout(),
 		}
-		game.AddPlayer(p1)
-		game.AddPlayer(p2)
-		game.AddPlayer(p3)
+		game.AddPlayer()
+		game.AddPlayer()
+		game.AddPlayer()
 		err := game.Start(rand.New(rand.NewSource(seed)))
 
 		t.Run("succeeds", func(t *testing.T) {
@@ -1022,7 +1011,7 @@ func TestGame(t *testing.T) {
 				t.Errorf("Expected game to still be in %s phase but was in %s instead", expected, actual)
 			}
 
-			game.AddPlayer(p1)
+			game.AddPlayer()
 			err = game.Start(rand.New(rand.NewSource(seed)))
 
 			if actual, expected := err, error(nil); actual != expected {

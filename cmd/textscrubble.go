@@ -36,9 +36,11 @@ func main() {
 	game := scrubble.NewGameWithDefaults()
 	game.Rules = game.Rules.WithDictionaryForScoring(!challengeEnabled)
 
+	var players []textscrubble.Player
+
 	for i := 2; i < len(os.Args); i++ {
-		player := &scrubble.Player{Name: os.Args[i]}
-		game.AddPlayer(player)
+		players = append(players, textscrubble.Player{Name: os.Args[i]})
+		game.AddPlayer()
 	}
 
 	err := game.Start(rng)
@@ -51,7 +53,7 @@ func main() {
 
 	for {
 		seat := game.CurrentSeat()
-		textscrubble.DrawGame(game)
+		textscrubble.DrawGame(game, players)
 
 		gt.Println()
 

@@ -36,9 +36,10 @@ func NewGameWithDefaults() *Game {
 // AddPlayer adds a seat for a new player to the game.
 //
 // If the game is not in the Setup phase, GameOutOfPhaseError is returned.
-func (g *Game) AddPlayer(p *Player) error {
-	return g.requirePhase(SetupPhase, func() error {
-		g.Seats = append(g.Seats, Seat{OccupiedBy: p})
+func (g *Game) AddPlayer() (seat *Seat, err error) {
+	return seat, g.requirePhase(SetupPhase, func() error {
+		g.Seats = append(g.Seats, Seat{})
+		seat = &g.Seats[len(g.Seats)-1]
 		return nil
 	})
 }
@@ -205,17 +206,14 @@ func (g *Game) Play(placements TilePlacements) (playedWords []PlayedWord, err er
 	})
 }
 
-// RemovePlayer removes the seat occupied by the specified player. If no such
-// seat exists, this has no effect.
+// RemovePlayer removes the seat at the specified index. If no such seat exists,
+// this has no effect.
 //
 // If the game is not in the Setup phase, GameOutOfPhaseError is returned.
-func (g *Game) RemovePlayer(p *Player) error {
+func (g *Game) RemovePlayer(seatIndex int) error {
 	return g.requirePhase(SetupPhase, func() error {
-		for i, s := range g.Seats {
-			if s.OccupiedBy == p {
-				g.Seats = append(g.Seats[:i], g.Seats[i+1:]...)
-				break
-			}
+		if seatIndex >= 0 && seatIndex < len(g.Seats) {
+			g.Seats = append(g.Seats[:seatIndex], g.Seats[seatIndex+1:]...)
 		}
 		return nil
 	})
