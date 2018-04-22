@@ -18,12 +18,17 @@ type Rules struct {
 // IsChallengeSuccessful determines if a challenge to a play is successful.
 // Unless overridden by WithChallengeValidator, this uses the default
 // implementation provided by the IsChallengeSuccessful function.
-func (r *Rules) IsChallengeSuccessful() bool {
+func (r *Rules) IsChallengeSuccessful(formedWords []PlayedWord) bool {
+	dictionary := r.dictionary
+	if dictionary == nil {
+		dictionary = DefaultEnglishDictionary
+	}
+
 	isChallengeSuccessful := r.challengeValidator
 	if isChallengeSuccessful == nil {
 		isChallengeSuccessful = IsChallengeSuccessful
 	}
-	return isChallengeSuccessful()
+	return isChallengeSuccessful(formedWords, dictionary)
 }
 
 // NextGamePhase determines the next game phase given the game's current state.

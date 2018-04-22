@@ -182,7 +182,7 @@ func TestGame(t *testing.T) {
 			seed := time.Now().UnixNano()
 
 			game := setupGame()
-			game.Rules = game.Rules.WithChallengeValidator(func() bool { return false })
+			game.Rules = game.Rules.WithChallengeValidator(func([]PlayedWord, Dictionary) bool { return false })
 
 			lastTurn := game.History.Last()
 
@@ -240,7 +240,7 @@ func TestGame(t *testing.T) {
 			seed := time.Now().UnixNano()
 
 			game := setupGame()
-			game.Rules = game.Rules.WithChallengeValidator(func() bool { return true })
+			game.Rules = game.Rules.WithChallengeValidator(func([]PlayedWord, Dictionary) bool { return true })
 
 			lastTurn := game.History.Last()
 

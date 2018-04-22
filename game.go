@@ -75,7 +75,7 @@ func (g *Game) Challenge(challengerSeatIndex int, r *rand.Rand) (success bool, e
 			return InvalidChallengeError{NoPlayToChallengeReason}
 		}
 
-		success = g.Rules.IsChallengeSuccessful()
+		success = g.Rules.IsChallengeSuccessful(play.WordsFormed)
 		if success {
 			challenged := g.prevSeat()
 			challenged.Rack.Remove(play.TilesDrawn...)

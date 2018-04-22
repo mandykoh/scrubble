@@ -3,8 +3,13 @@ package scrubble
 // IsChallengeSuccessful determines whether the challenge to a play is
 // successful. A challenge succeeds if any of the words formed by the play are
 // invalid according to the dictionary.
-func IsChallengeSuccessful() bool {
-	return true
+func IsChallengeSuccessful(formedWords []PlayedWord, isWordValid Dictionary) bool {
+	for _, w := range formedWords {
+		if !isWordValid(w.Word) {
+			return true
+		}
+	}
+	return false
 }
 
 // ValidatePlacements checks the intended placement of tiles on a board for

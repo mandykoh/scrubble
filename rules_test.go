@@ -74,7 +74,7 @@ func TestRules(t *testing.T) {
 				}
 			}()
 
-			rules.IsChallengeSuccessful()
+			rules.IsChallengeSuccessful([]PlayedWord{})
 		})
 
 		t.Run("can validate placements", func(t *testing.T) {
@@ -100,7 +100,7 @@ func TestRules(t *testing.T) {
 
 	t.Run(".WithChallengeValidator()", func(t *testing.T) {
 		validatorCalled := 0
-		validator := func() bool {
+		validator := func([]PlayedWord, Dictionary) bool {
 			validatorCalled++
 			return false
 		}
@@ -108,7 +108,7 @@ func TestRules(t *testing.T) {
 		overriddenRules := Rules{}.WithChallengeValidator(validator)
 
 		t.Run("sets the validator to use for challenge validation", func(t *testing.T) {
-			overriddenRules.IsChallengeSuccessful()
+			overriddenRules.IsChallengeSuccessful([]PlayedWord{})
 
 			if actual, expected := validatorCalled, 1; actual != expected {
 				t.Errorf("Expected overridden validator to be called once but got %d invocations", actual)
