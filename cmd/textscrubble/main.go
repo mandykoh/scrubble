@@ -14,7 +14,7 @@ import (
 
 	gt "github.com/buger/goterm"
 	"github.com/mandykoh/scrubble"
-	"github.com/mandykoh/scrubble/cmd/textscrubble"
+	"github.com/mandykoh/scrubble/cmd/textscrubble/textscrubble"
 )
 
 func main() {

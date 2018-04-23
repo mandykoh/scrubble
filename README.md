@@ -41,7 +41,7 @@ As a demonstration of how it might be used, this library includes `textscrubble`
 From the project location, `textscrubble` can be run as follows:
 
 ```
-$ go run cmd/textscrubble.go [mode] [player1_name] ... [playerN_name]
+$ go run cmd/textscrubble/main.go [mode] [player1_name] ... [playerN_name]
 ```
 
 `mode` can either be `simple` (where words are automatically validated and only valid words may be played) or `challenge` (where any words can be played but players may challenge a play to have it validated, at the risk of a penalty).
