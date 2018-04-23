@@ -1,14 +1,14 @@
-package scrubble
+package coord
 
 import (
 	"errors"
 	"testing"
 )
 
-func TestCoordRange(t *testing.T) {
+func TestRange(t *testing.T) {
 
-	t.Run(".EachCoord()", func(t *testing.T) {
-		b := CoordRange{Coord{2, 4}, Coord{4, 6}}
+	t.Run(".Each()", func(t *testing.T) {
+		b := Range{Coord{2, 4}, Coord{4, 6}}
 
 		t.Run("visits each coordinate in the range", func(t *testing.T) {
 			expectedCoords := []Coord{
@@ -19,7 +19,7 @@ func TestCoordRange(t *testing.T) {
 
 			offset := 0
 
-			b.EachCoord(func(c Coord) error {
+			b.Each(func(c Coord) error {
 				if actual, expected := c, expectedCoords[offset]; actual != expected {
 					t.Errorf("Expected to visit coordinate %v but got %v", expected, actual)
 				}
@@ -36,7 +36,7 @@ func TestCoordRange(t *testing.T) {
 			expectedError := errors.New("some error")
 			offset := 0
 
-			err := b.EachCoord(func(c Coord) error {
+			err := b.Each(func(c Coord) error {
 				offset++
 				if offset >= 3 {
 					return expectedError
@@ -56,17 +56,17 @@ func TestCoordRange(t *testing.T) {
 	t.Run(".Include()", func(t *testing.T) {
 
 		t.Run("returns expanded bounds for an outside point", func(t *testing.T) {
-			b := CoordRange{Coord{2, 4}, Coord{3, 5}}
+			b := Range{Coord{2, 4}, Coord{3, 5}}
 
 			included := b.Include(Coord{1, 7})
 
-			if actual, expected := included, (CoordRange{Coord{1, 4}, Coord{3, 7}}); actual != expected {
+			if actual, expected := included, (Range{Coord{1, 4}, Coord{3, 7}}); actual != expected {
 				t.Errorf("Expected expanded bounds to be %v but got %v", expected, actual)
 			}
 		})
 
 		t.Run("returns same bounds for an already included point", func(t *testing.T) {
-			b := CoordRange{Coord{2, 4}, Coord{3, 7}}
+			b := Range{Coord{2, 4}, Coord{3, 7}}
 
 			included := b.Include(Coord{2, 5})
 

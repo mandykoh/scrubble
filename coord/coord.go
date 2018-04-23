@@ -1,4 +1,4 @@
-package scrubble
+package coord
 
 // Coord represents the coordinate of a position on the board.
 //
@@ -7,6 +7,10 @@ package scrubble
 type Coord struct {
 	Row    int
 	Column int
+}
+
+func Make(row, col int) Coord {
+	return Coord{row, col}
 }
 
 // East returns the coordinate which is one step to the east.

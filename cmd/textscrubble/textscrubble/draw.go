@@ -3,6 +3,7 @@ package textscrubble
 import (
 	gt "github.com/buger/goterm"
 	"github.com/mandykoh/scrubble"
+	"github.com/mandykoh/scrubble/coord"
 	"github.com/mandykoh/scrubble/positiontype"
 	"github.com/mandykoh/scrubble/tile"
 )
@@ -22,7 +23,7 @@ func DrawBoard(b *scrubble.Board) {
 			gt.MoveCursorBackward(1)
 			gt.Print(gt.Color("|", gt.GREEN))
 
-			pos := b.Position(scrubble.Coord{Row: r, Column: c})
+			pos := b.Position(coord.Make(r, c))
 
 			bg := gt.BLACK
 			if pos.Tile != nil {

@@ -1,6 +1,9 @@
 package scrubble
 
-import "github.com/mandykoh/scrubble/positiontype"
+import (
+	"github.com/mandykoh/scrubble/coord"
+	"github.com/mandykoh/scrubble/positiontype"
+)
 
 // Board represents a game board, which is a grid of positions on which tiles
 // can be placed. The zero-value of a Board is a zero-sized board.
@@ -27,12 +30,12 @@ func BoardWithLayout(layout positiontype.Layout) Board {
 
 		// Set position types according to the specified layout
 		for col, posType := range lRow {
-			b.Position(Coord{row, col}).Type = posType
+			b.Position(coord.Make(row, col)).Type = posType
 		}
 
 		// Fill in any unspecified remainder of the row with Normal positions
 		for col := len(lRow); col < columns; col++ {
-			b.Position(Coord{row, col}).Type = normal
+			b.Position(coord.Make(row, col)).Type = normal
 		}
 	}
 
@@ -65,7 +68,7 @@ func BoardWithStandardLayout() Board {
 // Neighbours returns the cardinal neighbouring positions to the specified
 // coordinate. If a neighbour would be out of bounds, nil is returned in its
 // place. Neighbours are always returned in North, South, East, West order.
-func (b *Board) Neighbours(c Coord) [4]*BoardPosition {
+func (b *Board) Neighbours(c coord.Coord) [4]*BoardPosition {
 	return [4]*BoardPosition{
 		b.Position(c.North()),
 		b.Position(c.South()),
@@ -76,14 +79,14 @@ func (b *Board) Neighbours(c Coord) [4]*BoardPosition {
 
 // Position returns the board position related to the specified coordinate.
 // If the requested position is out of bounds, nil is returned.
-func (b *Board) Position(c Coord) *BoardPosition {
+func (b *Board) Position(c coord.Coord) *BoardPosition {
 	if c.Row < 0 || c.Row >= b.Rows || c.Column < 0 || c.Column >= b.Columns {
 		return nil
 	}
 	return &b.Positions[c.Row*b.Columns+c.Column]
 }
 
-func (b *Board) neighbourHasTile(c Coord) bool {
+func (b *Board) neighbourHasTile(c coord.Coord) bool {
 	neighbours := b.Neighbours(c)
 	for _, n := range neighbours {
 		if n != nil && n.Tile != nil {

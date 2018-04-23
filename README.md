@@ -154,8 +154,8 @@ Tiles can be played as follows:
 
 ```go
 playedWords, err := game.Play(scrubble.TilePlacements{
-	{tile.Make('B', 3), scrubble.Coord{5, 6}},
-	{tile.Make('G', 2), scrubble.Coord{5, 8}},
+	{tile.Make('B', 3), coord.Make(5, 6)},
+	{tile.Make('G', 2), coord.Make(5, 8)},
 })
 ```
 
@@ -166,8 +166,8 @@ those are treated as wildcards, which can take on any letter when played. To pla
 
 ```go
 playedWords, err := game.Play(scrubble.TilePlacements{
-	{tile.Make('B', 3), scrubble.Coord{5, 6}},
-	{tile.Make('G', 0), scrubble.Coord{5, 8}},
+	{tile.Make('B', 3), coord.Make(5, 6)},
+	{tile.Make('G', 0), coord.Make(5, 8)},
 })
 ```
 

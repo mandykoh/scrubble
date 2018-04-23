@@ -3,6 +3,7 @@ package scrubble
 import (
 	"math"
 
+	"github.com/mandykoh/scrubble/coord"
 	"github.com/mandykoh/scrubble/tile"
 )
 
@@ -10,10 +11,10 @@ import (
 type TilePlacements []TilePlacement
 
 // Bounds returns the minimum and maximum coordinates spanned by the placements.
-func (tp TilePlacements) Bounds() CoordRange {
-	bounds := CoordRange{
-		Coord{math.MaxInt32, math.MaxInt32},
-		Coord{math.MinInt32, math.MinInt32},
+func (tp TilePlacements) Bounds() coord.Range {
+	bounds := coord.Range{
+		Min: coord.Make(math.MaxInt32, math.MaxInt32),
+		Max: coord.Make(math.MinInt32, math.MinInt32),
 	}
 
 	for _, p := range tp {
@@ -25,7 +26,7 @@ func (tp TilePlacements) Bounds() CoordRange {
 
 // Find returns the first placement corresponding to the given coordinate, or
 // nil if no matching placement exists.
-func (tp TilePlacements) Find(c Coord) *TilePlacement {
+func (tp TilePlacements) Find(c coord.Coord) *TilePlacement {
 	for i := range tp {
 		if tp[i].Coord == c {
 			return &tp[i]
@@ -43,7 +44,7 @@ func (tp TilePlacements) Tiles() []tile.Tile {
 	return tiles
 }
 
-func (tp *TilePlacements) take(c Coord) *TilePlacement {
+func (tp *TilePlacements) take(c coord.Coord) *TilePlacement {
 	for i := range *tp {
 		p := (*tp)[i]
 		if p.Coord == c {

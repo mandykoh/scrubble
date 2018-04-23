@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/mandykoh/scrubble/coord"
 	"github.com/mandykoh/scrubble/positiontype"
 	"github.com/mandykoh/scrubble/tile"
 )
@@ -56,15 +57,15 @@ func TestValidatePlacements(t *testing.T) {
 
 	t.Run("returns an error when any of the board positions is out of bounds", func(t *testing.T) {
 		board := setupBoard()
-		board.Position(Coord{0, 0}).Tile = &tile.Tile{Letter: 'A', Points: 1}
+		board.Position(coord.Make(0, 0)).Tile = &tile.Tile{Letter: 'A', Points: 1}
 
-		err := ValidatePlacements(TilePlacements{{tile.Tile{Letter: 'B', Points: 1}, Coord{0, -1}}}, board)
+		err := ValidatePlacements(TilePlacements{{tile.Tile{Letter: 'B', Points: 1}, coord.Make(0, -1)}}, board)
 
 		if actual, expected := err, (InvalidTilePlacementError{PlacementOutOfBoundsReason}); actual != expected {
 			t.Errorf("Expected %v when attempting to play tiles out of bounds but got %v", expected, actual)
 		}
 
-		err = ValidatePlacements(TilePlacements{{tile.Make('B', 1), Coord{board.Rows, 0}}}, board)
+		err = ValidatePlacements(TilePlacements{{tile.Make('B', 1), coord.Make(board.Rows, 0)}}, board)
 
 		if actual, expected := err, (InvalidTilePlacementError{PlacementOutOfBoundsReason}); actual != expected {
 			t.Errorf("Expected %v when attempting to play tiles out of bounds but got %v", expected, actual)
@@ -73,12 +74,12 @@ func TestValidatePlacements(t *testing.T) {
 
 	t.Run("returns an error when any of the board positions is already occupied", func(t *testing.T) {
 		board := setupBoard()
-		board.Position(Coord{0, 0}).Tile = &tile.Tile{Letter: 'A', Points: 1}
+		board.Position(coord.Make(0, 0)).Tile = &tile.Tile{Letter: 'A', Points: 1}
 
 		err := ValidatePlacements(TilePlacements{
-			{tile.Make('B', 1), Coord{0, 0}},
-			{tile.Make('A', 1), Coord{0, 1}},
-			{tile.Make('D', 1), Coord{0, 2}},
+			{tile.Make('B', 1), coord.Make(0, 0)},
+			{tile.Make('A', 1), coord.Make(0, 1)},
+			{tile.Make('D', 1), coord.Make(0, 2)},
 		}, board)
 
 		if actual, expected := err, (InvalidTilePlacementError{PositionOccupiedReason}); actual != expected {
@@ -90,9 +91,9 @@ func TestValidatePlacements(t *testing.T) {
 		board := setupBoard()
 
 		err := ValidatePlacements(TilePlacements{
-			{tile.Make('B', 1), Coord{0, 0}},
-			{tile.Make('A', 1), Coord{0, 1}},
-			{tile.Make('D', 1), Coord{1, 1}},
+			{tile.Make('B', 1), coord.Make(0, 0)},
+			{tile.Make('A', 1), coord.Make(0, 1)},
+			{tile.Make('D', 1), coord.Make(1, 1)},
 		}, board)
 
 		if actual, expected := err, (InvalidTilePlacementError{PlacementNotLinearReason}); actual != expected {
@@ -104,9 +105,9 @@ func TestValidatePlacements(t *testing.T) {
 		board := setupBoard()
 
 		err := ValidatePlacements(TilePlacements{
-			{tile.Make('B', 1), Coord{0, 0}},
-			{tile.Make('A', 1), Coord{0, 1}},
-			{tile.Make('D', 1), Coord{0, 0}},
+			{tile.Make('B', 1), coord.Make(0, 0)},
+			{tile.Make('A', 1), coord.Make(0, 1)},
+			{tile.Make('D', 1), coord.Make(0, 0)},
 		}, board)
 
 		if actual, expected := err, (InvalidTilePlacementError{PlacementOverlapReason}); actual != expected {
@@ -118,9 +119,9 @@ func TestValidatePlacements(t *testing.T) {
 		board := setupBoard()
 
 		err := ValidatePlacements(TilePlacements{
-			{tile.Make('B', 1), Coord{0, 0}},
-			{tile.Make('A', 1), Coord{0, 1}},
-			{tile.Make('D', 1), Coord{0, 3}},
+			{tile.Make('B', 1), coord.Make(0, 0)},
+			{tile.Make('A', 1), coord.Make(0, 1)},
+			{tile.Make('D', 1), coord.Make(0, 3)},
 		}, board)
 
 		if actual, expected := err, (InvalidTilePlacementError{PlacementNotContiguousReason}); actual != expected {
@@ -130,12 +131,12 @@ func TestValidatePlacements(t *testing.T) {
 
 	t.Run("returns an error when the placements aren't connected to at least one existing tile or on a starting position", func(t *testing.T) {
 		board := setupBoard()
-		board.Position(Coord{0, 0}).Tile = &tile.Tile{Letter: 'A', Points: 1}
+		board.Position(coord.Make(0, 0)).Tile = &tile.Tile{Letter: 'A', Points: 1}
 
 		err := ValidatePlacements(TilePlacements{
-			{tile.Make('M', 1), Coord{2, 0}},
-			{tile.Make('A', 1), Coord{2, 1}},
-			{tile.Make('D', 1), Coord{2, 2}},
+			{tile.Make('M', 1), coord.Make(2, 0)},
+			{tile.Make('A', 1), coord.Make(2, 1)},
+			{tile.Make('D', 1), coord.Make(2, 2)},
 		}, board)
 
 		if actual, expected := err, (InvalidTilePlacementError{PlacementNotConnectedReason}); actual != expected {
@@ -144,14 +145,14 @@ func TestValidatePlacements(t *testing.T) {
 
 		_, startPositionType, _, _, _, _ := positiontype.All()
 
-		if actual, expected := board.Position(Coord{7, 7}).Type, startPositionType; actual != expected {
+		if actual, expected := board.Position(coord.Make(7, 7)).Type, startPositionType; actual != expected {
 			t.Fatalf("Expected starting position at 7,7 but found %v", actual)
 		}
 
 		err = ValidatePlacements(TilePlacements{
-			{tile.Make('M', 1), Coord{7, 6}},
-			{tile.Make('A', 1), Coord{7, 7}},
-			{tile.Make('D', 1), Coord{7, 8}},
+			{tile.Make('M', 1), coord.Make(7, 6)},
+			{tile.Make('A', 1), coord.Make(7, 7)},
+			{tile.Make('D', 1), coord.Make(7, 8)},
 		}, board)
 
 		if actual := err; actual != nil {

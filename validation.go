@@ -1,6 +1,7 @@
 package scrubble
 
 import (
+	"github.com/mandykoh/scrubble/coord"
 	"github.com/mandykoh/scrubble/dict"
 	"github.com/mandykoh/scrubble/tile"
 )
@@ -42,7 +43,7 @@ func ValidatePlacements(placements TilePlacements, board *Board) error {
 
 	connected := false
 
-	err := bounds.EachCoord(func(c Coord) error {
+	err := bounds.Each(func(c coord.Coord) error {
 		position := board.Position(c)
 		if position == nil {
 			return InvalidTilePlacementError{Reason: PlacementOutOfBoundsReason}

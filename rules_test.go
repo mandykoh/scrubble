@@ -3,6 +3,7 @@ package scrubble
 import (
 	"testing"
 
+	"github.com/mandykoh/scrubble/coord"
 	"github.com/mandykoh/scrubble/dict"
 	"github.com/mandykoh/scrubble/tile"
 )
@@ -15,14 +16,14 @@ func TestRules(t *testing.T) {
 
 		t.Run("allows any word for scoring", func(t *testing.T) {
 			_, _, err := rules.ScoreWords(TilePlacements{
-				{tile.Tile{'A', 1}, Coord{0, 0}},
-				{tile.Tile{'A', 1}, Coord{1, 0}},
-				{tile.Tile{'R', 1}, Coord{2, 0}},
-				{tile.Tile{'D', 1}, Coord{3, 0}},
-				{tile.Tile{'V', 1}, Coord{4, 0}},
-				{tile.Tile{'A', 1}, Coord{5, 0}},
-				{tile.Tile{'R', 1}, Coord{6, 0}},
-				{tile.Tile{'K', 1}, Coord{7, 0}},
+				{tile.Make('A', 1), coord.Make(0, 0)},
+				{tile.Make('A', 1), coord.Make(1, 0)},
+				{tile.Make('R', 1), coord.Make(2, 0)},
+				{tile.Make('D', 1), coord.Make(3, 0)},
+				{tile.Make('V', 1), coord.Make(4, 0)},
+				{tile.Make('A', 1), coord.Make(5, 0)},
+				{tile.Make('R', 1), coord.Make(6, 0)},
+				{tile.Make('K', 1), coord.Make(7, 0)},
 			}, &board)
 
 			if err != nil {
@@ -30,12 +31,12 @@ func TestRules(t *testing.T) {
 			}
 
 			_, _, err = rules.ScoreWords(TilePlacements{
-				{tile.Tile{'V', 1}, Coord{0, 0}},
-				{tile.Tile{'X', 1}, Coord{1, 0}},
-				{tile.Tile{'T', 1}, Coord{2, 0}},
-				{tile.Tile{'Q', 1}, Coord{3, 0}},
-				{tile.Tile{'R', 1}, Coord{4, 0}},
-				{tile.Tile{'P', 1}, Coord{5, 0}},
+				{tile.Make('V', 1), coord.Make(0, 0)},
+				{tile.Make('X', 1), coord.Make(1, 0)},
+				{tile.Make('T', 1), coord.Make(2, 0)},
+				{tile.Make('Q', 1), coord.Make(3, 0)},
+				{tile.Make('R', 1), coord.Make(4, 0)},
+				{tile.Make('P', 1), coord.Make(5, 0)},
 			}, &board)
 
 			if err != nil {
@@ -139,9 +140,9 @@ func TestRules(t *testing.T) {
 
 			r := overriddenRules.WithDictionaryForScoring(true)
 			r.ScoreWords(TilePlacements{
-				{tile.Tile{'C', 1}, Coord{0, 0}},
-				{tile.Tile{'A', 1}, Coord{1, 0}},
-				{tile.Tile{'T', 1}, Coord{2, 0}},
+				{tile.Make('C', 1), coord.Make(0, 0)},
+				{tile.Make('A', 1), coord.Make(1, 0)},
+				{tile.Make('T', 1), coord.Make(2, 0)},
 			}, &board)
 
 			if actual, expected := dictionaryCalled, 1; actual != expected {
@@ -154,9 +155,9 @@ func TestRules(t *testing.T) {
 
 			r := overriddenRules.WithDictionaryForScoring(false)
 			_, _, err := r.ScoreWords(TilePlacements{
-				{tile.Tile{'D', 1}, Coord{0, 0}},
-				{tile.Tile{'J', 1}, Coord{1, 0}},
-				{tile.Tile{'K', 1}, Coord{2, 0}},
+				{tile.Make('D', 1), coord.Make(0, 0)},
+				{tile.Make('J', 1), coord.Make(1, 0)},
+				{tile.Make('K', 1), coord.Make(2, 0)},
 			}, &board)
 
 			if err != nil {
