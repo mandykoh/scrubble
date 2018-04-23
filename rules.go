@@ -1,6 +1,9 @@
 package scrubble
 
-import "github.com/mandykoh/scrubble/dict"
+import (
+	"github.com/mandykoh/scrubble/dict"
+	"github.com/mandykoh/scrubble/tile"
+)
 
 // Rules is an immutable struct representing the rules used by the game to check
 // and validate various conditions for legality. The zero-value Rules uses
@@ -100,7 +103,7 @@ func (r *Rules) ValidatePlacements(placements TilePlacements, board *Board) erro
 // Otherwise, the remainder (after the placed tiles have been removed from the
 // rack) is returned with no error, indicating that it would be safe to update
 // the rack for placement.
-func (r *Rules) ValidateTilesFromRack(rack Rack, toPlay []Tile) (used, remaining []Tile, err error) {
+func (r *Rules) ValidateTilesFromRack(rack tile.Rack, toPlay []tile.Tile) (used, remaining []tile.Tile, err error) {
 	rackValidator := r.rackValidator
 	if rackValidator == nil {
 		rackValidator = ValidateTilesFromRack

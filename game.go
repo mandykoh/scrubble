@@ -2,6 +2,8 @@ package scrubble
 
 import (
 	"math/rand"
+
+	"github.com/mandykoh/scrubble/tile"
 )
 
 const GameMinPlayers = 1
@@ -12,7 +14,7 @@ const ChallengeFailPenaltyPoints = 5
 type Game struct {
 	Phase            GamePhase
 	Seats            []Seat
-	Bag              Bag
+	Bag              tile.Bag
 	Board            Board
 	CurrentSeatIndex int
 	Rules            Rules
@@ -20,7 +22,7 @@ type Game struct {
 }
 
 // NewGame returns an initialised game in the SetupPhase with no players.
-func NewGame(bag Bag, board Board) *Game {
+func NewGame(bag tile.Bag, board Board) *Game {
 	return &Game{
 		Bag:   bag,
 		Board: board,
@@ -30,7 +32,7 @@ func NewGame(bag Bag, board Board) *Game {
 // NewGameWithDefaults returns an initialised game in the SetupPhase with no
 // players, with a default bag and board layout.
 func NewGameWithDefaults() *Game {
-	return NewGame(BagWithStandardEnglishTiles(), BoardWithStandardLayout())
+	return NewGame(tile.BagWithStandardEnglishTiles(), BoardWithStandardLayout())
 }
 
 // AddPlayer adds a seat for a new player to the game.
@@ -120,12 +122,12 @@ func (g *Game) CurrentSeat() *Seat {
 // If an attempt is made to exchange zero tiles, or there are fewer than
 // MaxRackTiles in the bag, tile exchange is illegal and an
 // InvalidTileExchangeError is returned.
-func (g *Game) ExchangeTiles(tiles []Tile, r *rand.Rand) error {
+func (g *Game) ExchangeTiles(tiles []tile.Tile, r *rand.Rand) error {
 	return g.requirePhase(MainPhase, func() error {
 		if len(tiles) == 0 {
 			return InvalidTileExchangeError{NoTilesExchangedReason}
 		}
-		if len(g.Bag) < MaxRackTiles {
+		if len(g.Bag) < tile.MaxRackTiles {
 			return InvalidTileExchangeError{InsufficientTilesInBagReason}
 		}
 
@@ -247,7 +249,7 @@ func (g *Game) Start(r *rand.Rand) error {
 	})
 }
 
-func (g *Game) endTurn(score int, tilesSpent []Tile, tilesPlayed TilePlacements, wordsFormed []PlayedWord) {
+func (g *Game) endTurn(score int, tilesSpent []tile.Tile, tilesPlayed TilePlacements, wordsFormed []PlayedWord) {
 	seat := g.CurrentSeat()
 	seat.Score += score
 	tilesDrawn := seat.Rack.FillFromBag(&g.Bag)

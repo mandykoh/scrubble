@@ -9,6 +9,7 @@ import (
 
 	gt "github.com/buger/goterm"
 	"github.com/mandykoh/scrubble"
+	"github.com/mandykoh/scrubble/tile"
 )
 
 type Player struct {
@@ -41,7 +42,7 @@ func ExchangeTiles(letters string, game *scrubble.Game, rng *rand.Rand) {
 	}
 }
 
-func LettersToPlacements(rowDir, colDir, row, col int, letters string, rack scrubble.Rack, board *scrubble.Board) scrubble.TilePlacements {
+func LettersToPlacements(rowDir, colDir, row, col int, letters string, rack tile.Rack, board *scrubble.Board) scrubble.TilePlacements {
 	var placements scrubble.TilePlacements
 	tiles := LettersToRackTiles(letters, rack)
 
@@ -65,7 +66,7 @@ func LettersToPlacements(rowDir, colDir, row, col int, letters string, rack scru
 	return placements
 }
 
-func LettersToRackTiles(letters string, rack scrubble.Rack) (tiles []scrubble.Tile) {
+func LettersToRackTiles(letters string, rack tile.Rack) (tiles []tile.Tile) {
 	lettersToFind := strings.Split(strings.ToUpper(letters), "")
 
 LetterSearch:
@@ -79,7 +80,7 @@ LetterSearch:
 			}
 		}
 
-		tiles = append(tiles, scrubble.Tile{Letter: letter, Points: 0})
+		tiles = append(tiles, tile.Tile{Letter: letter, Points: 0})
 	}
 	return
 }

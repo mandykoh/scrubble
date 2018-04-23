@@ -1,6 +1,10 @@
 package scrubble
 
-import "math"
+import (
+	"math"
+
+	"github.com/mandykoh/scrubble/tile"
+)
 
 // TilePlacements represents a set of tile placements on a board.
 type TilePlacements []TilePlacement
@@ -31,8 +35,8 @@ func (tp TilePlacements) Find(c Coord) *TilePlacement {
 }
 
 // Tiles returns the collection of tiles being placed.
-func (tp TilePlacements) Tiles() []Tile {
-	tiles := make([]Tile, len(tp))
+func (tp TilePlacements) Tiles() []tile.Tile {
+	tiles := make([]tile.Tile, len(tp))
 	for i, p := range tp {
 		tiles[i] = p.Tile
 	}

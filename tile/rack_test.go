@@ -1,4 +1,4 @@
-package scrubble
+package tile
 
 import "testing"
 
@@ -9,7 +9,7 @@ func TestRack(t *testing.T) {
 		t.Run("moves MaxRackTiles from the bag to an empty rack", func(t *testing.T) {
 			var r Rack
 
-			b := BagWithDistribution(TileDistribution{
+			b := BagWithDistribution(Distribution{
 				{Tile{'A', 1}, 3},
 				{Tile{'B', 1}, 3},
 				{Tile{'C', 1}, 3},
@@ -51,7 +51,7 @@ func TestRack(t *testing.T) {
 				{'I', 1},
 			}
 
-			b := BagWithDistribution(TileDistribution{
+			b := BagWithDistribution(Distribution{
 				{Tile{'A', 1}, 1},
 				{Tile{'B', 1}, 1},
 				{Tile{'C', 1}, 1},
@@ -86,7 +86,7 @@ func TestRack(t *testing.T) {
 		t.Run("moves all tiles from the bag when not enough to reach MaxRackTiles", func(t *testing.T) {
 			var r Rack
 
-			b := BagWithDistribution(TileDistribution{
+			b := BagWithDistribution(Distribution{
 				{Tile{'A', 1}, 1},
 				{Tile{'B', 1}, 1},
 				{Tile{'C', 1}, 1},

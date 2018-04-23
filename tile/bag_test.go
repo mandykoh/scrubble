@@ -1,4 +1,4 @@
-package scrubble
+package tile
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 func ExampleBagWithDistribution() {
 
 	// Creates a Bag with 9 x A tiles, 2 x B tiles, 2 x C tiles, and 4 x D tiles
-	bag := BagWithDistribution(TileDistribution{
+	bag := BagWithDistribution(Distribution{
 		{Tile{'A', 1}, 9},
 		{Tile{'B', 3}, 2},
 		{Tile{'C', 3}, 2},
@@ -36,7 +36,7 @@ func TestBag(t *testing.T) {
 	t.Run("BagWithDistribution()", func(t *testing.T) {
 
 		t.Run("creates bag with correct distribution of tiles", func(t *testing.T) {
-			dist := TileDistribution{
+			dist := Distribution{
 				{Tile{'A', 1}, 9},
 				{Tile{'B', 3}, 2},
 				{Tile{'C', 3}, 2},
@@ -56,7 +56,7 @@ func TestBag(t *testing.T) {
 		})
 
 		t.Run("creates bag with deterministic ordering", func(t *testing.T) {
-			dist := TileDistribution{
+			dist := Distribution{
 				{Tile{'A', 1}, 2},
 				{Tile{'B', 3}, 2},
 				{Tile{'C', 3}, 2},
@@ -77,7 +77,7 @@ func TestBag(t *testing.T) {
 		})
 
 		t.Run("allocates exact capacity for requested tiles", func(t *testing.T) {
-			dist := TileDistribution{
+			dist := Distribution{
 				{Tile{'A', 1}, 3},
 				{Tile{'B', 2}, 3},
 				{Tile{'C', 3}, 3},
@@ -93,7 +93,7 @@ func TestBag(t *testing.T) {
 	t.Run("BagWithStandardEnglishTiles()", func(t *testing.T) {
 
 		t.Run("creates a bag with correct distribution of tiles", func(t *testing.T) {
-			expectedDist := TileDistribution{
+			expectedDist := Distribution{
 				{Tile{' ', 0}, 2},
 				{Tile{'A', 1}, 9},
 				{Tile{'B', 3}, 2},
@@ -140,7 +140,7 @@ func TestBag(t *testing.T) {
 	t.Run(".DrawTile()", func(t *testing.T) {
 
 		t.Run("removes and returns tiles in last to first order", func(t *testing.T) {
-			dist := TileDistribution{
+			dist := Distribution{
 				{Tile{'A', 1}, 1},
 				{Tile{'B', 2}, 1},
 				{Tile{'C', 3}, 1},

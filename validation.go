@@ -1,6 +1,9 @@
 package scrubble
 
-import "github.com/mandykoh/scrubble/dict"
+import (
+	"github.com/mandykoh/scrubble/dict"
+	"github.com/mandykoh/scrubble/tile"
+)
 
 // IsChallengeSuccessful determines whether the challenge to a play is
 // successful. A challenge succeeds if any of the words formed by the play are
@@ -87,9 +90,9 @@ func ValidatePlacements(placements TilePlacements, board *Board) error {
 // matches any zero-point tile in the rack regardless of letter. This implies
 // that wildcards need to have their letters replaced with the desired letter
 // when being placed (so that any resulting words are valid).
-func ValidateTilesFromRack(rack Rack, toPlay []Tile) (used []Tile, remaining []Tile, err error) {
-	var missing []Tile
-	used = make([]Tile, 0, len(toPlay))
+func ValidateTilesFromRack(rack tile.Rack, toPlay []tile.Tile) (used, remaining []tile.Tile, err error) {
+	var missing []tile.Tile
+	used = make([]tile.Tile, 0, len(toPlay))
 	remaining = append(remaining, rack...)
 
 Placements:

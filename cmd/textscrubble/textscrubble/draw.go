@@ -4,6 +4,7 @@ import (
 	gt "github.com/buger/goterm"
 	"github.com/mandykoh/scrubble"
 	"github.com/mandykoh/scrubble/positiontype"
+	"github.com/mandykoh/scrubble/tile"
 )
 
 func DrawBoard(b *scrubble.Board) {
@@ -80,7 +81,7 @@ func DrawGame(g *scrubble.Game, players []Player) {
 	gt.Flush()
 }
 
-func DrawRack(r scrubble.Rack) {
+func DrawRack(r tile.Rack) {
 	gt.Println()
 
 	for _, t := range r {

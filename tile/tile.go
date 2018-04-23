@@ -1,4 +1,4 @@
-package scrubble
+package tile
 
 import "fmt"
 
@@ -7,6 +7,10 @@ import "fmt"
 type Tile struct {
 	Letter rune
 	Points int
+}
+
+func Make(letter rune, points int) Tile {
+	return Tile{letter, points}
 }
 
 func (t Tile) String() string {

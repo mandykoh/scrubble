@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/mandykoh/scrubble/positiontype"
+	"github.com/mandykoh/scrubble/tile"
 )
 
 func TestIsChallengeSuccessful(t *testing.T) {
@@ -55,15 +56,15 @@ func TestValidatePlacements(t *testing.T) {
 
 	t.Run("returns an error when any of the board positions is out of bounds", func(t *testing.T) {
 		board := setupBoard()
-		board.Position(Coord{0, 0}).Tile = &Tile{'A', 1}
+		board.Position(Coord{0, 0}).Tile = &tile.Tile{Letter: 'A', Points: 1}
 
-		err := ValidatePlacements(TilePlacements{{Tile{'B', 1}, Coord{0, -1}}}, board)
+		err := ValidatePlacements(TilePlacements{{tile.Tile{Letter: 'B', Points: 1}, Coord{0, -1}}}, board)
 
 		if actual, expected := err, (InvalidTilePlacementError{PlacementOutOfBoundsReason}); actual != expected {
 			t.Errorf("Expected %v when attempting to play tiles out of bounds but got %v", expected, actual)
 		}
 
-		err = ValidatePlacements(TilePlacements{{Tile{'B', 1}, Coord{board.Rows, 0}}}, board)
+		err = ValidatePlacements(TilePlacements{{tile.Make('B', 1), Coord{board.Rows, 0}}}, board)
 
 		if actual, expected := err, (InvalidTilePlacementError{PlacementOutOfBoundsReason}); actual != expected {
 			t.Errorf("Expected %v when attempting to play tiles out of bounds but got %v", expected, actual)
@@ -72,12 +73,12 @@ func TestValidatePlacements(t *testing.T) {
 
 	t.Run("returns an error when any of the board positions is already occupied", func(t *testing.T) {
 		board := setupBoard()
-		board.Position(Coord{0, 0}).Tile = &Tile{'A', 1}
+		board.Position(Coord{0, 0}).Tile = &tile.Tile{Letter: 'A', Points: 1}
 
 		err := ValidatePlacements(TilePlacements{
-			{Tile{'B', 1}, Coord{0, 0}},
-			{Tile{'A', 1}, Coord{0, 1}},
-			{Tile{'D', 1}, Coord{0, 2}},
+			{tile.Make('B', 1), Coord{0, 0}},
+			{tile.Make('A', 1), Coord{0, 1}},
+			{tile.Make('D', 1), Coord{0, 2}},
 		}, board)
 
 		if actual, expected := err, (InvalidTilePlacementError{PositionOccupiedReason}); actual != expected {
@@ -89,9 +90,9 @@ func TestValidatePlacements(t *testing.T) {
 		board := setupBoard()
 
 		err := ValidatePlacements(TilePlacements{
-			{Tile{'B', 1}, Coord{0, 0}},
-			{Tile{'A', 1}, Coord{0, 1}},
-			{Tile{'D', 1}, Coord{1, 1}},
+			{tile.Make('B', 1), Coord{0, 0}},
+			{tile.Make('A', 1), Coord{0, 1}},
+			{tile.Make('D', 1), Coord{1, 1}},
 		}, board)
 
 		if actual, expected := err, (InvalidTilePlacementError{PlacementNotLinearReason}); actual != expected {
@@ -103,9 +104,9 @@ func TestValidatePlacements(t *testing.T) {
 		board := setupBoard()
 
 		err := ValidatePlacements(TilePlacements{
-			{Tile{'B', 1}, Coord{0, 0}},
-			{Tile{'A', 1}, Coord{0, 1}},
-			{Tile{'D', 1}, Coord{0, 0}},
+			{tile.Make('B', 1), Coord{0, 0}},
+			{tile.Make('A', 1), Coord{0, 1}},
+			{tile.Make('D', 1), Coord{0, 0}},
 		}, board)
 
 		if actual, expected := err, (InvalidTilePlacementError{PlacementOverlapReason}); actual != expected {
@@ -117,9 +118,9 @@ func TestValidatePlacements(t *testing.T) {
 		board := setupBoard()
 
 		err := ValidatePlacements(TilePlacements{
-			{Tile{'B', 1}, Coord{0, 0}},
-			{Tile{'A', 1}, Coord{0, 1}},
-			{Tile{'D', 1}, Coord{0, 3}},
+			{tile.Make('B', 1), Coord{0, 0}},
+			{tile.Make('A', 1), Coord{0, 1}},
+			{tile.Make('D', 1), Coord{0, 3}},
 		}, board)
 
 		if actual, expected := err, (InvalidTilePlacementError{PlacementNotContiguousReason}); actual != expected {
@@ -129,12 +130,12 @@ func TestValidatePlacements(t *testing.T) {
 
 	t.Run("returns an error when the placements aren't connected to at least one existing tile or on a starting position", func(t *testing.T) {
 		board := setupBoard()
-		board.Position(Coord{0, 0}).Tile = &Tile{'A', 1}
+		board.Position(Coord{0, 0}).Tile = &tile.Tile{Letter: 'A', Points: 1}
 
 		err := ValidatePlacements(TilePlacements{
-			{Tile{'M', 1}, Coord{2, 0}},
-			{Tile{'A', 1}, Coord{2, 1}},
-			{Tile{'D', 1}, Coord{2, 2}},
+			{tile.Make('M', 1), Coord{2, 0}},
+			{tile.Make('A', 1), Coord{2, 1}},
+			{tile.Make('D', 1), Coord{2, 2}},
 		}, board)
 
 		if actual, expected := err, (InvalidTilePlacementError{PlacementNotConnectedReason}); actual != expected {
@@ -148,9 +149,9 @@ func TestValidatePlacements(t *testing.T) {
 		}
 
 		err = ValidatePlacements(TilePlacements{
-			{Tile{'M', 1}, Coord{7, 6}},
-			{Tile{'A', 1}, Coord{7, 7}},
-			{Tile{'D', 1}, Coord{7, 8}},
+			{tile.Make('M', 1), Coord{7, 6}},
+			{tile.Make('A', 1), Coord{7, 7}},
+			{tile.Make('D', 1), Coord{7, 8}},
 		}, board)
 
 		if actual := err; actual != nil {
@@ -161,7 +162,7 @@ func TestValidatePlacements(t *testing.T) {
 
 func TestValidateTilesFromRack(t *testing.T) {
 
-	expectRackContains := func(t *testing.T, r Rack, letters ...rune) {
+	expectRackContains := func(t *testing.T, r tile.Rack, letters ...rune) {
 		if actual, expected := len(r), len(letters); actual != expected {
 			t.Fatalf("Expected rack to contain %d tiles but found %d", expected, actual)
 		}
@@ -174,14 +175,14 @@ func TestValidateTilesFromRack(t *testing.T) {
 	}
 
 	t.Run("returns missing tiles when the rack has insufficient tiles for the play", func(t *testing.T) {
-		r := Rack{
+		r := tile.Rack{
 			{'A', 1},
 			{'B', 1},
 			{'O', 1},
 			{'M', 1},
 		}
 
-		used, remaining, err := ValidateTilesFromRack(r, []Tile{
+		used, remaining, err := ValidateTilesFromRack(r, []tile.Tile{
 			{'B', 1},
 			{'O', 1},
 			{'O', 1},
@@ -193,8 +194,8 @@ func TestValidateTilesFromRack(t *testing.T) {
 
 		case InsufficientTilesError:
 			expectTiles(t, "missing", e.Missing,
-				Tile{'O', 1},
-				Tile{'S', 1},
+				tile.Tile{'O', 1},
+				tile.Tile{'S', 1},
 			)
 
 		default:
@@ -207,7 +208,7 @@ func TestValidateTilesFromRack(t *testing.T) {
 	})
 
 	t.Run("returns no missing tiles and the remainder if successful", func(t *testing.T) {
-		r := Rack{
+		r := tile.Rack{
 			{'A', 1},
 			{'O', 1},
 			{'M', 1},
@@ -215,7 +216,7 @@ func TestValidateTilesFromRack(t *testing.T) {
 			{'O', 1},
 		}
 
-		used, remaining, err := ValidateTilesFromRack(r, []Tile{
+		used, remaining, err := ValidateTilesFromRack(r, []tile.Tile{
 			{'B', 1},
 			{'O', 1},
 			{'O', 1},
@@ -232,7 +233,7 @@ func TestValidateTilesFromRack(t *testing.T) {
 	})
 
 	t.Run("treats zero-point tiles as wildcard tiles", func(t *testing.T) {
-		r := Rack{
+		r := tile.Rack{
 			{'A', 1},
 			{' ', 0},
 			{'M', 1},
@@ -240,7 +241,7 @@ func TestValidateTilesFromRack(t *testing.T) {
 			{'O', 1},
 		}
 
-		used, remaining, err := ValidateTilesFromRack(r, []Tile{
+		used, remaining, err := ValidateTilesFromRack(r, []tile.Tile{
 			{'B', 1},
 			{'O', 1},
 			{'O', 0},

@@ -127,12 +127,12 @@ Bags can also be created with tiles different to those provided by [`BagWithStan
 ```go
 // Creates a Bag with 9 x A tiles, 2 x B tiles, 2 x C tiles, 4 x D tiles, and
 // 1 x 😃 tile (that happens to be worth 50 points)
-bag := scrubble.BagWithDistribution(scrubble.TileDistribution{
-    {scrubble.Tile{'A', 1}, 9},
-    {scrubble.Tile{'B', 3}, 2},
-    {scrubble.Tile{'C', 3}, 2},
-    {scrubble.Tile{'D', 2}, 4},
-    {scrubble.Tile{'😃', 50}, 1},
+bag := tile.BagWithDistribution(tile.Distribution{
+    {tile.Make('A', 1), 9},
+    {tile.Make('B', 3), 2},
+    {tile.Make('C', 3), 2},
+    {tile.Make('D', 2), 4},
+    {tile.Make('😃', 50), 1},
 })
 ```
 
@@ -154,8 +154,8 @@ Tiles can be played as follows:
 
 ```go
 playedWords, err := game.Play(scrubble.TilePlacements{
-	{scrubble.Tile{'B', 3}, scrubble.Coord{5, 6}},
-	{scrubble.Tile{'G', 2}, scrubble.Coord{5, 8}},
+	{tile.Make('B', 3), scrubble.Coord{5, 6}},
+	{tile.Make('G', 2), scrubble.Coord{5, 8}},
 })
 ```
 
@@ -166,8 +166,8 @@ those are treated as wildcards, which can take on any letter when played. To pla
 
 ```go
 playedWords, err := game.Play(scrubble.TilePlacements{
-	{scrubble.Tile{'B', 3}, scrubble.Coord{5, 6}},
-	{scrubble.Tile{'G', 0}, scrubble.Coord{5, 8}},
+	{tile.Make('B', 3), scrubble.Coord{5, 6}},
+	{tile.Make('G', 0), scrubble.Coord{5, 8}},
 })
 ```
 
@@ -184,7 +184,7 @@ boardCoordinateRangeOfFirstWord := playedWords[0].CoordRange
 A player may also exchange any tiles from their rack with random tiles from the bag:
 
 ```go
-err := game.ExchangeTiles([]scrubble.Tile{
+err := game.ExchangeTiles([]tile.Tile{
 	{'B', 3},
 	{'G', 2},
 }, rng)

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/mandykoh/scrubble/dict"
+	"github.com/mandykoh/scrubble/tile"
 )
 
 func TestRules(t *testing.T) {
@@ -14,14 +15,14 @@ func TestRules(t *testing.T) {
 
 		t.Run("allows any word for scoring", func(t *testing.T) {
 			_, _, err := rules.ScoreWords(TilePlacements{
-				{Tile{'A', 1}, Coord{0, 0}},
-				{Tile{'A', 1}, Coord{1, 0}},
-				{Tile{'R', 1}, Coord{2, 0}},
-				{Tile{'D', 1}, Coord{3, 0}},
-				{Tile{'V', 1}, Coord{4, 0}},
-				{Tile{'A', 1}, Coord{5, 0}},
-				{Tile{'R', 1}, Coord{6, 0}},
-				{Tile{'K', 1}, Coord{7, 0}},
+				{tile.Tile{'A', 1}, Coord{0, 0}},
+				{tile.Tile{'A', 1}, Coord{1, 0}},
+				{tile.Tile{'R', 1}, Coord{2, 0}},
+				{tile.Tile{'D', 1}, Coord{3, 0}},
+				{tile.Tile{'V', 1}, Coord{4, 0}},
+				{tile.Tile{'A', 1}, Coord{5, 0}},
+				{tile.Tile{'R', 1}, Coord{6, 0}},
+				{tile.Tile{'K', 1}, Coord{7, 0}},
 			}, &board)
 
 			if err != nil {
@@ -29,12 +30,12 @@ func TestRules(t *testing.T) {
 			}
 
 			_, _, err = rules.ScoreWords(TilePlacements{
-				{Tile{'V', 1}, Coord{0, 0}},
-				{Tile{'X', 1}, Coord{1, 0}},
-				{Tile{'T', 1}, Coord{2, 0}},
-				{Tile{'Q', 1}, Coord{3, 0}},
-				{Tile{'R', 1}, Coord{4, 0}},
-				{Tile{'P', 1}, Coord{5, 0}},
+				{tile.Tile{'V', 1}, Coord{0, 0}},
+				{tile.Tile{'X', 1}, Coord{1, 0}},
+				{tile.Tile{'T', 1}, Coord{2, 0}},
+				{tile.Tile{'Q', 1}, Coord{3, 0}},
+				{tile.Tile{'R', 1}, Coord{4, 0}},
+				{tile.Tile{'P', 1}, Coord{5, 0}},
 			}, &board)
 
 			if err != nil {
@@ -96,7 +97,7 @@ func TestRules(t *testing.T) {
 				}
 			}()
 
-			rules.ValidateTilesFromRack(Rack{}, []Tile{})
+			rules.ValidateTilesFromRack(tile.Rack{}, []tile.Tile{})
 		})
 	})
 
@@ -138,9 +139,9 @@ func TestRules(t *testing.T) {
 
 			r := overriddenRules.WithDictionaryForScoring(true)
 			r.ScoreWords(TilePlacements{
-				{Tile{'C', 1}, Coord{0, 0}},
-				{Tile{'A', 1}, Coord{1, 0}},
-				{Tile{'T', 1}, Coord{2, 0}},
+				{tile.Tile{'C', 1}, Coord{0, 0}},
+				{tile.Tile{'A', 1}, Coord{1, 0}},
+				{tile.Tile{'T', 1}, Coord{2, 0}},
 			}, &board)
 
 			if actual, expected := dictionaryCalled, 1; actual != expected {
@@ -153,9 +154,9 @@ func TestRules(t *testing.T) {
 
 			r := overriddenRules.WithDictionaryForScoring(false)
 			_, _, err := r.ScoreWords(TilePlacements{
-				{Tile{'D', 1}, Coord{0, 0}},
-				{Tile{'J', 1}, Coord{1, 0}},
-				{Tile{'K', 1}, Coord{2, 0}},
+				{tile.Tile{'D', 1}, Coord{0, 0}},
+				{tile.Tile{'J', 1}, Coord{1, 0}},
+				{tile.Tile{'K', 1}, Coord{2, 0}},
 			}, &board)
 
 			if err != nil {
@@ -224,7 +225,7 @@ func TestRules(t *testing.T) {
 
 	t.Run(".WithRackValidator()", func(t *testing.T) {
 		validatorCalled := 0
-		validator := func(Rack, []Tile) ([]Tile, []Tile, error) {
+		validator := func(tile.Rack, []tile.Tile) ([]tile.Tile, []tile.Tile, error) {
 			validatorCalled++
 			return nil, nil, nil
 		}
@@ -232,7 +233,7 @@ func TestRules(t *testing.T) {
 		overriddenRules := Rules{}.WithRackValidator(validator)
 
 		t.Run("sets the validator to use for rack validation", func(t *testing.T) {
-			overriddenRules.ValidateTilesFromRack(Rack{}, []Tile{})
+			overriddenRules.ValidateTilesFromRack(tile.Rack{}, []tile.Tile{})
 
 			if actual, expected := validatorCalled, 1; actual != expected {
 				t.Errorf("Expected overridden validator to be called once but got %d invocations", actual)

@@ -1,5 +1,7 @@
 package scrubble
 
+import "github.com/mandykoh/scrubble/tile"
+
 // History represents a game's history of turns and scoring.
 type History []HistoryEntry
 
@@ -21,7 +23,7 @@ func (h *History) AppendChallengeSuccess(challengerSeatIndex int) {
 
 // AppendExchange adds an entry to the history representing a turn where tiles
 // were successfully exchanged with the bag.
-func (h *History) AppendExchange(seatIndex int, tilesSpent []Tile, tilesDrawn []Tile) {
+func (h *History) AppendExchange(seatIndex int, tilesSpent, tilesDrawn []tile.Tile) {
 	*h = append(*h, HistoryEntry{
 		Type:       ExchangeTilesHistoryEntryType,
 		SeatIndex:  seatIndex,
@@ -40,7 +42,7 @@ func (h *History) AppendPass(seatIndex int) {
 
 // AppendPlay adds an entry to the history representing a turn where tiles were
 // successfully played.
-func (h *History) AppendPlay(seatIndex int, score int, tilesSpent []Tile, tilesPlayed TilePlacements, tilesDrawn []Tile, wordsFormed []PlayedWord) {
+func (h *History) AppendPlay(seatIndex int, score int, tilesSpent []tile.Tile, tilesPlayed TilePlacements, tilesDrawn []tile.Tile, wordsFormed []PlayedWord) {
 	*h = append(*h, HistoryEntry{
 		Type:        PlayHistoryEntryType,
 		SeatIndex:   seatIndex,

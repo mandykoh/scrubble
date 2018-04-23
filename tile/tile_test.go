@@ -1,12 +1,8 @@
-package scrubble
+package tile
 
-import (
-	"testing"
+import "testing"
 
-	"github.com/mandykoh/scrubble/tile"
-)
-
-func expectTiles(t *testing.T, descriptor string, tiles []tile.Tile, expected ...tile.Tile) {
+func expectTiles(t *testing.T, descriptor string, tiles []Tile, expected ...Tile) {
 	t.Helper()
 
 	if actual, expectedLen := len(tiles), len(expected); actual != expectedLen {

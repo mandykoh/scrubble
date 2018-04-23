@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/mandykoh/scrubble/positiontype"
+	"github.com/mandykoh/scrubble/tile"
 )
 
 func ExampleBoardWithLayout() {
@@ -131,9 +132,9 @@ func TestBoard(t *testing.T) {
 			Rows:    3,
 			Columns: 3,
 			Positions: []BoardPosition{
-				{__, &Tile{'A', 1}}, {__, &Tile{'B', 1}}, {__, &Tile{'C', 1}},
-				{__, &Tile{'D', 1}}, {__, &Tile{'E', 1}}, {__, &Tile{'F', 1}},
-				{__, &Tile{'G', 1}}, {__, &Tile{'H', 1}}, {__, &Tile{'I', 1}},
+				{__, &tile.Tile{'A', 1}}, {__, &tile.Tile{'B', 1}}, {__, &tile.Tile{'C', 1}},
+				{__, &tile.Tile{'D', 1}}, {__, &tile.Tile{'E', 1}}, {__, &tile.Tile{'F', 1}},
+				{__, &tile.Tile{'G', 1}}, {__, &tile.Tile{'H', 1}}, {__, &tile.Tile{'I', 1}},
 			},
 		}
 

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/mandykoh/scrubble/dict"
+	"github.com/mandykoh/scrubble/tile"
 )
 
 func TestGame(t *testing.T) {
@@ -75,11 +76,11 @@ func TestGame(t *testing.T) {
 		setupGame := func() Game {
 			game := Game{
 				Phase: MainPhase,
-				Bag:   BagWithStandardEnglishTiles(),
+				Bag:   tile.BagWithStandardEnglishTiles(),
 				Board: BoardWithStandardLayout(),
 				Seats: []Seat{
 					{
-						Rack: Rack{
+						Rack: tile.Rack{
 							{'K', 1},
 							{'P', 1},
 							{'Q', 1},
@@ -91,7 +92,7 @@ func TestGame(t *testing.T) {
 						Score: 123,
 					},
 					{
-						Rack: Rack{
+						Rack: tile.Rack{
 							{'D', 1},
 							{'A', 1},
 							{'B', 1},
@@ -108,9 +109,9 @@ func TestGame(t *testing.T) {
 						Type:        PlayHistoryEntryType,
 						SeatIndex:   0,
 						Score:       123,
-						TilesSpent:  []Tile{{'A', 1}, {'D', 1}},
-						TilesPlayed: TilePlacements{{Tile{'A', 1}, Coord{0, 0}}, {Tile{'D', 1}, Coord{0, 1}}},
-						TilesDrawn:  []Tile{{'R', 1}, {'W', 1}},
+						TilesSpent:  []tile.Tile{{'A', 1}, {'D', 1}},
+						TilesPlayed: TilePlacements{{tile.Make('A', 1), Coord{0, 0}}, {tile.Make('D', 1), Coord{0, 1}}},
+						TilesDrawn:  []tile.Tile{{'R', 1}, {'W', 1}},
 						WordsFormed: nil,
 					},
 				},
@@ -177,8 +178,8 @@ func TestGame(t *testing.T) {
 			lastTurn := game.History.Last()
 
 			originalScore := game.CurrentSeat().Score
-			expectedBag := append(Bag{}, game.Bag...)
-			expectedRack := append(Rack{}, game.prevSeat().Rack...)
+			expectedBag := append(tile.Bag{}, game.Bag...)
+			expectedRack := append(tile.Rack{}, game.prevSeat().Rack...)
 
 			success, err := game.Challenge(game.CurrentSeatIndex, rand.New(rand.NewSource(seed)))
 
@@ -241,7 +242,7 @@ func TestGame(t *testing.T) {
 
 			lastTurn := game.History.Last()
 
-			expectedBag := append(Bag{}, game.Bag...)
+			expectedBag := append(tile.Bag{}, game.Bag...)
 			expectedBag = append(expectedBag, lastTurn.TilesDrawn...)
 			expectedBag.Shuffle(rand.New(rand.NewSource(seed)))
 
@@ -286,14 +287,15 @@ func TestGame(t *testing.T) {
 			})
 
 			t.Run("restores the challenged player's rack to how it was before the play", func(t *testing.T) {
-				expectTiles(t, "racked", game.prevSeat().Rack,
-					Tile{'K', 1},
-					Tile{'P', 1},
-					Tile{'Q', 1},
-					Tile{'Z', 1},
-					Tile{'T', 1},
-					Tile{'A', 1},
-					Tile{'D', 1})
+				expectTiles(t, "racked", game.prevSeat().Rack, []tile.Tile{
+					{'K', 1},
+					{'P', 1},
+					{'Q', 1},
+					{'Z', 1},
+					{'T', 1},
+					{'A', 1},
+					{'D', 1},
+				}...)
 			})
 
 			t.Run("records a history entry", func(t *testing.T) {
@@ -313,16 +315,16 @@ func TestGame(t *testing.T) {
 
 			game := Game{
 				Phase: MainPhase,
-				Bag:   BagWithStandardEnglishTiles(),
+				Bag:   tile.BagWithStandardEnglishTiles(),
 				Board: BoardWithStandardLayout(),
 				Seats: []Seat{
 					{
-						Rack: Rack{
+						Rack: tile.Rack{
 							{'Z', 10},
 						},
 					},
 					{
-						Rack: Rack{
+						Rack: tile.Rack{
 							{'D', 1},
 							{'A', 1},
 							{'B', 1},
@@ -334,7 +336,7 @@ func TestGame(t *testing.T) {
 				},
 				CurrentSeatIndex: 1,
 				Rules: Rules{
-					rackValidator: func(rack Rack, toPlay []Tile) ([]Tile, []Tile, error) {
+					rackValidator: func(rack tile.Rack, toPlay []tile.Tile) ([]tile.Tile, []tile.Tile, error) {
 						tilesFromRackValidated++
 						return ValidateTilesFromRack(rack, toPlay)
 					},
@@ -348,7 +350,7 @@ func TestGame(t *testing.T) {
 			game := setupGame()
 			game.Phase = SetupPhase
 
-			err := game.ExchangeTiles([]Tile{
+			err := game.ExchangeTiles([]tile.Tile{
 				game.CurrentSeat().Rack[0],
 			}, nil)
 
@@ -369,9 +371,9 @@ func TestGame(t *testing.T) {
 
 		t.Run("returns an error when insufficient tiles are in the bag", func(t *testing.T) {
 			game := setupGame()
-			game.Bag = game.Bag[:MaxRackTiles-1]
+			game.Bag = game.Bag[:tile.MaxRackTiles-1]
 
-			err := game.ExchangeTiles([]Tile{
+			err := game.ExchangeTiles([]tile.Tile{
 				game.CurrentSeat().Rack[0],
 			}, nil)
 
@@ -383,11 +385,11 @@ func TestGame(t *testing.T) {
 		t.Run("with insufficient tiles on the rack", func(t *testing.T) {
 			game := setupGame()
 
-			game.Rules.rackValidator = func(rack Rack, toPlay []Tile) ([]Tile, []Tile, error) {
+			game.Rules.rackValidator = func(rack tile.Rack, toPlay []tile.Tile) ([]tile.Tile, []tile.Tile, error) {
 				return nil, rack, errors.New("some error")
 			}
 
-			tiles := []Tile{
+			tiles := []tile.Tile{
 				{'B', 1},
 				{'O', 1},
 				{'O', 1},
@@ -422,14 +424,14 @@ func TestGame(t *testing.T) {
 			originalBagSize := len(game.Bag)
 			originalRackSize := len(game.CurrentSeat().Rack)
 
-			expectedBag := append(Bag{}, game.Bag...)
-			nextBagTiles := []Tile{
+			expectedBag := append(tile.Bag{}, game.Bag...)
+			nextBagTiles := []tile.Tile{
 				expectedBag.DrawTile(),
 				expectedBag.DrawTile(),
 				expectedBag.DrawTile(),
 			}
 
-			tilesExchanged := []Tile{
+			tilesExchanged := []tile.Tile{
 				{'B', 1},
 				{'M', 1},
 				{'D', 1},
@@ -456,23 +458,23 @@ func TestGame(t *testing.T) {
 			t.Run("replenishes the player's rack from the bag", func(t *testing.T) {
 				rack := game.prevSeat().Rack
 
-				if actual, expected := len(rack), MaxRackTiles; actual != expected {
+				if actual, expected := len(rack), tile.MaxRackTiles; actual != expected {
 					t.Errorf("Expected player's rack to have been replenished to %d tiles but found %d", expected, actual)
 				} else {
-					expectTiles(t, "racked", rack,
-						Tile{'A', 1},
-						Tile{'E', 1},
-						Tile{'O', 1},
+					expectTiles(t, "racked", rack, []tile.Tile{
+						{'A', 1},
+						{'E', 1},
+						{'O', 1},
 						nextBagTiles[0],
 						nextBagTiles[1],
 						nextBagTiles[2],
 						nextBagTiles[3],
-					)
+					}...)
 				}
 			})
 
 			t.Run("returns the exchanged tiles to the bag", func(t *testing.T) {
-				if actual, expected := len(game.Bag), originalBagSize-(MaxRackTiles-originalRackSize); actual != expected {
+				if actual, expected := len(game.Bag), originalBagSize-(tile.MaxRackTiles-originalRackSize); actual != expected {
 					t.Errorf("Expected %d tiles to still be in bag but found %d", expected, actual)
 				}
 			})
@@ -496,7 +498,7 @@ func TestGame(t *testing.T) {
 				return EndPhase
 			})
 
-			err := game.ExchangeTiles([]Tile{
+			err := game.ExchangeTiles([]tile.Tile{
 				game.CurrentSeat().Rack[0],
 			}, rand.New(rand.NewSource(0)))
 
@@ -537,14 +539,14 @@ func TestGame(t *testing.T) {
 				Board: BoardWithStandardLayout(),
 				Seats: []Seat{
 					{
-						Rack: Rack{
+						Rack: tile.Rack{
 							{'A', 1},
 							{'B', 1},
 							{'C', 1},
 						},
 					},
 					{
-						Rack: Rack{
+						Rack: tile.Rack{
 							{'E', 2},
 							{'F', 2},
 							{'G', 2},
@@ -571,7 +573,7 @@ func TestGame(t *testing.T) {
 
 		t.Run("records a history entry", func(t *testing.T) {
 			game := setupGame()
-			game.CurrentSeat().Rack = Rack{
+			game.CurrentSeat().Rack = tile.Rack{
 				{'A', 1},
 				{'B', 1},
 				{'C', 1},
@@ -646,7 +648,7 @@ func TestGame(t *testing.T) {
 			tilesFromRackValidated = 0
 			wordsScored = 0
 
-			rackTiles := []Tile{
+			rackTiles := []tile.Tile{
 				{'A', 1},
 				{'B', 1},
 				{'E', 1},
@@ -657,11 +659,11 @@ func TestGame(t *testing.T) {
 
 			game := Game{
 				Phase: MainPhase,
-				Bag:   BagWithStandardEnglishTiles(),
+				Bag:   tile.BagWithStandardEnglishTiles(),
 				Board: BoardWithStandardLayout(),
 				Seats: []Seat{
-					{Rack: append(Rack{}, rackTiles...)},
-					{Rack: append(Rack{}, rackTiles...)},
+					{Rack: append(tile.Rack{}, rackTiles...)},
+					{Rack: append(tile.Rack{}, rackTiles...)},
 				},
 				CurrentSeatIndex: 1,
 				Rules: Rules{
@@ -669,7 +671,7 @@ func TestGame(t *testing.T) {
 						placementsValidated++
 						return nil
 					},
-					rackValidator: func(rack Rack, toPlay []Tile) ([]Tile, []Tile, error) {
+					rackValidator: func(rack tile.Rack, toPlay []tile.Tile) ([]tile.Tile, []tile.Tile, error) {
 						tilesFromRackValidated++
 						return ValidateTilesFromRack(rack, toPlay)
 					},
@@ -690,7 +692,7 @@ func TestGame(t *testing.T) {
 			}
 
 			_, err := game.Play(TilePlacements{
-				{Tile{'A', 1}, Coord{7, 7}},
+				{tile.Make('A', 1), Coord{7, 7}},
 			})
 
 			if actual, expected := err, (GameOutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
@@ -701,11 +703,11 @@ func TestGame(t *testing.T) {
 		t.Run("with insufficient tiles on the rack", func(t *testing.T) {
 			game := setupGame()
 
-			game.Rules.rackValidator = func(rack Rack, toPlay []Tile) ([]Tile, []Tile, error) {
+			game.Rules.rackValidator = func(rack tile.Rack, toPlay []tile.Tile) ([]tile.Tile, []tile.Tile, error) {
 				return nil, rack, errors.New("some error")
 			}
 
-			playTiles := []Tile{
+			playTiles := []tile.Tile{
 				{'B', 1},
 				{'O', 1},
 				{'O', 1},
@@ -731,14 +733,14 @@ func TestGame(t *testing.T) {
 			})
 
 			t.Run("does not remove tiles from the player's rack", func(t *testing.T) {
-				expectTiles(t, "racked", game.CurrentSeat().Rack,
-					Tile{'A', 1},
-					Tile{'B', 1},
-					Tile{'E', 1},
-					Tile{'O', 1},
-					Tile{'D', 1},
-					Tile{'M', 1},
-				)
+				expectTiles(t, "racked", game.CurrentSeat().Rack, []tile.Tile{
+					{'A', 1},
+					{'B', 1},
+					{'E', 1},
+					{'O', 1},
+					{'D', 1},
+					{'M', 1},
+				}...)
 			})
 		})
 
@@ -750,8 +752,8 @@ func TestGame(t *testing.T) {
 			}
 
 			placements := TilePlacements{
-				{Tile{'B', 1}, Coord{0, 0}},
-				{Tile{'D', 1}, Coord{0, 2}},
+				{tile.Make('B', 1), Coord{0, 0}},
+				{tile.Make('D', 1), Coord{0, 2}},
 			}
 			_, err := game.Play(placements)
 
@@ -776,17 +778,17 @@ func TestGame(t *testing.T) {
 
 		t.Run("with a valid play", func(t *testing.T) {
 			game := setupGame()
-			game.Board.Position(Coord{0, 1}).Tile = &Tile{'A', 1}
+			game.Board.Position(Coord{0, 1}).Tile = &tile.Tile{Letter: 'A', Points: 1}
 
-			nextBagTiles := []Tile{
+			nextBagTiles := []tile.Tile{
 				game.Bag[len(game.Bag)-1],
 				game.Bag[len(game.Bag)-2],
 				game.Bag[len(game.Bag)-3],
 			}
 
 			placements := TilePlacements{
-				{Tile{'B', 1}, Coord{0, 0}},
-				{Tile{'D', 1}, Coord{0, 2}},
+				{tile.Make('B', 1), Coord{0, 0}},
+				{tile.Make('D', 1), Coord{0, 2}},
 			}
 			playedWords, err := game.Play(placements)
 
@@ -828,15 +830,15 @@ func TestGame(t *testing.T) {
 			t.Run("replenishes the player's rack from the bag", func(t *testing.T) {
 				rack := game.prevSeat().Rack
 
-				expectTiles(t, "racked", rack,
-					Tile{'A', 1},
-					Tile{'E', 1},
-					Tile{'O', 1},
-					Tile{'M', 1},
+				expectTiles(t, "racked", rack, []tile.Tile{
+					{'A', 1},
+					{'E', 1},
+					{'O', 1},
+					{'M', 1},
 					nextBagTiles[0],
 					nextBagTiles[1],
 					nextBagTiles[2],
-				)
+				}...)
 			})
 
 			t.Run("moves to next player's turn", func(t *testing.T) {
@@ -864,11 +866,11 @@ func TestGame(t *testing.T) {
 				return EndPhase
 			})
 
-			game.Board.Position(Coord{0, 1}).Tile = &Tile{'A', 1}
+			game.Board.Position(Coord{0, 1}).Tile = &tile.Tile{Letter: 'A', Points: 1}
 
 			placements := TilePlacements{
-				{Tile{'B', 1}, Coord{0, 0}},
-				{Tile{'D', 1}, Coord{0, 2}},
+				{tile.Make('B', 1), Coord{0, 0}},
+				{tile.Make('D', 1), Coord{0, 2}},
 			}
 			game.Play(placements)
 
@@ -990,20 +992,20 @@ func TestGame(t *testing.T) {
 		expectedRand := rand.New(rand.NewSource(seed))
 		expectedStartingSeat := expectedRand.Intn(3)
 
-		expectedBag := BagWithStandardEnglishTiles()
+		expectedBag := tile.BagWithStandardEnglishTiles()
 		expectedBag.Shuffle(expectedRand)
 
-		var expectedRacks []Rack
+		var expectedRacks []tile.Rack
 		for i := 0; i < 3; i++ {
-			var rack Rack
-			for j := 0; j < MaxRackTiles; j++ {
+			var rack tile.Rack
+			for j := 0; j < tile.MaxRackTiles; j++ {
 				rack = append(rack, expectedBag.DrawTile())
 			}
 			expectedRacks = append(expectedRacks, rack)
 		}
 
 		game := Game{
-			Bag:   BagWithStandardEnglishTiles(),
+			Bag:   tile.BagWithStandardEnglishTiles(),
 			Board: BoardWithStandardLayout(),
 		}
 		game.AddPlayer()
@@ -1042,7 +1044,7 @@ func TestGame(t *testing.T) {
 
 		t.Run("returns an error if not in Setup phase", func(t *testing.T) {
 			game := Game{
-				Bag:   BagWithStandardEnglishTiles(),
+				Bag:   tile.BagWithStandardEnglishTiles(),
 				Phase: MainPhase,
 			}
 
@@ -1052,12 +1054,12 @@ func TestGame(t *testing.T) {
 				t.Errorf("Expected %v but got %v", expected, actual)
 			}
 
-			expectTiles(t, "bagged", game.Bag, BagWithStandardEnglishTiles()...)
+			expectTiles(t, "bagged", game.Bag, tile.BagWithStandardEnglishTiles()...)
 		})
 
 		t.Run("returns an error if there are no players", func(t *testing.T) {
 			game := Game{
-				Bag: BagWithStandardEnglishTiles(),
+				Bag: tile.BagWithStandardEnglishTiles(),
 			}
 
 			err := game.Start(rand.New(rand.NewSource(seed)))

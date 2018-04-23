@@ -1,4 +1,4 @@
-package scrubble
+package tile
 
 import "math/rand"
 
@@ -8,7 +8,7 @@ type Bag []Tile
 
 // BagWithDistribution returns a Bag containing tiles according to the specified
 // tile distribution.
-func BagWithDistribution(dist TileDistribution) Bag {
+func BagWithDistribution(dist Distribution) Bag {
 
 	totalTiles := 0
 	for _, d := range dist {
@@ -29,7 +29,7 @@ func BagWithDistribution(dist TileDistribution) Bag {
 // BagWithStandardEnglishTiles returns a Bag containing tiles corresponding to
 // a standard English tile and letter distribution.
 func BagWithStandardEnglishTiles() Bag {
-	return BagWithDistribution(TileDistribution{
+	return BagWithDistribution(Distribution{
 		{Tile{' ', 0}, 2},
 		{Tile{'E', 1}, 12},
 		{Tile{'A', 1}, 9},

@@ -1,6 +1,10 @@
 package scrubble
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/mandykoh/scrubble/tile"
+)
 
 func TestNextGamePhase(t *testing.T) {
 
@@ -8,7 +12,7 @@ func TestNextGamePhase(t *testing.T) {
 		game := &Game{
 			Seats: []Seat{
 				{
-					Rack: []Tile{
+					Rack: tile.Rack{
 						{'A', 1},
 					},
 				},
@@ -26,7 +30,7 @@ func TestNextGamePhase(t *testing.T) {
 	t.Run("ends the game when the rack was emptied and couldn't be replenished from the bag", func(t *testing.T) {
 		game := &Game{
 			Seats: []Seat{
-				{Rack: []Tile{}},
+				{Rack: tile.Rack{}},
 			},
 			History: History{{Type: UnknownHistoryEntryType, Score: 123}},
 		}
@@ -41,8 +45,8 @@ func TestNextGamePhase(t *testing.T) {
 	t.Run("ends the game after six consecutive scoreless turns", func(t *testing.T) {
 		game := &Game{
 			Seats: []Seat{
-				{Rack: []Tile{{'A', 1}}},
-				{Rack: []Tile{{'B', 2}}},
+				{Rack: tile.Rack{{'A', 1}}},
+				{Rack: tile.Rack{{'B', 2}}},
 			},
 			History: History{
 				{Type: PassHistoryEntryType},
@@ -70,8 +74,8 @@ func TestNextGamePhase(t *testing.T) {
 	t.Run("treats successfully challenged plays as scoreless turns", func(t *testing.T) {
 		game := &Game{
 			Seats: []Seat{
-				{Rack: []Tile{{'A', 1}}},
-				{Rack: []Tile{{'B', 2}}},
+				{Rack: tile.Rack{{'A', 1}}},
+				{Rack: tile.Rack{{'B', 2}}},
 			},
 			History: History{
 				{Type: PlayHistoryEntryType, Score: 123},
