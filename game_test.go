@@ -342,7 +342,7 @@ func TestGame(t *testing.T) {
 				Rules: Rules{
 					rackValidator: func(rack tile.Rack, toPlay []tile.Tile) ([]tile.Tile, []tile.Tile, error) {
 						tilesFromRackValidated++
-						return ValidateTilesFromRack(rack, toPlay)
+						return tile.ValidateFromRack(rack, toPlay)
 					},
 				},
 			}
@@ -677,7 +677,7 @@ func TestGame(t *testing.T) {
 					},
 					rackValidator: func(rack tile.Rack, toPlay []tile.Tile) ([]tile.Tile, []tile.Tile, error) {
 						tilesFromRackValidated++
-						return ValidateTilesFromRack(rack, toPlay)
+						return tile.ValidateFromRack(rack, toPlay)
 					},
 					wordScorer: func(placements play.Tiles, board *Board, dictionary dict.Dictionary) (score int, words []play.Word, err error) {
 						wordsScored++

@@ -108,7 +108,7 @@ func (r *Rules) ValidatePlacements(placements play.Tiles, board *Board) error {
 func (r *Rules) ValidateTilesFromRack(rack tile.Rack, toPlay []tile.Tile) (used, remaining []tile.Tile, err error) {
 	rackValidator := r.rackValidator
 	if rackValidator == nil {
-		rackValidator = ValidateTilesFromRack
+		rackValidator = tile.ValidateFromRack
 	}
 	return rackValidator(rack, toPlay)
 }

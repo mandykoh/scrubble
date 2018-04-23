@@ -1,15 +1,13 @@
-package scrubble
+package tile
 
 import (
 	"fmt"
-
-	"github.com/mandykoh/scrubble/tile"
 )
 
 // InsufficientTilesError indicates that a play called for tiles which the
 // player doesn't possess in their rack.
 type InsufficientTilesError struct {
-	Missing []tile.Tile
+	Missing []Tile
 }
 
 func (e InsufficientTilesError) Error() string {
