@@ -9,6 +9,7 @@ import (
 
 	"github.com/mandykoh/scrubble/coord"
 	"github.com/mandykoh/scrubble/dict"
+	"github.com/mandykoh/scrubble/play"
 	"github.com/mandykoh/scrubble/tile"
 )
 
@@ -111,7 +112,7 @@ func TestGame(t *testing.T) {
 						SeatIndex:   0,
 						Score:       123,
 						TilesSpent:  []tile.Tile{{'A', 1}, {'D', 1}},
-						TilesPlayed: TilePlacements{{tile.Make('A', 1), coord.Make(0, 0)}, {tile.Make('D', 1), coord.Make(0, 1)}},
+						TilesPlayed: play.Tiles{{tile.Make('A', 1), coord.Make(0, 0)}, {tile.Make('D', 1), coord.Make(0, 1)}},
 						TilesDrawn:  []tile.Tile{{'R', 1}, {'W', 1}},
 						WordsFormed: nil,
 					},
@@ -174,7 +175,7 @@ func TestGame(t *testing.T) {
 
 			game := setupGame()
 			game.Phase = EndPhase
-			game.Rules = game.Rules.WithChallengeValidator(func([]PlayedWord, dict.Dictionary) bool { return false })
+			game.Rules = game.Rules.WithChallengeValidator(func([]play.Word, dict.Dictionary) bool { return false })
 
 			lastTurn := game.History.Last()
 
@@ -239,7 +240,7 @@ func TestGame(t *testing.T) {
 
 			game := setupGame()
 			game.Phase = EndPhase
-			game.Rules = game.Rules.WithChallengeValidator(func([]PlayedWord, dict.Dictionary) bool { return true })
+			game.Rules = game.Rules.WithChallengeValidator(func([]play.Word, dict.Dictionary) bool { return true })
 
 			lastTurn := game.History.Last()
 
@@ -668,7 +669,7 @@ func TestGame(t *testing.T) {
 				},
 				CurrentSeatIndex: 1,
 				Rules: Rules{
-					placementValidator: func(placements TilePlacements, board *Board) error {
+					placementValidator: func(placements play.Tiles, board *Board) error {
 						placementsValidated++
 						return nil
 					},
@@ -676,9 +677,9 @@ func TestGame(t *testing.T) {
 						tilesFromRackValidated++
 						return ValidateTilesFromRack(rack, toPlay)
 					},
-					wordScorer: func(placements TilePlacements, board *Board, dictionary dict.Dictionary) (score int, words []PlayedWord, err error) {
+					wordScorer: func(placements play.Tiles, board *Board, dictionary dict.Dictionary) (score int, words []play.Word, err error) {
 						wordsScored++
-						words = append(words, PlayedWord{Word: "SOMEWORD", Score: 123, Range: placements.Bounds()})
+						words = append(words, play.Word{Word: "SOMEWORD", Score: 123, Range: placements.Bounds()})
 						return 123, words, nil
 					},
 				},
@@ -692,7 +693,7 @@ func TestGame(t *testing.T) {
 				Phase: SetupPhase,
 			}
 
-			_, err := game.Play(TilePlacements{
+			_, err := game.Play(play.Tiles{
 				{tile.Make('A', 1), coord.Make(7, 7)},
 			})
 
@@ -716,9 +717,9 @@ func TestGame(t *testing.T) {
 				{'S', 1},
 			}
 
-			var placements TilePlacements
+			var placements play.Tiles
 			for i, t := range playTiles {
-				placements = append(placements, TilePlacement{t, coord.Make(7, 7+i)})
+				placements = append(placements, play.TilePlacement{Tile: t, Coord: coord.Make(7, 7+i)})
 			}
 
 			_, err := game.Play(placements)
@@ -748,11 +749,11 @@ func TestGame(t *testing.T) {
 		t.Run("with invalid tile placement", func(t *testing.T) {
 			game := setupGame()
 
-			game.Rules.placementValidator = func(placements TilePlacements, board *Board) error {
+			game.Rules.placementValidator = func(placements play.Tiles, board *Board) error {
 				return errors.New("some error")
 			}
 
-			placements := TilePlacements{
+			placements := play.Tiles{
 				{tile.Make('B', 1), coord.Make(0, 0)},
 				{tile.Make('D', 1), coord.Make(0, 2)},
 			}
@@ -787,7 +788,7 @@ func TestGame(t *testing.T) {
 				game.Bag[len(game.Bag)-3],
 			}
 
-			placements := TilePlacements{
+			placements := play.Tiles{
 				{tile.Make('B', 1), coord.Make(0, 0)},
 				{tile.Make('D', 1), coord.Make(0, 2)},
 			}
@@ -850,14 +851,14 @@ func TestGame(t *testing.T) {
 
 			t.Run("records a history entry", func(t *testing.T) {
 				expectHistory(t, game.History,
-					HistoryEntry{Type: PlayHistoryEntryType, SeatIndex: 1, Score: 123, TilesSpent: placements.Tiles(), TilesPlayed: placements, TilesDrawn: nextBagTiles, WordsFormed: []PlayedWord{
+					HistoryEntry{Type: PlayHistoryEntryType, SeatIndex: 1, Score: 123, TilesSpent: placements.Tiles(), TilesPlayed: placements, TilesDrawn: nextBagTiles, WordsFormed: []play.Word{
 						{Word: "SOMEWORD", Score: 123, Range: placements.Bounds()},
 					}},
 				)
 			})
 
 			t.Run("returns the words formed from scoring using the set rules", func(t *testing.T) {
-				expectPlayedWords(t, playedWords, PlayedWord{"SOMEWORD", 123, placements.Bounds()})
+				expectPlayedWords(t, playedWords, play.Word{"SOMEWORD", 123, placements.Bounds()})
 			})
 		})
 
@@ -869,7 +870,7 @@ func TestGame(t *testing.T) {
 
 			game.Board.Position(coord.Make(0, 1)).Tile = &tile.Tile{Letter: 'A', Points: 1}
 
-			placements := TilePlacements{
+			placements := play.Tiles{
 				{tile.Make('B', 1), coord.Make(0, 0)},
 				{tile.Make('D', 1), coord.Make(0, 2)},
 			}

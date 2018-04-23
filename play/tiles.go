@@ -1,4 +1,4 @@
-package scrubble
+package play
 
 import (
 	"math"
@@ -7,11 +7,11 @@ import (
 	"github.com/mandykoh/scrubble/tile"
 )
 
-// TilePlacements represents a set of tile placements on a board.
-type TilePlacements []TilePlacement
+// Tiles represents a set of tile placements on a board.
+type Tiles []TilePlacement
 
 // Bounds returns the minimum and maximum coordinates spanned by the placements.
-func (tp TilePlacements) Bounds() coord.Range {
+func (tp Tiles) Bounds() coord.Range {
 	bounds := coord.Range{
 		Min: coord.Make(math.MaxInt32, math.MaxInt32),
 		Max: coord.Make(math.MinInt32, math.MinInt32),
@@ -26,7 +26,7 @@ func (tp TilePlacements) Bounds() coord.Range {
 
 // Find returns the first placement corresponding to the given coordinate, or
 // nil if no matching placement exists.
-func (tp TilePlacements) Find(c coord.Coord) *TilePlacement {
+func (tp Tiles) Find(c coord.Coord) *TilePlacement {
 	for i := range tp {
 		if tp[i].Coord == c {
 			return &tp[i]
@@ -35,16 +35,9 @@ func (tp TilePlacements) Find(c coord.Coord) *TilePlacement {
 	return nil
 }
 
-// Tiles returns the collection of tiles being placed.
-func (tp TilePlacements) Tiles() []tile.Tile {
-	tiles := make([]tile.Tile, len(tp))
-	for i, p := range tp {
-		tiles[i] = p.Tile
-	}
-	return tiles
-}
-
-func (tp *TilePlacements) take(c coord.Coord) *TilePlacement {
+// Take removes and returns a placement for the specified coordinate, returning
+// nil if no tile is being placed at that coordinate.
+func (tp *Tiles) Take(c coord.Coord) *TilePlacement {
 	for i := range *tp {
 		p := (*tp)[i]
 		if p.Coord == c {
@@ -55,7 +48,9 @@ func (tp *TilePlacements) take(c coord.Coord) *TilePlacement {
 	return nil
 }
 
-func (tp *TilePlacements) takeLast() *TilePlacement {
+// TakeLast removes the last placement and returns it, or nil if there are no
+// placements left.
+func (tp *Tiles) TakeLast() *TilePlacement {
 	length := len(*tp)
 	if length == 0 {
 		return nil
@@ -64,4 +59,13 @@ func (tp *TilePlacements) takeLast() *TilePlacement {
 	p := &(*tp)[length-1]
 	*tp = (*tp)[:length-1]
 	return p
+}
+
+// Tiles returns the collection of tiles being placed.
+func (tp Tiles) Tiles() []tile.Tile {
+	tiles := make([]tile.Tile, len(tp))
+	for i, p := range tp {
+		tiles[i] = p.Tile
+	}
+	return tiles
 }

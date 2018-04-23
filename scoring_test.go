@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/mandykoh/scrubble/coord"
+	"github.com/mandykoh/scrubble/play"
 	"github.com/mandykoh/scrubble/tile"
 )
 
@@ -17,7 +18,7 @@ func TestScoreWords(t *testing.T) {
 		return true
 	}
 
-	expectFormedWords := func(t *testing.T, actualWords []PlayedWord, expectedWords ...PlayedWord) {
+	expectFormedWords := func(t *testing.T, actualWords []play.Word, expectedWords ...play.Word) {
 		if actual, expected := len(actualWords), len(expectedWords); actual != expected {
 			t.Errorf("Expected %d word(s) formed but found %d", expected, actual)
 		} else {
@@ -32,7 +33,7 @@ func TestScoreWords(t *testing.T) {
 	t.Run("returns an error for single-letter words", func(t *testing.T) {
 		board := setupBoard()
 
-		_, _, err := ScoreWords(TilePlacements{
+		_, _, err := ScoreWords(play.Tiles{
 			{tile.Make('A', 2), coord.Make(7, 7)},
 		}, board, dictionary)
 
@@ -40,8 +41,8 @@ func TestScoreWords(t *testing.T) {
 			t.Errorf("Expected an error for single-letter word but got nil")
 		} else {
 			switch e := err.(type) {
-			case InvalidWordError:
-				expectFormedWords(t, e.Words, PlayedWord{"A", 4, coord.Range{coord.Make(7, 7), coord.Make(7, 7)}})
+			case play.InvalidWordError:
+				expectFormedWords(t, e.Words, play.Word{"A", 4, coord.Range{coord.Make(7, 7), coord.Make(7, 7)}})
 
 			default:
 				t.Errorf("Expected InvalidWordError but got %v", e)
@@ -61,7 +62,7 @@ func TestScoreWords(t *testing.T) {
 			return false
 		}
 
-		_, _, err := ScoreWords(TilePlacements{
+		_, _, err := ScoreWords(play.Tiles{
 			{tile.Make('D', 2), coord.Make(1, 2)},
 			{tile.Make('O', 1), coord.Make(1, 3)},
 			{tile.Make('G', 2), coord.Make(1, 4)},
@@ -71,7 +72,7 @@ func TestScoreWords(t *testing.T) {
 			t.Errorf("Expected an error but succeeded")
 		} else {
 			switch e := err.(type) {
-			case InvalidWordError:
+			case play.InvalidWordError:
 				if actual, expected := len(wordsLookedUp), 2; actual != expected {
 					t.Errorf("Expected %d words to be validated against dictionary but only got %d", expected, actual)
 				} else {
@@ -83,8 +84,8 @@ func TestScoreWords(t *testing.T) {
 					}
 				}
 				expectFormedWords(t, e.Words,
-					PlayedWord{"DOG", 5, coord.Range{coord.Make(1, 2), coord.Make(1, 4)}},
-					PlayedWord{"GOD", 5, coord.Range{coord.Make(0, 3), coord.Make(2, 3)}})
+					play.Word{"DOG", 5, coord.Range{coord.Make(1, 2), coord.Make(1, 4)}},
+					play.Word{"GOD", 5, coord.Range{coord.Make(0, 3), coord.Make(2, 3)}})
 
 			default:
 				t.Errorf("Expected InvalidWordError but got %v", e)
@@ -95,7 +96,7 @@ func TestScoreWords(t *testing.T) {
 	t.Run("counts entire horizontal word", func(t *testing.T) {
 		board := setupBoard()
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('D', 2), coord.Make(1, 2)},
 			{tile.Make('O', 1), coord.Make(1, 3)},
 			{tile.Make('G', 2), coord.Make(1, 4)},
@@ -107,7 +108,7 @@ func TestScoreWords(t *testing.T) {
 			if actual, expected := score, 5; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
-			expectFormedWords(t, words, PlayedWord{"DOG", 5, coord.Range{coord.Make(1, 2), coord.Make(1, 4)}})
+			expectFormedWords(t, words, play.Word{"DOG", 5, coord.Range{coord.Make(1, 2), coord.Make(1, 4)}})
 		}
 	})
 
@@ -115,7 +116,7 @@ func TestScoreWords(t *testing.T) {
 		board := setupBoard()
 		board.Position(coord.Make(2, 3)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(2, 4)},
 			{tile.Make('G', 2), coord.Make(2, 5)},
 		}, board, dictionary)
@@ -126,14 +127,14 @@ func TestScoreWords(t *testing.T) {
 			if actual, expected := score, 5; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
-			expectFormedWords(t, words, PlayedWord{"DOG", 5, coord.Range{coord.Make(2, 3), coord.Make(2, 5)}})
+			expectFormedWords(t, words, play.Word{"DOG", 5, coord.Range{coord.Make(2, 3), coord.Make(2, 5)}})
 		}
 	})
 
 	t.Run("counts entire vertical word", func(t *testing.T) {
 		board := setupBoard()
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('D', 2), coord.Make(2, 1)},
 			{tile.Make('O', 1), coord.Make(3, 1)},
 			{tile.Make('G', 2), coord.Make(4, 1)},
@@ -145,7 +146,7 @@ func TestScoreWords(t *testing.T) {
 			if actual, expected := score, 5; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
-			expectFormedWords(t, words, PlayedWord{"DOG", 5, coord.Range{coord.Make(2, 1), coord.Make(4, 1)}})
+			expectFormedWords(t, words, play.Word{"DOG", 5, coord.Range{coord.Make(2, 1), coord.Make(4, 1)}})
 		}
 	})
 
@@ -153,7 +154,7 @@ func TestScoreWords(t *testing.T) {
 		board := setupBoard()
 		board.Position(coord.Make(1, 4)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(2, 4)},
 			{tile.Make('G', 2), coord.Make(3, 4)},
 		}, board, dictionary)
@@ -164,7 +165,7 @@ func TestScoreWords(t *testing.T) {
 			if actual, expected := score, 5; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
-			expectFormedWords(t, words, PlayedWord{"DOG", 5, coord.Range{coord.Make(1, 4), coord.Make(3, 4)}})
+			expectFormedWords(t, words, play.Word{"DOG", 5, coord.Range{coord.Make(1, 4), coord.Make(3, 4)}})
 		}
 	})
 
@@ -174,7 +175,7 @@ func TestScoreWords(t *testing.T) {
 		board.Position(coord.Make(6, 4)).Tile = &tile.Tile{Letter: 'O', Points: 1}
 		board.Position(coord.Make(7, 4)).Tile = &tile.Tile{Letter: 'G', Points: 2}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('S', 2), coord.Make(8, 4)},
 			{tile.Make('O', 2), coord.Make(8, 5)},
 		}, board, dictionary)
@@ -186,8 +187,8 @@ func TestScoreWords(t *testing.T) {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
 			expectFormedWords(t, words,
-				PlayedWord{"SO", 4, coord.Range{coord.Make(8, 4), coord.Make(8, 5)}},
-				PlayedWord{"DOGS", 7, coord.Range{coord.Make(5, 4), coord.Make(8, 4)}})
+				play.Word{"SO", 4, coord.Range{coord.Make(8, 4), coord.Make(8, 5)}},
+				play.Word{"DOGS", 7, coord.Range{coord.Make(5, 4), coord.Make(8, 4)}})
 		}
 	})
 
@@ -197,7 +198,7 @@ func TestScoreWords(t *testing.T) {
 		board.Position(coord.Make(6, 4)).Tile = &tile.Tile{Letter: 'O', Points: 1}
 		board.Position(coord.Make(7, 4)).Tile = &tile.Tile{Letter: 'G', Points: 2}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('G', 2), coord.Make(6, 3)},
 			{tile.Make('D', 2), coord.Make(6, 5)},
 		}, board, dictionary)
@@ -208,7 +209,7 @@ func TestScoreWords(t *testing.T) {
 			if actual, expected := score, 5; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
-			expectFormedWords(t, words, PlayedWord{"GOD", 5, coord.Range{coord.Make(6, 3), coord.Make(6, 5)}})
+			expectFormedWords(t, words, play.Word{"GOD", 5, coord.Range{coord.Make(6, 3), coord.Make(6, 5)}})
 		}
 	})
 
@@ -216,7 +217,7 @@ func TestScoreWords(t *testing.T) {
 		board := setupBoard()
 		board.Position(coord.Make(2, 4)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(2, 5)},
 			{tile.Make('G', 2), coord.Make(2, 6)},
 		}, board, dictionary)
@@ -227,7 +228,7 @@ func TestScoreWords(t *testing.T) {
 			if actual, expected := score, 7; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
-			expectFormedWords(t, words, PlayedWord{"DOG", 7, coord.Range{coord.Make(2, 4), coord.Make(2, 6)}})
+			expectFormedWords(t, words, play.Word{"DOG", 7, coord.Range{coord.Make(2, 4), coord.Make(2, 6)}})
 		}
 	})
 
@@ -237,7 +238,7 @@ func TestScoreWords(t *testing.T) {
 		board.Position(coord.Make(3, 6)).Tile = &tile.Tile{Letter: 'O', Points: 1}
 		board.Position(coord.Make(4, 6)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(2, 5)},
 			{tile.Make('G', 2), coord.Make(2, 6)},
 		}, board, dictionary)
@@ -249,8 +250,8 @@ func TestScoreWords(t *testing.T) {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
 			expectFormedWords(t, words,
-				PlayedWord{"DOG", 7, coord.Range{coord.Make(2, 4), coord.Make(2, 6)}},
-				PlayedWord{"GOD", 7, coord.Range{coord.Make(2, 6), coord.Make(4, 6)}})
+				play.Word{"DOG", 7, coord.Range{coord.Make(2, 4), coord.Make(2, 6)}},
+				play.Word{"GOD", 7, coord.Range{coord.Make(2, 6), coord.Make(4, 6)}})
 		}
 	})
 
@@ -258,7 +259,7 @@ func TestScoreWords(t *testing.T) {
 		board := setupBoard()
 		board.Position(coord.Make(2, 8)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(2, 9)},
 			{tile.Make('G', 2), coord.Make(2, 10)},
 		}, board, dictionary)
@@ -269,7 +270,7 @@ func TestScoreWords(t *testing.T) {
 			if actual, expected := score, 5; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
-			expectFormedWords(t, words, PlayedWord{"DOG", 5, coord.Range{coord.Make(2, 8), coord.Make(2, 10)}})
+			expectFormedWords(t, words, play.Word{"DOG", 5, coord.Range{coord.Make(2, 8), coord.Make(2, 10)}})
 		}
 	})
 
@@ -277,7 +278,7 @@ func TestScoreWords(t *testing.T) {
 		board := setupBoard()
 		board.Position(coord.Make(1, 3)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(1, 4)},
 			{tile.Make('G', 2), coord.Make(1, 5)},
 		}, board, dictionary)
@@ -288,7 +289,7 @@ func TestScoreWords(t *testing.T) {
 			if actual, expected := score, 9; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
-			expectFormedWords(t, words, PlayedWord{"DOG", 9, coord.Range{coord.Make(1, 3), coord.Make(1, 5)}})
+			expectFormedWords(t, words, play.Word{"DOG", 9, coord.Range{coord.Make(1, 3), coord.Make(1, 5)}})
 		}
 	})
 
@@ -298,7 +299,7 @@ func TestScoreWords(t *testing.T) {
 		board.Position(coord.Make(2, 5)).Tile = &tile.Tile{Letter: 'O', Points: 1}
 		board.Position(coord.Make(3, 5)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(1, 4)},
 			{tile.Make('G', 2), coord.Make(1, 5)},
 		}, board, dictionary)
@@ -310,8 +311,8 @@ func TestScoreWords(t *testing.T) {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
 			expectFormedWords(t, words,
-				PlayedWord{"DOG", 9, coord.Range{coord.Make(1, 3), coord.Make(1, 5)}},
-				PlayedWord{"GOD", 9, coord.Range{coord.Make(1, 5), coord.Make(3, 5)}})
+				play.Word{"DOG", 9, coord.Range{coord.Make(1, 3), coord.Make(1, 5)}},
+				play.Word{"GOD", 9, coord.Range{coord.Make(1, 5), coord.Make(3, 5)}})
 		}
 	})
 
@@ -319,7 +320,7 @@ func TestScoreWords(t *testing.T) {
 		board := setupBoard()
 		board.Position(coord.Make(1, 9)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(1, 10)},
 			{tile.Make('G', 2), coord.Make(1, 11)},
 		}, board, dictionary)
@@ -330,7 +331,7 @@ func TestScoreWords(t *testing.T) {
 			if actual, expected := score, 5; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
-			expectFormedWords(t, words, PlayedWord{"DOG", 5, coord.Range{coord.Make(1, 9), coord.Make(1, 11)}})
+			expectFormedWords(t, words, play.Word{"DOG", 5, coord.Range{coord.Make(1, 9), coord.Make(1, 11)}})
 		}
 	})
 
@@ -338,7 +339,7 @@ func TestScoreWords(t *testing.T) {
 		board := setupBoard()
 		board.Position(coord.Make(3, 1)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(3, 2)},
 			{tile.Make('G', 2), coord.Make(3, 3)},
 		}, board, dictionary)
@@ -349,7 +350,7 @@ func TestScoreWords(t *testing.T) {
 			if actual, expected := score, 10; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
-			expectFormedWords(t, words, PlayedWord{"DOG", 10, coord.Range{coord.Make(3, 1), coord.Make(3, 3)}})
+			expectFormedWords(t, words, play.Word{"DOG", 10, coord.Range{coord.Make(3, 1), coord.Make(3, 3)}})
 		}
 	})
 
@@ -357,7 +358,7 @@ func TestScoreWords(t *testing.T) {
 		board := setupBoard()
 		board.Position(coord.Make(7, 5)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(7, 6)},
 			{tile.Make('G', 2), coord.Make(7, 7)},
 		}, board, dictionary)
@@ -368,7 +369,7 @@ func TestScoreWords(t *testing.T) {
 			if actual, expected := score, 10; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
-			expectFormedWords(t, words, PlayedWord{"DOG", 10, coord.Range{coord.Make(7, 5), coord.Make(7, 7)}})
+			expectFormedWords(t, words, play.Word{"DOG", 10, coord.Range{coord.Make(7, 5), coord.Make(7, 7)}})
 		}
 	})
 
@@ -378,7 +379,7 @@ func TestScoreWords(t *testing.T) {
 		board.Position(coord.Make(4, 3)).Tile = &tile.Tile{Letter: 'O', Points: 1}
 		board.Position(coord.Make(5, 3)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(3, 2)},
 			{tile.Make('G', 2), coord.Make(3, 3)},
 		}, board, dictionary)
@@ -390,8 +391,8 @@ func TestScoreWords(t *testing.T) {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
 			expectFormedWords(t, words,
-				PlayedWord{"DOG", 10, coord.Range{coord.Make(3, 1), coord.Make(3, 3)}},
-				PlayedWord{"GOD", 10, coord.Range{coord.Make(3, 3), coord.Make(5, 3)}})
+				play.Word{"DOG", 10, coord.Range{coord.Make(3, 1), coord.Make(3, 3)}},
+				play.Word{"GOD", 10, coord.Range{coord.Make(3, 3), coord.Make(5, 3)}})
 		}
 	})
 
@@ -399,7 +400,7 @@ func TestScoreWords(t *testing.T) {
 		board := setupBoard()
 		board.Position(coord.Make(1, 1)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(1, 2)},
 			{tile.Make('G', 2), coord.Make(1, 3)},
 		}, board, dictionary)
@@ -410,7 +411,7 @@ func TestScoreWords(t *testing.T) {
 			if actual, expected := score, 5; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
-			expectFormedWords(t, words, PlayedWord{"DOG", 5, coord.Range{coord.Make(1, 1), coord.Make(1, 3)}})
+			expectFormedWords(t, words, play.Word{"DOG", 5, coord.Range{coord.Make(1, 1), coord.Make(1, 3)}})
 		}
 	})
 
@@ -419,7 +420,7 @@ func TestScoreWords(t *testing.T) {
 		board.Position(coord.Make(1, 1)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 		board.Position(coord.Make(1, 2)).Tile = &tile.Tile{Letter: 'O', Points: 1}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('G', 2), coord.Make(1, 3)},
 			{tile.Make('O', 1), coord.Make(2, 3)},
 			{tile.Make('D', 2), coord.Make(3, 3)},
@@ -432,8 +433,8 @@ func TestScoreWords(t *testing.T) {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
 			expectFormedWords(t, words,
-				PlayedWord{"DOG", 5, coord.Range{coord.Make(1, 1), coord.Make(1, 3)}},
-				PlayedWord{"GOD", 10, coord.Range{coord.Make(1, 3), coord.Make(3, 3)}})
+				play.Word{"DOG", 5, coord.Range{coord.Make(1, 1), coord.Make(1, 3)}},
+				play.Word{"GOD", 10, coord.Range{coord.Make(1, 3), coord.Make(3, 3)}})
 		}
 	})
 
@@ -441,7 +442,7 @@ func TestScoreWords(t *testing.T) {
 		board := setupBoard()
 		board.Position(coord.Make(0, 12)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(0, 13)},
 			{tile.Make('G', 2), coord.Make(0, 14)},
 		}, board, dictionary)
@@ -452,7 +453,7 @@ func TestScoreWords(t *testing.T) {
 			if actual, expected := score, 15; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
-			expectFormedWords(t, words, PlayedWord{"DOG", 15, coord.Range{coord.Make(0, 12), coord.Make(0, 14)}})
+			expectFormedWords(t, words, play.Word{"DOG", 15, coord.Range{coord.Make(0, 12), coord.Make(0, 14)}})
 		}
 	})
 
@@ -462,7 +463,7 @@ func TestScoreWords(t *testing.T) {
 		board.Position(coord.Make(1, 14)).Tile = &tile.Tile{Letter: 'O', Points: 1}
 		board.Position(coord.Make(2, 14)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(0, 13)},
 			{tile.Make('G', 2), coord.Make(0, 14)},
 		}, board, dictionary)
@@ -474,8 +475,8 @@ func TestScoreWords(t *testing.T) {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
 			expectFormedWords(t, words,
-				PlayedWord{"DOG", 15, coord.Range{coord.Make(0, 12), coord.Make(0, 14)}},
-				PlayedWord{"GOD", 15, coord.Range{coord.Make(0, 14), coord.Make(2, 14)}})
+				play.Word{"DOG", 15, coord.Range{coord.Make(0, 12), coord.Make(0, 14)}},
+				play.Word{"GOD", 15, coord.Range{coord.Make(0, 14), coord.Make(2, 14)}})
 		}
 	})
 
@@ -483,7 +484,7 @@ func TestScoreWords(t *testing.T) {
 		board := setupBoard()
 		board.Position(coord.Make(0, 0)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(0, 1)},
 			{tile.Make('G', 2), coord.Make(0, 2)},
 		}, board, dictionary)
@@ -494,7 +495,7 @@ func TestScoreWords(t *testing.T) {
 			if actual, expected := score, 5; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
-			expectFormedWords(t, words, PlayedWord{"DOG", 5, coord.Range{coord.Make(0, 0), coord.Make(0, 2)}})
+			expectFormedWords(t, words, play.Word{"DOG", 5, coord.Range{coord.Make(0, 0), coord.Make(0, 2)}})
 		}
 	})
 
@@ -503,7 +504,7 @@ func TestScoreWords(t *testing.T) {
 		board.Position(coord.Make(13, 6)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 		board.Position(coord.Make(13, 8)).Tile = &tile.Tile{Letter: 'G', Points: 2}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('G', 2), coord.Make(12, 7)},
 			{tile.Make('O', 1), coord.Make(13, 7)},
 			{tile.Make('D', 2), coord.Make(14, 7)},
@@ -516,8 +517,8 @@ func TestScoreWords(t *testing.T) {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
 			expectFormedWords(t, words,
-				PlayedWord{"DOG", 5, coord.Range{coord.Make(13, 6), coord.Make(13, 8)}},
-				PlayedWord{"GOD", 15, coord.Range{coord.Make(12, 7), coord.Make(14, 7)}})
+				play.Word{"DOG", 5, coord.Range{coord.Make(13, 6), coord.Make(13, 8)}},
+				play.Word{"GOD", 15, coord.Range{coord.Make(12, 7), coord.Make(14, 7)}})
 		}
 	})
 
@@ -528,7 +529,7 @@ func TestScoreWords(t *testing.T) {
 		board.Position(coord.Make(3, 3)).Tile = &tile.Tile{Letter: 'E', Points: 1}
 		board.Position(coord.Make(4, 3)).Tile = &tile.Tile{Letter: 'L', Points: 1}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('E', 1), coord.Make(2, 3)},
 			{tile.Make('L', 1), coord.Make(2, 4)},
 			{tile.Make('E', 1), coord.Make(2, 5)},
@@ -545,8 +546,8 @@ func TestScoreWords(t *testing.T) {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
 			expectFormedWords(t, words,
-				PlayedWord{"ELEPHANTS", 14, coord.Range{coord.Make(2, 3), coord.Make(2, 11)}},
-				PlayedWord{"EEL", 3, coord.Range{coord.Make(2, 3), coord.Make(4, 3)}})
+				play.Word{"ELEPHANTS", 14, coord.Range{coord.Make(2, 3), coord.Make(2, 11)}},
+				play.Word{"EEL", 3, coord.Range{coord.Make(2, 3), coord.Make(4, 3)}})
 		}
 	})
 
@@ -554,7 +555,7 @@ func TestScoreWords(t *testing.T) {
 		board := setupBoard()
 		board.Position(coord.Make(0, 8)).Tile = &tile.Tile{Letter: 'S', Points: 1}
 
-		score, words, err := ScoreWords(TilePlacements{
+		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('E', 1), coord.Make(0, 0)},
 			{tile.Make('L', 1), coord.Make(0, 1)},
 			{tile.Make('E', 1), coord.Make(0, 2)},
@@ -574,7 +575,7 @@ func TestScoreWords(t *testing.T) {
 			if actual, expected := score, expectedTotalScore; actual != expected {
 				t.Errorf("Expected a total score of %d but got %d", expected, actual)
 			}
-			expectFormedWords(t, words, PlayedWord{"ELEPHANTS", expectedWordScore, coord.Range{coord.Make(0, 0), coord.Make(0, 8)}})
+			expectFormedWords(t, words, play.Word{"ELEPHANTS", expectedWordScore, coord.Range{coord.Make(0, 0), coord.Make(0, 8)}})
 		}
 	})
 }

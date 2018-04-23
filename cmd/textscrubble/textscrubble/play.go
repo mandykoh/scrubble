@@ -10,6 +10,7 @@ import (
 	gt "github.com/buger/goterm"
 	"github.com/mandykoh/scrubble"
 	"github.com/mandykoh/scrubble/coord"
+	"github.com/mandykoh/scrubble/play"
 	"github.com/mandykoh/scrubble/tile"
 )
 
@@ -43,8 +44,8 @@ func ExchangeTiles(letters string, game *scrubble.Game, rng *rand.Rand) {
 	}
 }
 
-func LettersToPlacements(rowDir, colDir, row, col int, letters string, rack tile.Rack, board *scrubble.Board) scrubble.TilePlacements {
-	var placements scrubble.TilePlacements
+func LettersToPlacements(rowDir, colDir, row, col int, letters string, rack tile.Rack, board *scrubble.Board) play.Tiles {
+	var placements play.Tiles
 	tiles := LettersToRackTiles(letters, rack)
 
 	for _, t := range tiles {
@@ -56,7 +57,7 @@ func LettersToPlacements(rowDir, colDir, row, col int, letters string, rack tile
 			pos = board.Position(coord.Make(row, col))
 		}
 
-		placements = append(placements, scrubble.TilePlacement{
+		placements = append(placements, play.TilePlacement{
 			Tile:  t,
 			Coord: coord.Make(row, col),
 		})

@@ -3,13 +3,14 @@ package scrubble
 import (
 	"github.com/mandykoh/scrubble/coord"
 	"github.com/mandykoh/scrubble/dict"
+	"github.com/mandykoh/scrubble/play"
 	"github.com/mandykoh/scrubble/tile"
 )
 
 // IsChallengeSuccessful determines whether the challenge to a play is
 // successful. A challenge succeeds if any of the words formed by the play are
 // invalid according to the dictionary.
-func IsChallengeSuccessful(formedWords []PlayedWord, isWordValid dict.Dictionary) bool {
+func IsChallengeSuccessful(formedWords []play.Word, isWordValid dict.Dictionary) bool {
 	for _, w := range formedWords {
 		if !isWordValid(w.Word) {
 			return true
@@ -30,15 +31,15 @@ func IsChallengeSuccessful(formedWords []PlayedWord, isWordValid dict.Dictionary
 //
 // Otherwise, nil is returned, indicating that it would be safe to place the
 // given tiles on the board (word validity not withstanding).
-func ValidatePlacements(placements TilePlacements, board *Board) error {
+func ValidatePlacements(placements play.Tiles, board *Board) error {
 	placementsLeft := len(placements)
 	if placementsLeft == 0 {
-		return InvalidTilePlacementError{Reason: NoTilesPlacedReason}
+		return play.InvalidTilePlacementError{Reason: play.NoTilesPlacedReason}
 	}
 
 	bounds := placements.Bounds()
 	if !bounds.IsLinear() {
-		return InvalidTilePlacementError{Reason: PlacementNotLinearReason}
+		return play.InvalidTilePlacementError{Reason: play.PlacementNotLinearReason}
 	}
 
 	connected := false
@@ -46,19 +47,19 @@ func ValidatePlacements(placements TilePlacements, board *Board) error {
 	err := bounds.Each(func(c coord.Coord) error {
 		position := board.Position(c)
 		if position == nil {
-			return InvalidTilePlacementError{Reason: PlacementOutOfBoundsReason}
+			return play.InvalidTilePlacementError{Reason: play.PlacementOutOfBoundsReason}
 		}
 
 		if placement := placements.Find(c); placement != nil {
 			if position.Tile != nil {
-				return InvalidTilePlacementError{Reason: PositionOccupiedReason}
+				return play.InvalidTilePlacementError{Reason: play.PositionOccupiedReason}
 			}
 
 			connected = connected || position.Type.CountsAsConnected() || board.neighbourHasTile(c)
 			placementsLeft--
 
 		} else if position.Tile == nil {
-			return InvalidTilePlacementError{Reason: PlacementNotContiguousReason}
+			return play.InvalidTilePlacementError{Reason: play.PlacementNotContiguousReason}
 		}
 
 		return nil
@@ -68,10 +69,10 @@ func ValidatePlacements(placements TilePlacements, board *Board) error {
 	}
 
 	if placementsLeft != 0 {
-		return InvalidTilePlacementError{Reason: PlacementOverlapReason}
+		return play.InvalidTilePlacementError{Reason: play.PlacementOverlapReason}
 	}
 	if !connected {
-		return InvalidTilePlacementError{Reason: PlacementNotConnectedReason}
+		return play.InvalidTilePlacementError{Reason: play.PlacementNotConnectedReason}
 	}
 
 	return nil

@@ -1,6 +1,9 @@
 package scrubble
 
-import "github.com/mandykoh/scrubble/tile"
+import (
+	"github.com/mandykoh/scrubble/play"
+	"github.com/mandykoh/scrubble/tile"
+)
 
 // HistoryEntry represents an entry for one turn in a game's history of turns.
 type HistoryEntry struct {
@@ -8,7 +11,7 @@ type HistoryEntry struct {
 	SeatIndex   int
 	Score       int
 	TilesSpent  []tile.Tile
-	TilesPlayed TilePlacements
+	TilesPlayed play.Tiles
 	TilesDrawn  []tile.Tile
-	WordsFormed []PlayedWord
+	WordsFormed []play.Word
 }

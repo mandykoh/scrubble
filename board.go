@@ -2,6 +2,7 @@ package scrubble
 
 import (
 	"github.com/mandykoh/scrubble/coord"
+	"github.com/mandykoh/scrubble/play"
 	"github.com/mandykoh/scrubble/positiontype"
 )
 
@@ -96,7 +97,7 @@ func (b *Board) neighbourHasTile(c coord.Coord) bool {
 	return false
 }
 
-func (b *Board) placeTiles(placements TilePlacements) {
+func (b *Board) placeTiles(placements play.Tiles) {
 	for _, p := range placements {
 		tile := p.Tile
 		b.Position(p.Coord).Tile = &tile

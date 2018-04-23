@@ -1,4 +1,4 @@
-package scrubble
+package play
 
 const (
 	// UnknownInvalidTilePlacementReason indicates that a reason was undefined.

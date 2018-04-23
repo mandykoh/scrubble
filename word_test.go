@@ -1,8 +1,12 @@
 package scrubble
 
-import "testing"
+import (
+	"testing"
 
-func expectPlayedWords(t *testing.T, words []PlayedWord, expected ...PlayedWord) {
+	"github.com/mandykoh/scrubble/play"
+)
+
+func expectPlayedWords(t *testing.T, words []play.Word, expected ...play.Word) {
 	t.Helper()
 
 	if actual, expectedLen := len(words), len(expected); actual != expectedLen {

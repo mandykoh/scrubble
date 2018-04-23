@@ -1,4 +1,4 @@
-package scrubble
+package play
 
 import (
 	"github.com/mandykoh/scrubble/coord"

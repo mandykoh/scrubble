@@ -2,6 +2,7 @@ package scrubble
 
 import (
 	"github.com/mandykoh/scrubble/dict"
+	"github.com/mandykoh/scrubble/play"
 	"github.com/mandykoh/scrubble/tile"
 )
 
@@ -23,7 +24,7 @@ type Rules struct {
 // IsChallengeSuccessful determines if a challenge to a play is successful.
 // Unless overridden by WithChallengeValidator, this uses the default
 // implementation provided by the IsChallengeSuccessful function.
-func (r *Rules) IsChallengeSuccessful(formedWords []PlayedWord) bool {
+func (r *Rules) IsChallengeSuccessful(formedWords []play.Word) bool {
 	dictionary := r.dictionary
 	if dictionary == nil {
 		dictionary = dict.DefaultEnglish
@@ -61,7 +62,7 @@ func (r *Rules) NextGamePhase(game *Game) GamePhase {
 //
 // Otherwise, the total score is returned along with the words that would be
 // formed on the board should the tiles be placed.
-func (r *Rules) ScoreWords(placements TilePlacements, board *Board) (score int, words []PlayedWord, err error) {
+func (r *Rules) ScoreWords(placements play.Tiles, board *Board) (score int, words []play.Word, err error) {
 	dictionary := r.dictionary
 	if !r.useDictForScoring {
 		dictionary = func(string) bool { return true }
@@ -85,7 +86,7 @@ func (r *Rules) ScoreWords(placements TilePlacements, board *Board) (score int, 
 //
 // Otherwise, nil is returned, indicating that it would be safe to place the
 // given tiles on the board (word validity not withstanding).
-func (r *Rules) ValidatePlacements(placements TilePlacements, board *Board) error {
+func (r *Rules) ValidatePlacements(placements play.Tiles, board *Board) error {
 	placementValidator := r.placementValidator
 	if placementValidator == nil {
 		placementValidator = ValidatePlacements

@@ -3,6 +3,7 @@ package scrubble
 import (
 	"math/rand"
 
+	"github.com/mandykoh/scrubble/play"
 	"github.com/mandykoh/scrubble/tile"
 )
 
@@ -65,8 +66,8 @@ func (g *Game) Challenge(challengerSeatIndex int, r *rand.Rand) (success bool, e
 		return false, InvalidChallengeError{InvalidChallengerReason}
 	}
 
-	play := g.History.Last()
-	switch play.Type {
+	lastPlay := g.History.Last()
+	switch lastPlay.Type {
 	case ChallengeFailHistoryEntryType, ChallengeSuccessHistoryEntryType:
 		return false, InvalidChallengeError{PlayAlreadyChallengedReason}
 
@@ -77,18 +78,18 @@ func (g *Game) Challenge(challengerSeatIndex int, r *rand.Rand) (success bool, e
 		return false, InvalidChallengeError{NoPlayToChallengeReason}
 	}
 
-	success = g.Rules.IsChallengeSuccessful(play.WordsFormed)
+	success = g.Rules.IsChallengeSuccessful(lastPlay.WordsFormed)
 	if success {
 		challenged := g.prevSeat()
-		challenged.Rack.Remove(play.TilesDrawn...)
-		challenged.Rack = append(challenged.Rack, play.TilesSpent...)
-		challenged.Score -= play.Score
+		challenged.Rack.Remove(lastPlay.TilesDrawn...)
+		challenged.Rack = append(challenged.Rack, lastPlay.TilesSpent...)
+		challenged.Score -= lastPlay.Score
 
-		for _, p := range play.TilesPlayed {
+		for _, p := range lastPlay.TilesPlayed {
 			g.Board.Position(p.Coord).Tile = nil
 		}
 
-		g.Bag = append(g.Bag, play.TilesDrawn...)
+		g.Bag = append(g.Bag, lastPlay.TilesDrawn...)
 		g.Bag.Shuffle(r)
 
 		g.History.AppendChallengeSuccess(challengerSeatIndex)
@@ -179,7 +180,7 @@ func (g *Game) Pass() error {
 // If the tile placement is illegal, an InvalidTilePlacementError is returned.
 //
 // If any formed words are invalid, an InvalidWordError is returned.
-func (g *Game) Play(placements TilePlacements) (playedWords []PlayedWord, err error) {
+func (g *Game) Play(placements play.Tiles) (playedWords []play.Word, err error) {
 	return playedWords, g.requirePhase(MainPhase, func() error {
 		seat := g.CurrentSeat()
 
@@ -249,7 +250,7 @@ func (g *Game) Start(r *rand.Rand) error {
 	})
 }
 
-func (g *Game) endTurn(score int, tilesSpent []tile.Tile, tilesPlayed TilePlacements, wordsFormed []PlayedWord) {
+func (g *Game) endTurn(score int, tilesSpent []tile.Tile, tilesPlayed play.Tiles, wordsFormed []play.Word) {
 	seat := g.CurrentSeat()
 	seat.Score += score
 	tilesDrawn := seat.Rack.FillFromBag(&g.Bag)

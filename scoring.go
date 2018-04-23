@@ -5,6 +5,7 @@ import (
 
 	"github.com/mandykoh/scrubble/coord"
 	"github.com/mandykoh/scrubble/dict"
+	"github.com/mandykoh/scrubble/play"
 	"github.com/mandykoh/scrubble/positiontype"
 	"github.com/mandykoh/scrubble/tile"
 )
@@ -22,7 +23,7 @@ const MaxRackTilesBonus = 50
 //
 // Otherwise, the total score is returned along with the words that would be
 // formed on the board should the tiles be placed.
-func ScoreWords(placements TilePlacements, board *Board, isWordValid dict.Dictionary) (score int, words []PlayedWord, err error) {
+func ScoreWords(placements play.Tiles, board *Board, isWordValid dict.Dictionary) (score int, words []play.Word, err error) {
 	var wordSpans []coord.Range
 	findSpans(coord.Coord.West, coord.Coord.East, placements, &wordSpans, board)
 	findSpans(coord.Coord.North, coord.Coord.South, placements, &wordSpans, board)
@@ -40,7 +41,7 @@ func ScoreWords(placements TilePlacements, board *Board, isWordValid dict.Dictio
 	}
 
 	if len(invalidWords) > 0 {
-		return 0, nil, InvalidWordError{invalidWords}
+		return 0, nil, play.InvalidWordError{Words: invalidWords}
 	}
 
 	if len(placements) >= tile.MaxRackTiles {
@@ -50,10 +51,10 @@ func ScoreWords(placements TilePlacements, board *Board, isWordValid dict.Dictio
 	return
 }
 
-func findSpans(growMinDir, growMaxDir func(coord.Coord) coord.Coord, placements TilePlacements, results *[]coord.Range, board *Board) {
-	unspanned := append(TilePlacements{}, placements...)
+func findSpans(growMinDir, growMaxDir func(coord.Coord) coord.Coord, placements play.Tiles, results *[]coord.Range, board *Board) {
+	unspanned := append(play.Tiles{}, placements...)
 
-	for p := unspanned.takeLast(); p != nil; p = unspanned.takeLast() {
+	for p := unspanned.TakeLast(); p != nil; p = unspanned.TakeLast() {
 		span := coord.Range{Min: p.Coord, Max: p.Coord}
 		growSpan(&span.Min, growMinDir, &unspanned, board)
 		growSpan(&span.Max, growMaxDir, &unspanned, board)
@@ -64,7 +65,7 @@ func findSpans(growMinDir, growMaxDir func(coord.Coord) coord.Coord, placements 
 	}
 }
 
-func findUnspanned(placements TilePlacements, wordSpans []coord.Range, result *[]coord.Range) {
+func findUnspanned(placements play.Tiles, wordSpans []coord.Range, result *[]coord.Range) {
 	for _, p := range placements {
 		inSpan := false
 
@@ -81,7 +82,7 @@ func findUnspanned(placements TilePlacements, wordSpans []coord.Range, result *[
 	}
 }
 
-func growSpan(growCoord *coord.Coord, growDir func(coord.Coord) coord.Coord, unspanned *TilePlacements, board *Board) {
+func growSpan(growCoord *coord.Coord, growDir func(coord.Coord) coord.Coord, unspanned *play.Tiles, board *Board) {
 	for {
 		c := growDir(*growCoord)
 		pos := board.Position(c)
@@ -91,7 +92,7 @@ func growSpan(growCoord *coord.Coord, growDir func(coord.Coord) coord.Coord, uns
 
 		if pos.Tile != nil {
 			*growCoord = c
-		} else if placement := unspanned.take(c); placement != nil {
+		} else if placement := unspanned.Take(c); placement != nil {
 			*growCoord = c
 		} else {
 			break
@@ -99,9 +100,9 @@ func growSpan(growCoord *coord.Coord, growDir func(coord.Coord) coord.Coord, uns
 	}
 }
 
-func spansToPlayedWords(wordSpans []coord.Range, placements TilePlacements, board *Board) (totalScore int, words []PlayedWord) {
+func spansToPlayedWords(wordSpans []coord.Range, placements play.Tiles, board *Board) (totalScore int, words []play.Word) {
 	for _, s := range wordSpans {
-		var playedWord = PlayedWord{Range: s}
+		var playedWord = play.Word{Range: s}
 		var word strings.Builder
 		var wordScoreModifiers []positiontype.Interface
 

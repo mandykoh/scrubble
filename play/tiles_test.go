@@ -1,4 +1,4 @@
-package scrubble
+package play
 
 import (
 	"testing"
@@ -7,27 +7,12 @@ import (
 	"github.com/mandykoh/scrubble/tile"
 )
 
-func expectTilePlacements(t *testing.T, placements TilePlacements, expected ...TilePlacement) {
-	t.Helper()
-
-	if actual, expectedLen := len(placements), len(expected); actual != expectedLen {
-		t.Errorf("Expected there to be %d tiles placed but found %d", expectedLen, actual)
-
-	} else {
-		for i, e := range expected {
-			if placements[i] != e {
-				t.Errorf("Expected tile placement %v in position %d but found %v instead", e, i, placements[i])
-			}
-		}
-	}
-}
-
 func TestTilePlacements(t *testing.T) {
 
 	t.Run(".Bounds()", func(t *testing.T) {
 
 		t.Run("returns the correct bounds of the placements", func(t *testing.T) {
-			placements := TilePlacements{
+			placements := Tiles{
 				{tile.Make('A', 1), coord.Make(3, 0)},
 				{tile.Make('B', 1), coord.Make(3, 1)},
 				{tile.Make('C', 1), coord.Make(2, 7)},
@@ -53,7 +38,7 @@ func TestTilePlacements(t *testing.T) {
 
 	t.Run(".Find()", func(t *testing.T) {
 
-		placements := TilePlacements{
+		placements := Tiles{
 			{tile.Make('Z', 1), coord.Make(2, 5)},
 			{tile.Make('A', 1), coord.Make(3, 7)},
 			{tile.Make('B', 1), coord.Make(3, 2)},
@@ -84,7 +69,7 @@ func TestTilePlacements(t *testing.T) {
 
 	t.Run(".Tiles()", func(t *testing.T) {
 
-		placements := TilePlacements{
+		placements := Tiles{
 			{tile.Make('Z', 1), coord.Make(2, 5)},
 			{tile.Make('A', 1), coord.Make(3, 7)},
 			{tile.Make('B', 1), coord.Make(3, 2)},
@@ -115,17 +100,17 @@ func TestTilePlacements(t *testing.T) {
 		})
 	})
 
-	t.Run(".take()", func(t *testing.T) {
+	t.Run(".Take()", func(t *testing.T) {
 
 		t.Run("removes and returns the specified placement", func(t *testing.T) {
-			placements := TilePlacements{
+			placements := Tiles{
 				{tile.Make('A', 1), coord.Make(3, 0)},
 				{tile.Make('B', 1), coord.Make(3, 1)},
 				{tile.Make('C', 1), coord.Make(2, 7)},
 				{tile.Make('D', 1), coord.Make(5, 6)},
 			}
 
-			p := placements.take(coord.Make(2, 7))
+			p := placements.Take(coord.Make(2, 7))
 
 			if p == nil {
 				t.Errorf("Expected a valid placement but was nil")
@@ -138,7 +123,7 @@ func TestTilePlacements(t *testing.T) {
 				}
 			}
 
-			p = placements.take(coord.Make(5, 6))
+			p = placements.Take(coord.Make(5, 6))
 
 			if p == nil {
 				t.Errorf("Expected a valid placement but was nil")
@@ -153,12 +138,12 @@ func TestTilePlacements(t *testing.T) {
 		})
 
 		t.Run("returns nil when placement is not found", func(t *testing.T) {
-			placements := TilePlacements{
+			placements := Tiles{
 				{tile.Make('A', 1), coord.Make(3, 0)},
 				{tile.Make('B', 1), coord.Make(3, 1)},
 			}
 
-			p := placements.take(coord.Make(3, 8))
+			p := placements.Take(coord.Make(3, 8))
 
 			if p != nil {
 				t.Errorf("Expected nil but still got a placement %v", p)
@@ -166,17 +151,17 @@ func TestTilePlacements(t *testing.T) {
 		})
 	})
 
-	t.Run(".takeLast()", func(t *testing.T) {
+	t.Run(".TakeLast()", func(t *testing.T) {
 
 		t.Run("removes and returns the last placement", func(t *testing.T) {
-			placements := TilePlacements{
+			placements := Tiles{
 				{tile.Make('A', 1), coord.Make(3, 0)},
 				{tile.Make('B', 1), coord.Make(3, 1)},
 				{tile.Make('C', 1), coord.Make(2, 7)},
 				{tile.Make('D', 1), coord.Make(5, 6)},
 			}
 
-			p := placements.takeLast()
+			p := placements.TakeLast()
 
 			if p == nil {
 				t.Errorf("Expected a valid placement but got nil")
@@ -189,7 +174,7 @@ func TestTilePlacements(t *testing.T) {
 				}
 			}
 
-			p = placements.takeLast()
+			p = placements.TakeLast()
 
 			if p == nil {
 				t.Errorf("Expected a valid placement but got nil")
@@ -204,9 +189,9 @@ func TestTilePlacements(t *testing.T) {
 		})
 
 		t.Run("returns nil when no placements are left", func(t *testing.T) {
-			placements := TilePlacements{}
+			placements := Tiles{}
 
-			p := placements.takeLast()
+			p := placements.TakeLast()
 
 			if p != nil {
 				t.Errorf("Expected nil but still got a placement %v", p)
