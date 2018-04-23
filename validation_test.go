@@ -3,6 +3,8 @@ package scrubble
 import (
 	"strings"
 	"testing"
+
+	"github.com/mandykoh/scrubble/positiontype"
 )
 
 func TestIsChallengeSuccessful(t *testing.T) {
@@ -139,7 +141,9 @@ func TestValidatePlacements(t *testing.T) {
 			t.Errorf("Expected %v when attempting to play non-connected tiles but got %v", expected, actual)
 		}
 
-		if actual, expected := board.Position(Coord{7, 7}).Type, startPositionTypeInstance; actual != expected {
+		_, startPositionType, _, _, _, _ := positiontype.All()
+
+		if actual, expected := board.Position(Coord{7, 7}).Type, startPositionType; actual != expected {
 			t.Fatalf("Expected starting position at 7,7 but found %v", actual)
 		}
 

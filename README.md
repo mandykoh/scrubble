@@ -96,9 +96,9 @@ All game operations which use randomness take a random number generator. This al
 Apart from using the standard board layout provided by [`BoardWithStandardLayout`](https://godoc.org/github.com/mandykoh/scrubble#BoardWithStandardLayout), custom board layouts are supported. A custom layout can be easily created as follows:
 
 ```go
-__, st, dl, dw, tl, tw := scrubble.BoardPositionTypes()
+__, st, dl, dw, tl, tw := positiontype.All()
 
-board := scrubble.BoardWithLayout(scrubble.BoardLayout{
+board := scrubble.BoardWithLayout(positiontype.Layout{
     {tw, __, __, dl, __, __, __, tw, __, __, __, dl, __, __, tw},
     {__, dw, __, __, __, tl, __, __, __, tl, __, __, __, dw, __},
     {__, __, dw, __, __, __, dl, __, dl, __, __, __, dw, __, __},

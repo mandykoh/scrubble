@@ -3,12 +3,14 @@ package scrubble
 import (
 	"fmt"
 	"testing"
+
+	"github.com/mandykoh/scrubble/positiontype"
 )
 
 func ExampleBoardWithLayout() {
-	__, st, dl, dw, tl, tw := BoardPositionTypes()
+	__, st, dl, dw, tl, tw := positiontype.All()
 
-	board := BoardWithLayout(BoardLayout{
+	board := BoardWithLayout(positiontype.Layout{
 		{tw, __, __, dl, __, __, __, tw, __, __, __, dl, __, __, tw},
 		{__, dw, __, __, __, tl, __, __, __, tl, __, __, __, dw, __},
 		{__, __, dw, __, __, __, dl, __, dl, __, __, __, dw, __, __},
@@ -31,11 +33,11 @@ func ExampleBoardWithLayout() {
 
 func TestBoard(t *testing.T) {
 
-	__, st, dl, dw, tl, tw := BoardPositionTypes()
+	__, st, dl, dw, tl, tw := positiontype.All()
 
-	expectEmptyBoardWithLayout := func(t *testing.T, b Board, layout BoardLayout) {
+	expectEmptyBoardWithLayout := func(t *testing.T, b Board, layout positiontype.Layout) {
 		rows := len(layout)
-		columns := layout.widestRow()
+		columns := layout.WidestRow()
 
 		if actual, expected := b.Rows, rows; actual != expected {
 			t.Errorf("Expected board to have %d rows but found %d instead", expected, actual)
@@ -49,7 +51,7 @@ func TestBoard(t *testing.T) {
 		}
 
 		for row, lRow := range layout {
-			posType := PositionType(nil)
+			var posType positiontype.Interface
 
 			for col := 0; col < columns; col++ {
 				if col < len(lRow) {
@@ -72,7 +74,7 @@ func TestBoard(t *testing.T) {
 	t.Run("BoardWithLayout()", func(t *testing.T) {
 
 		t.Run("creates an empty board with the specified layout", func(t *testing.T) {
-			layout := BoardLayout{
+			layout := positiontype.Layout{
 				{__, __, __, __, __, __, __},
 				{__, __, __, st, __, __, __},
 				{__, __, __, __, __, __, __},
@@ -84,13 +86,13 @@ func TestBoard(t *testing.T) {
 		})
 
 		t.Run("always creates a rectangular board by filling out with empties to match the longest column", func(t *testing.T) {
-			board := BoardWithLayout(BoardLayout{
+			board := BoardWithLayout(positiontype.Layout{
 				{__, __, __, __, __, __, __},
 				{__, __, __, st},
 				{},
 			})
 
-			expectEmptyBoardWithLayout(t, board, BoardLayout{
+			expectEmptyBoardWithLayout(t, board, positiontype.Layout{
 				{__, __, __, __, __, __, __},
 				{__, __, __, st, __, __, __},
 				{__, __, __, __, __, __, __},
@@ -103,7 +105,7 @@ func TestBoard(t *testing.T) {
 		t.Run("creates an empty board with a standardised layout", func(t *testing.T) {
 			board := BoardWithStandardLayout()
 
-			expectEmptyBoardWithLayout(t, board, BoardLayout{
+			expectEmptyBoardWithLayout(t, board, positiontype.Layout{
 				{tw, __, __, dl, __, __, __, tw, __, __, __, dl, __, __, tw},
 				{__, dw, __, __, __, tl, __, __, __, tl, __, __, __, dw, __},
 				{__, __, dw, __, __, __, dl, __, dl, __, __, __, dw, __, __},

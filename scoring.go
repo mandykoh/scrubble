@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/mandykoh/scrubble/dict"
+	"github.com/mandykoh/scrubble/positiontype"
 )
 
 // MaxRackTilesBonus is the number of bonus points awarded for playing all the
@@ -100,7 +101,7 @@ func spansToPlayedWords(wordSpans []CoordRange, placements TilePlacements, board
 	for _, s := range wordSpans {
 		var playedWord = PlayedWord{CoordRange: s}
 		var word strings.Builder
-		var wordScoreModifiers []PositionType
+		var wordScoreModifiers []positiontype.Interface
 
 		s.EachCoord(func(c Coord) error {
 			var tile *Tile

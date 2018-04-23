@@ -3,10 +3,11 @@ package textscrubble
 import (
 	gt "github.com/buger/goterm"
 	"github.com/mandykoh/scrubble"
+	"github.com/mandykoh/scrubble/positiontype"
 )
 
 func DrawBoard(b *scrubble.Board) {
-	_, st, dl, dw, tl, tw := scrubble.BoardPositionTypes()
+	_, st, dl, dw, tl, tw := positiontype.All()
 
 	for r := 0; r < b.Rows; r++ {
 		offsetY := r*2 + 1

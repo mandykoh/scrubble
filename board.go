@@ -1,5 +1,7 @@
 package scrubble
 
+import "github.com/mandykoh/scrubble/positiontype"
+
 // Board represents a game board, which is a grid of positions on which tiles
 // can be placed. The zero-value of a Board is a zero-sized board.
 type Board struct {
@@ -9,9 +11,11 @@ type Board struct {
 }
 
 // BoardWithLayout creates a board with no tiles, with the specified layout.
-func BoardWithLayout(layout BoardLayout) Board {
+func BoardWithLayout(layout positiontype.Layout) Board {
+	normal, _, _, _, _, _ := positiontype.All()
+
 	rows := len(layout)
-	columns := layout.widestRow()
+	columns := layout.WidestRow()
 
 	b := Board{
 		Rows:      rows,
@@ -28,7 +32,7 @@ func BoardWithLayout(layout BoardLayout) Board {
 
 		// Fill in any unspecified remainder of the row with Normal positions
 		for col := len(lRow); col < columns; col++ {
-			b.Position(Coord{row, col}).Type = normalPositionTypeInstance
+			b.Position(Coord{row, col}).Type = normal
 		}
 	}
 
@@ -37,9 +41,9 @@ func BoardWithLayout(layout BoardLayout) Board {
 
 // BoardWithStandardLayout returns an empty Board with a standardised layout.
 func BoardWithStandardLayout() Board {
-	__, st, dl, dw, tl, tw := BoardPositionTypes()
+	__, st, dl, dw, tl, tw := positiontype.All()
 
-	return BoardWithLayout(BoardLayout{
+	return BoardWithLayout(positiontype.Layout{
 		{tw, __, __, dl, __, __, __, tw, __, __, __, dl, __, __, tw},
 		{__, dw, __, __, __, tl, __, __, __, tl, __, __, __, dw, __},
 		{__, __, dw, __, __, __, dl, __, dl, __, __, __, dw, __, __},
