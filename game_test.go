@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mandykoh/scrubble/challenge"
 	"github.com/mandykoh/scrubble/coord"
 	"github.com/mandykoh/scrubble/dict"
 	"github.com/mandykoh/scrubble/history"
@@ -132,7 +133,7 @@ func TestGame(t *testing.T) {
 			game := setupGame()
 
 			_, err := game.Challenge(5, nil)
-			if actual, expected := err, (InvalidChallengeError{InvalidChallengerReason}); actual != expected {
+			if actual, expected := err, (challenge.InvalidChallengeError{Reason: challenge.InvalidChallengerReason}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
 		})
@@ -142,14 +143,14 @@ func TestGame(t *testing.T) {
 			game.History = nil
 
 			_, err := game.Challenge(game.CurrentSeatIndex, nil)
-			if actual, expected := err, (InvalidChallengeError{NoPlayToChallengeReason}); actual != expected {
+			if actual, expected := err, (challenge.InvalidChallengeError{Reason: challenge.NoPlayToChallengeReason}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
 
 			game.History.AppendPass(game.prevSeatIndex())
 
 			_, err = game.Challenge(game.CurrentSeatIndex, nil)
-			if actual, expected := err, (InvalidChallengeError{NoPlayToChallengeReason}); actual != expected {
+			if actual, expected := err, (challenge.InvalidChallengeError{Reason: challenge.NoPlayToChallengeReason}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
 		})
@@ -159,14 +160,14 @@ func TestGame(t *testing.T) {
 			game.History.AppendChallengeSuccess(game.CurrentSeatIndex)
 
 			_, err := game.Challenge(game.CurrentSeatIndex, nil)
-			if actual, expected := err, (InvalidChallengeError{PlayAlreadyChallengedReason}); actual != expected {
+			if actual, expected := err, (challenge.InvalidChallengeError{Reason: challenge.PlayAlreadyChallengedReason}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
 
 			game.History.AppendChallengeFail(game.CurrentSeatIndex)
 
 			_, err = game.Challenge(game.CurrentSeatIndex, nil)
-			if actual, expected := err, (InvalidChallengeError{PlayAlreadyChallengedReason}); actual != expected {
+			if actual, expected := err, (challenge.InvalidChallengeError{Reason: challenge.PlayAlreadyChallengedReason}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
 		})

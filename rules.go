@@ -1,6 +1,7 @@
 package scrubble
 
 import (
+	"github.com/mandykoh/scrubble/challenge"
 	"github.com/mandykoh/scrubble/dict"
 	"github.com/mandykoh/scrubble/play"
 	"github.com/mandykoh/scrubble/tile"
@@ -16,7 +17,7 @@ type Rules struct {
 	gamePhaseController GamePhaseController
 	placementValidator  PlacementValidator
 	rackValidator       RackValidator
-	challengeValidator  ChallengeValidator
+	challengeValidator  challenge.Validator
 	wordScorer          WordScorer
 	useDictForScoring   bool
 }
@@ -32,7 +33,7 @@ func (r *Rules) IsChallengeSuccessful(formedWords []play.Word) bool {
 
 	isChallengeSuccessful := r.challengeValidator
 	if isChallengeSuccessful == nil {
-		isChallengeSuccessful = IsChallengeSuccessful
+		isChallengeSuccessful = challenge.IsSuccessful
 	}
 	return isChallengeSuccessful(formedWords, dictionary)
 }
@@ -114,7 +115,7 @@ func (r *Rules) ValidateTilesFromRack(rack tile.Rack, toPlay []tile.Tile) (used,
 
 // WithChallengeValidator returns a copy of these Rules which uses the
 // specified function for determining the success or failure of challenges.
-func (r Rules) WithChallengeValidator(validator ChallengeValidator) Rules {
+func (r Rules) WithChallengeValidator(validator challenge.Validator) Rules {
 	r.challengeValidator = validator
 	return r
 }

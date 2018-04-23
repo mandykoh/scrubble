@@ -1,4 +1,4 @@
-package scrubble
+package challenge
 
 const (
 	// UnknownInvalidChallengeReason indicates that a reason was undefined.

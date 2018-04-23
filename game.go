@@ -3,6 +3,7 @@ package scrubble
 import (
 	"math/rand"
 
+	"github.com/mandykoh/scrubble/challenge"
 	"github.com/mandykoh/scrubble/history"
 	"github.com/mandykoh/scrubble/play"
 	"github.com/mandykoh/scrubble/tile"
@@ -61,22 +62,22 @@ func (g *Game) AddPlayer() (seat *Seat, err error) {
 // reason. Otherwise, whether the challenge succeeded or failed is returned.
 func (g *Game) Challenge(challengerSeatIndex int, r *rand.Rand) (success bool, err error) {
 	if len(g.History) == 0 {
-		return false, InvalidChallengeError{NoPlayToChallengeReason}
+		return false, challenge.InvalidChallengeError{Reason: challenge.NoPlayToChallengeReason}
 	}
 	if challengerSeatIndex < 0 || challengerSeatIndex >= len(g.Seats) {
-		return false, InvalidChallengeError{InvalidChallengerReason}
+		return false, challenge.InvalidChallengeError{Reason: challenge.InvalidChallengerReason}
 	}
 
 	lastPlay := g.History.Last()
 	switch lastPlay.Type {
 	case history.ChallengeFailEntryType, history.ChallengeSuccessEntryType:
-		return false, InvalidChallengeError{PlayAlreadyChallengedReason}
+		return false, challenge.InvalidChallengeError{Reason: challenge.PlayAlreadyChallengedReason}
 
 	case history.PlayEntryType:
 		break
 
 	default:
-		return false, InvalidChallengeError{NoPlayToChallengeReason}
+		return false, challenge.InvalidChallengeError{Reason: challenge.NoPlayToChallengeReason}
 	}
 
 	success = g.Rules.IsChallengeSuccessful(lastPlay.WordsFormed)

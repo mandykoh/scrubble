@@ -1,4 +1,4 @@
-package scrubble
+package challenge
 
 import "fmt"
 

@@ -2,22 +2,9 @@ package scrubble
 
 import (
 	"github.com/mandykoh/scrubble/coord"
-	"github.com/mandykoh/scrubble/dict"
 	"github.com/mandykoh/scrubble/play"
 	"github.com/mandykoh/scrubble/tile"
 )
-
-// IsChallengeSuccessful determines whether the challenge to a play is
-// successful. A challenge succeeds if any of the words formed by the play are
-// invalid according to the dictionary.
-func IsChallengeSuccessful(formedWords []play.Word, isWordValid dict.Dictionary) bool {
-	for _, w := range formedWords {
-		if !isWordValid(w.Word) {
-			return true
-		}
-	}
-	return false
-}
 
 // ValidatePlacements checks the intended placement of tiles on a board for
 // legality. This includes: that at least one tile is placed, that tiles are
