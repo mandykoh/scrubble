@@ -60,10 +60,10 @@ $ go test -v ./...
 
 ### Setting up a game
 
-A Game first needs to be created and started to begin play. At minimum, a [Bag](https://godoc.org/github.com/mandykoh/scrubble#Bag) of tiles and a [Board](https://godoc.org/github.com/mandykoh/scrubble#Board) must be provided:
+A Game first needs to be created and started to begin play. At minimum, a [Bag](https://godoc.org/github.com/mandykoh/scrubble/tile#Bag) of tiles and a [Board](https://godoc.org/github.com/mandykoh/scrubble#Board) must be provided:
 
 ```go
-bag := scrubble.BagWithStandardEnglishTiles()
+bag := tile.BagWithStandardEnglishTiles()
 board := scrubble.BoardWithStandardLayout()
 game := scrubble.NewGame(bag, board)
 ```
@@ -122,7 +122,7 @@ with `__`, `st`, `dl`, `dw`, `tl`, and `tw` representing positions where regular
 
 ### Custom tile bags
 
-Bags can also be created with tiles different to those provided by [`BagWithStandardEnglishTiles`](https://godoc.org/github.com/mandykoh/scrubble#BagWithStandardEnglishTiles) by specifying what tiles and how many of each tile a bag should contain:
+Bags can also be created with tiles different to those provided by [`BagWithStandardEnglishTiles`](https://godoc.org/github.com/mandykoh/scrubble/tile#BagWithStandardEnglishTiles) by specifying what tiles and how many of each tile a bag should contain:
 
 ```go
 // Creates a Bag with 9 x A tiles, 2 x B tiles, 2 x C tiles, 4 x D tiles, and
@@ -153,7 +153,7 @@ The current player may play some tiles from their rack, exchange any tiles on th
 Tiles can be played as follows:
 
 ```go
-playedWords, err := game.Play(scrubble.TilePlacements{
+playedWords, err := game.Play(play.Tiles{
 	{tile.Make('B', 3), coord.Make(5, 6)},
 	{tile.Make('G', 2), coord.Make(5, 8)},
 })
@@ -165,7 +165,7 @@ Tiles with different point values are treated as different tiles, with the excep
 those are treated as wildcards, which can take on any letter when played. To play a wildcard, specify a tile of any letter but with a zero point value:
 
 ```go
-playedWords, err := game.Play(scrubble.TilePlacements{
+playedWords, err := game.Play(play.Tiles{
 	{tile.Make('B', 3), coord.Make(5, 6)},
 	{tile.Make('G', 0), coord.Make(5, 8)},
 })
@@ -173,12 +173,12 @@ playedWords, err := game.Play(scrubble.TilePlacements{
 
 If the current player does indeed have a wildcard tile on their rack, the game will interpret this as playing it with a letter of 'G'.
 
-The words formed by the play, their positions on the board, and their individual scores are returned as a slice of [`PlayedWord`](https://godoc.org/github.com/mandykoh/scrubble#PlayedWord)s, so that any UI can display them, highlight them, etc:
+The words formed by the play, their positions on the board, and their individual scores are returned as a slice of [`Word`](https://godoc.org/github.com/mandykoh/scrubble/play#Word)s, so that any UI can display them, highlight them, etc:
 
 ```go
 firstWordAsString := playedWords[0].Word
 scoreOfFirstWord := playedWords[0].Score
-boardCoordinateRangeOfFirstWord := playedWords[0].CoordRange
+boardCoordinateRangeOfFirstWord := playedWords[0].Range
 ```
 
 A player may also exchange any tiles from their rack with random tiles from the bag:
