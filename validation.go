@@ -1,9 +1,11 @@
 package scrubble
 
+import "github.com/mandykoh/scrubble/dict"
+
 // IsChallengeSuccessful determines whether the challenge to a play is
 // successful. A challenge succeeds if any of the words formed by the play are
 // invalid according to the dictionary.
-func IsChallengeSuccessful(formedWords []PlayedWord, isWordValid Dictionary) bool {
+func IsChallengeSuccessful(formedWords []PlayedWord, isWordValid dict.Dictionary) bool {
 	for _, w := range formedWords {
 		if !isWordValid(w.Word) {
 			return true

@@ -1,6 +1,10 @@
 package scrubble
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/mandykoh/scrubble/dict"
+)
 
 // MaxRackTilesBonus is the number of bonus points awarded for playing all the
 // tiles on a full rack in one turn.
@@ -15,7 +19,7 @@ const MaxRackTilesBonus = 50
 //
 // Otherwise, the total score is returned along with the words that would be
 // formed on the board should the tiles be placed.
-func ScoreWords(placements TilePlacements, board *Board, isWordValid Dictionary) (score int, words []PlayedWord, err error) {
+func ScoreWords(placements TilePlacements, board *Board, isWordValid dict.Dictionary) (score int, words []PlayedWord, err error) {
 	var wordSpans []CoordRange
 	findSpans(Coord.West, Coord.East, placements, &wordSpans, board)
 	findSpans(Coord.North, Coord.South, placements, &wordSpans, board)

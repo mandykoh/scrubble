@@ -2,6 +2,8 @@ package scrubble
 
 import (
 	"testing"
+
+	"github.com/mandykoh/scrubble/dict"
 )
 
 func TestRules(t *testing.T) {
@@ -100,7 +102,7 @@ func TestRules(t *testing.T) {
 
 	t.Run(".WithChallengeValidator()", func(t *testing.T) {
 		validatorCalled := 0
-		validator := func([]PlayedWord, Dictionary) bool {
+		validator := func([]PlayedWord, dict.Dictionary) bool {
 			validatorCalled++
 			return false
 		}
@@ -246,7 +248,7 @@ func TestRules(t *testing.T) {
 
 	t.Run(".WithWordScorer()", func(t *testing.T) {
 		scorerCalled := 0
-		scorer := func(TilePlacements, *Board, Dictionary) (int, []PlayedWord, error) {
+		scorer := func(TilePlacements, *Board, dict.Dictionary) (int, []PlayedWord, error) {
 			scorerCalled++
 			return 0, nil, nil
 		}

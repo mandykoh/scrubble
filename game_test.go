@@ -6,6 +6,8 @@ import (
 	"math/rand"
 	"testing"
 	"time"
+
+	"github.com/mandykoh/scrubble/dict"
 )
 
 func TestGame(t *testing.T) {
@@ -170,7 +172,7 @@ func TestGame(t *testing.T) {
 
 			game := setupGame()
 			game.Phase = EndPhase
-			game.Rules = game.Rules.WithChallengeValidator(func([]PlayedWord, Dictionary) bool { return false })
+			game.Rules = game.Rules.WithChallengeValidator(func([]PlayedWord, dict.Dictionary) bool { return false })
 
 			lastTurn := game.History.Last()
 
@@ -235,7 +237,7 @@ func TestGame(t *testing.T) {
 
 			game := setupGame()
 			game.Phase = EndPhase
-			game.Rules = game.Rules.WithChallengeValidator(func([]PlayedWord, Dictionary) bool { return true })
+			game.Rules = game.Rules.WithChallengeValidator(func([]PlayedWord, dict.Dictionary) bool { return true })
 
 			lastTurn := game.History.Last()
 
@@ -671,7 +673,7 @@ func TestGame(t *testing.T) {
 						tilesFromRackValidated++
 						return ValidateTilesFromRack(rack, toPlay)
 					},
-					wordScorer: func(placements TilePlacements, board *Board, dictionary Dictionary) (score int, words []PlayedWord, err error) {
+					wordScorer: func(placements TilePlacements, board *Board, dictionary dict.Dictionary) (score int, words []PlayedWord, err error) {
 						wordsScored++
 						words = append(words, PlayedWord{Word: "SOMEWORD", Score: 123, CoordRange: placements.Bounds()})
 						return 123, words, nil
