@@ -52,7 +52,7 @@ $ go run cmd/textscrubble/main.go [mode] [player1_name] ... [playerN_name]
 Tests can be run like any Go project:
 
 ```
-$ go test
+$ go test -v ./...
 ```
 
 
