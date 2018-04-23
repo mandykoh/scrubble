@@ -1,5 +1,7 @@
 package scrubble
 
+import "github.com/mandykoh/scrubble/history"
+
 // MaxScorelessTurns represents the maximum number of consecutive scoreless
 // turns for the game to end.
 const MaxScorelessTurns = 6
@@ -22,7 +24,7 @@ func NextGamePhase(game *Game) GamePhase {
 	for i := len(game.History) - 1; i >= 0; i-- {
 		entry := &game.History[i]
 
-		if entry.Type == ChallengeSuccessHistoryEntryType {
+		if entry.Type == history.ChallengeSuccessEntryType {
 			i--
 		} else if entry.Score > 0 {
 			break

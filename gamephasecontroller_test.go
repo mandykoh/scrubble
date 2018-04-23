@@ -3,6 +3,7 @@ package scrubble
 import (
 	"testing"
 
+	"github.com/mandykoh/scrubble/history"
 	"github.com/mandykoh/scrubble/tile"
 )
 
@@ -17,7 +18,7 @@ func TestNextGamePhase(t *testing.T) {
 					},
 				},
 			},
-			History: History{{Type: UnknownHistoryEntryType, Score: 123}},
+			History: history.History{{Type: history.UnknownEntryType, Score: 123}},
 		}
 
 		next := NextGamePhase(game)
@@ -32,7 +33,7 @@ func TestNextGamePhase(t *testing.T) {
 			Seats: []Seat{
 				{Rack: tile.Rack{}},
 			},
-			History: History{{Type: UnknownHistoryEntryType, Score: 123}},
+			History: history.History{{Type: history.UnknownEntryType, Score: 123}},
 		}
 
 		next := NextGamePhase(game)
@@ -48,12 +49,12 @@ func TestNextGamePhase(t *testing.T) {
 				{Rack: tile.Rack{{'A', 1}}},
 				{Rack: tile.Rack{{'B', 2}}},
 			},
-			History: History{
-				{Type: PassHistoryEntryType},
-				{Type: PassHistoryEntryType, SeatIndex: 1},
-				{Type: PassHistoryEntryType},
-				{Type: PassHistoryEntryType, SeatIndex: 1},
-				{Type: PassHistoryEntryType},
+			History: history.History{
+				{Type: history.PassEntryType},
+				{Type: history.PassEntryType, SeatIndex: 1},
+				{Type: history.PassEntryType},
+				{Type: history.PassEntryType, SeatIndex: 1},
+				{Type: history.PassEntryType},
 			},
 		}
 
@@ -77,14 +78,14 @@ func TestNextGamePhase(t *testing.T) {
 				{Rack: tile.Rack{{'A', 1}}},
 				{Rack: tile.Rack{{'B', 2}}},
 			},
-			History: History{
-				{Type: PlayHistoryEntryType, Score: 123},
-				{Type: ChallengeSuccessHistoryEntryType, SeatIndex: 1},
-				{Type: PlayHistoryEntryType, SeatIndex: 1, Score: 234},
-				{Type: ChallengeSuccessHistoryEntryType},
-				{Type: PassHistoryEntryType},
-				{Type: PassHistoryEntryType, SeatIndex: 1},
-				{Type: PassHistoryEntryType},
+			History: history.History{
+				{Type: history.PlayEntryType, Score: 123},
+				{Type: history.ChallengeSuccessEntryType, SeatIndex: 1},
+				{Type: history.PlayEntryType, SeatIndex: 1, Score: 234},
+				{Type: history.ChallengeSuccessEntryType},
+				{Type: history.PassEntryType},
+				{Type: history.PassEntryType, SeatIndex: 1},
+				{Type: history.PassEntryType},
 			},
 		}
 

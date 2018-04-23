@@ -1,22 +1,22 @@
-package scrubble
+package history
 
 import "testing"
 
-func TestHistoryEntryType(t *testing.T) {
+func TestEntryType(t *testing.T) {
 
 	t.Run(".GoString()", func(t *testing.T) {
 
 		t.Run("returns Go syntax for valid entry types", func(t *testing.T) {
 			cases := []struct {
-				Type         HistoryEntryType
+				Type         EntryType
 				ExpectedName string
 			}{
-				{PlayHistoryEntryType, "PlayHistoryEntryType"},
-				{PassHistoryEntryType, "PassHistoryEntryType"},
-				{ExchangeTilesHistoryEntryType, "ExchangeTilesHistoryEntryType"},
-				{ChallengeFailHistoryEntryType, "ChallengeFailHistoryEntryType"},
-				{ChallengeSuccessHistoryEntryType, "ChallengeSuccessHistoryEntryType"},
-				{UnknownHistoryEntryType, "UnknownHistoryEntryType"},
+				{PlayEntryType, "PlayEntryType"},
+				{PassEntryType, "PassEntryType"},
+				{ExchangeTilesEntryType, "ExchangeTilesEntryType"},
+				{ChallengeFailEntryType, "ChallengeFailEntryType"},
+				{ChallengeSuccessEntryType, "ChallengeSuccessEntryType"},
+				{UnknownEntryType, "UnknownEntryType"},
 			}
 
 			for _, c := range cases {
@@ -26,11 +26,11 @@ func TestHistoryEntryType(t *testing.T) {
 			}
 		})
 
-		t.Run("returns UnknownHistoryEntryType for invalid types", func(t *testing.T) {
-			cases := []HistoryEntryType{999, -1}
+		t.Run("returns UnknownEntryType for invalid types", func(t *testing.T) {
+			cases := []EntryType{999, -1}
 
 			for _, c := range cases {
-				if actual, expected := c.GoString(), "UnknownHistoryEntryType"; actual != expected {
+				if actual, expected := c.GoString(), "UnknownEntryType"; actual != expected {
 					t.Errorf("Expected invalid reason but got '%s'", actual)
 				}
 			}
@@ -41,14 +41,14 @@ func TestHistoryEntryType(t *testing.T) {
 
 		t.Run("returns name of valid types", func(t *testing.T) {
 			cases := []struct {
-				Type         HistoryEntryType
+				Type         EntryType
 				ExpectedName string
 			}{
-				{PlayHistoryEntryType, "Play"},
-				{PassHistoryEntryType, "Pass"},
-				{ExchangeTilesHistoryEntryType, "ExchangeTiles"},
-				{ChallengeFailHistoryEntryType, "ChallengeFail"},
-				{ChallengeSuccessHistoryEntryType, "ChallengeSuccess"},
+				{PlayEntryType, "Play"},
+				{PassEntryType, "Pass"},
+				{ExchangeTilesEntryType, "ExchangeTiles"},
+				{ChallengeFailEntryType, "ChallengeFail"},
+				{ChallengeSuccessEntryType, "ChallengeSuccess"},
 			}
 
 			for _, c := range cases {
@@ -59,7 +59,7 @@ func TestHistoryEntryType(t *testing.T) {
 		})
 
 		t.Run("returns 'Unknown' for invalid type", func(t *testing.T) {
-			cases := []HistoryEntryType{999, -1}
+			cases := []EntryType{999, -1}
 
 			for _, c := range cases {
 				if actual, expected := c.String(), "Unknown"; actual != expected {

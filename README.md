@@ -254,4 +254,4 @@ game.Rules = game.Rules.
 
 ### Game history and replays
 
-Each turn and challenge for a game is recorded in its [`History`](https://godoc.org/github.com/mandykoh/scrubble#History). All operations requiring a random number generator accept one as a parameter. When the game is run consistently with a deterministic random number generator (such as a seeded pseudorandom generator), the history makes it possible to track (and backtrack) and replay games.
+Each turn and challenge for a game is recorded in its [`History`](https://godoc.org/github.com/mandykoh/scrubble/history#History). All operations requiring a random number generator accept one as a parameter. When the game is run consistently with a deterministic random number generator (such as a seeded pseudorandom generator), the history makes it possible to track (and backtrack) and replay games.

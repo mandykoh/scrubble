@@ -9,6 +9,7 @@ import (
 
 	"github.com/mandykoh/scrubble/coord"
 	"github.com/mandykoh/scrubble/dict"
+	"github.com/mandykoh/scrubble/history"
 	"github.com/mandykoh/scrubble/play"
 	"github.com/mandykoh/scrubble/tile"
 )
@@ -106,9 +107,9 @@ func TestGame(t *testing.T) {
 					},
 				},
 				CurrentSeatIndex: 1,
-				History: History{
+				History: history.History{
 					{
-						Type:        PlayHistoryEntryType,
+						Type:        history.PlayEntryType,
 						SeatIndex:   0,
 						Score:       123,
 						TilesSpent:  []tile.Tile{{'A', 1}, {'D', 1}},
@@ -230,7 +231,7 @@ func TestGame(t *testing.T) {
 			t.Run("records a history entry", func(t *testing.T) {
 				expectHistory(t, game.History,
 					game.History[0],
-					HistoryEntry{Type: ChallengeFailHistoryEntryType, SeatIndex: game.CurrentSeatIndex},
+					history.Entry{Type: history.ChallengeFailEntryType, SeatIndex: game.CurrentSeatIndex},
 				)
 			})
 		})
@@ -303,7 +304,7 @@ func TestGame(t *testing.T) {
 			t.Run("records a history entry", func(t *testing.T) {
 				expectHistory(t, game.History,
 					game.History[0],
-					HistoryEntry{Type: ChallengeSuccessHistoryEntryType, SeatIndex: game.CurrentSeatIndex},
+					history.Entry{Type: history.ChallengeSuccessEntryType, SeatIndex: game.CurrentSeatIndex},
 				)
 			})
 		})
@@ -489,7 +490,7 @@ func TestGame(t *testing.T) {
 
 			t.Run("records a history entry", func(t *testing.T) {
 				expectHistory(t, game.History,
-					HistoryEntry{Type: ExchangeTilesHistoryEntryType, SeatIndex: 1, TilesSpent: tilesExchanged, TilesDrawn: nextBagTiles[len(nextBagTiles)-1:]},
+					history.Entry{Type: history.ExchangeTilesEntryType, SeatIndex: 1, TilesSpent: tilesExchanged, TilesDrawn: nextBagTiles[len(nextBagTiles)-1:]},
 				)
 			})
 		})
@@ -592,7 +593,7 @@ func TestGame(t *testing.T) {
 			}
 
 			expectHistory(t, game.History,
-				HistoryEntry{Type: PassHistoryEntryType, SeatIndex: 1},
+				history.Entry{Type: history.PassEntryType, SeatIndex: 1},
 			)
 		})
 
@@ -851,7 +852,7 @@ func TestGame(t *testing.T) {
 
 			t.Run("records a history entry", func(t *testing.T) {
 				expectHistory(t, game.History,
-					HistoryEntry{Type: PlayHistoryEntryType, SeatIndex: 1, Score: 123, TilesSpent: placements.Tiles(), TilesPlayed: placements, TilesDrawn: nextBagTiles, WordsFormed: []play.Word{
+					history.Entry{Type: history.PlayEntryType, SeatIndex: 1, Score: 123, TilesSpent: placements.Tiles(), TilesPlayed: placements, TilesDrawn: nextBagTiles, WordsFormed: []play.Word{
 						{Word: "SOMEWORD", Score: 123, Range: placements.Bounds()},
 					}},
 				)

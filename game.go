@@ -3,6 +3,7 @@ package scrubble
 import (
 	"math/rand"
 
+	"github.com/mandykoh/scrubble/history"
 	"github.com/mandykoh/scrubble/play"
 	"github.com/mandykoh/scrubble/tile"
 )
@@ -19,7 +20,7 @@ type Game struct {
 	Board            Board
 	CurrentSeatIndex int
 	Rules            Rules
-	History          History
+	History          history.History
 }
 
 // NewGame returns an initialised game in the SetupPhase with no players.
@@ -68,10 +69,10 @@ func (g *Game) Challenge(challengerSeatIndex int, r *rand.Rand) (success bool, e
 
 	lastPlay := g.History.Last()
 	switch lastPlay.Type {
-	case ChallengeFailHistoryEntryType, ChallengeSuccessHistoryEntryType:
+	case history.ChallengeFailEntryType, history.ChallengeSuccessEntryType:
 		return false, InvalidChallengeError{PlayAlreadyChallengedReason}
 
-	case PlayHistoryEntryType:
+	case history.PlayEntryType:
 		break
 
 	default:

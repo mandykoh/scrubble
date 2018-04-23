@@ -5,6 +5,7 @@ import (
 
 	"github.com/mandykoh/scrubble/coord"
 	"github.com/mandykoh/scrubble/dict"
+	"github.com/mandykoh/scrubble/history"
 	"github.com/mandykoh/scrubble/play"
 	"github.com/mandykoh/scrubble/tile"
 )
@@ -56,8 +57,8 @@ func TestRules(t *testing.T) {
 				Seats: []Seat{
 					{},
 				},
-				History: History{
-					{Type: UnknownHistoryEntryType, Score: 123},
+				History: history.History{
+					{Type: history.UnknownEntryType, Score: 123},
 				},
 			})
 		})
