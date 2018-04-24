@@ -226,7 +226,7 @@ g.Rules = g.Rules.WithDictionaryForScoring(trueOrFalse)
 
 When `WithDictionaryForScoring` is set to true, all words formed on every play are automatically validated against the current dictionary, and only valid words are allowed to be played.
 
-When set to false, any words may be played and it is up to players to initiate a challenge (via [`Game.Challenge`](https://godoc.org/github.com/mandykoh/scrubble#Game.Challenge)) if they believe some words formed may be illegal, at which point words from the last play will then be validated against the dictionary:
+When set to false, any words may be played and it is up to players to initiate a challenge (via [`Game.Challenge`](https://godoc.org/github.com/mandykoh/scrubble/game#Game.Challenge)) if they believe some words formed may be illegal, at which point words from the last play will then be validated against the dictionary:
 
 ```go
 err := g.Challenge(challengerSeatNum, rng)
