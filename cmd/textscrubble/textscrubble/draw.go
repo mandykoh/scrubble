@@ -2,9 +2,9 @@ package textscrubble
 
 import (
 	gt "github.com/buger/goterm"
-	"github.com/mandykoh/scrubble"
 	"github.com/mandykoh/scrubble/board"
 	"github.com/mandykoh/scrubble/coord"
+	"github.com/mandykoh/scrubble/game"
 	"github.com/mandykoh/scrubble/tile"
 )
 
@@ -66,14 +66,14 @@ func DrawBoard(b *board.Board) {
 	}
 }
 
-func DrawGame(g *scrubble.Game, players []Player) {
+func DrawGame(g *game.Game, players []Player) {
 	gt.Clear()
 	DrawBoard(&g.Board)
 	DrawStats(g, players)
 
 	gt.MoveCursor(0, g.Board.Rows*2+3)
 
-	if g.Phase == scrubble.EndPhase {
+	if g.Phase == game.EndPhase {
 		gt.Println("Game over")
 	} else {
 		gt.Printf("%s’s turn (? for help, Enter to clear output):", players[g.CurrentSeatIndex].Name)
@@ -100,7 +100,7 @@ func DrawRack(r tile.Rack) {
 	}
 }
 
-func DrawStats(g *scrubble.Game, players []Player) {
+func DrawStats(g *game.Game, players []Player) {
 	gt.MoveCursor(g.Board.Columns*4+7, 1)
 	gt.Printf("%d tiles in bag", len(g.Bag))
 

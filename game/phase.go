@@ -1,10 +1,10 @@
-package scrubble
+package game
 
-// GamePhase represents the phase that a Game is in.
-type GamePhase int
+// Phase represents the phase that a Game is in.
+type Phase int
 
 const (
-	SetupPhase GamePhase = iota
+	SetupPhase Phase = iota
 	MainPhase
 	EndPhase
 	UnknownPhase
@@ -12,7 +12,7 @@ const (
 
 // GoString returns the Go syntax representation of the game phase, or
 // UnknownPhase if it is not a valid phase.
-func (p GamePhase) GoString() string {
+func (p Phase) GoString() string {
 	switch p {
 	case SetupPhase:
 		return "SetupPhase"
@@ -27,7 +27,7 @@ func (p GamePhase) GoString() string {
 
 // String returns the textual representation of the game phase, or "Unknown" if
 // it is not a valid phase.
-func (p GamePhase) String() string {
+func (p Phase) String() string {
 	switch p {
 	case SetupPhase:
 		return "Setup"

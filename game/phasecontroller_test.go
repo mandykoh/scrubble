@@ -1,4 +1,4 @@
-package scrubble
+package game
 
 import (
 	"testing"
@@ -8,7 +8,7 @@ import (
 	"github.com/mandykoh/scrubble/tile"
 )
 
-func TestNextGamePhase(t *testing.T) {
+func TestNextPhase(t *testing.T) {
 
 	t.Run("allows the game to continue when the rack could be replenished with at least one tile", func(t *testing.T) {
 		game := &Game{
@@ -22,7 +22,7 @@ func TestNextGamePhase(t *testing.T) {
 			History: history.History{{Type: history.UnknownEntryType, Score: 123}},
 		}
 
-		next := NextGamePhase(game)
+		next := NextPhase(game)
 
 		if next != MainPhase {
 			t.Errorf("Expected that the game should continue but got %#v next", next)
@@ -37,7 +37,7 @@ func TestNextGamePhase(t *testing.T) {
 			History: history.History{{Type: history.UnknownEntryType, Score: 123}},
 		}
 
-		next := NextGamePhase(game)
+		next := NextPhase(game)
 
 		if next != EndPhase {
 			t.Errorf("Expected that the game should end but got %#v next", next)
@@ -59,14 +59,14 @@ func TestNextGamePhase(t *testing.T) {
 			},
 		}
 
-		next := NextGamePhase(game)
+		next := NextPhase(game)
 
 		if next == EndPhase {
 			t.Errorf("Expected that the game should still continue for one turn but got %#v next", next)
 		}
 
 		game.History.AppendPass(1)
-		next = NextGamePhase(game)
+		next = NextPhase(game)
 
 		if next != EndPhase {
 			t.Errorf("Expected that the game should end but got %#v next", next)
@@ -90,14 +90,14 @@ func TestNextGamePhase(t *testing.T) {
 			},
 		}
 
-		next := NextGamePhase(game)
+		next := NextPhase(game)
 
 		if next == EndPhase {
 			t.Errorf("Expected that the game should still continue for one turn but got %#v next", next)
 		}
 
 		game.History.AppendPass(1)
-		next = NextGamePhase(game)
+		next = NextPhase(game)
 
 		if next != EndPhase {
 			t.Errorf("Expected that the game should end but got %#v next", next)

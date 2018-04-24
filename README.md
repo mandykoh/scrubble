@@ -65,19 +65,19 @@ A Game first needs to be created and started to begin play. At minimum, a [Bag](
 ```go
 bag := tile.BagWithStandardEnglishTiles()
 board := board.WithStandardLayout()
-game := scrubble.NewGame(bag, board)
+g := game.New(bag, board)
 ```
 
 The above can also be written more concisely as:
 
 ```go
-game := scrubble.NewGameWithDefaults()
+g := game.NewWithDefaults()
 ```
 
-Once a game is created, it is in the Setup phase, and players can be added. `scrubble` doesn’t model players directly, preferring to let different usages model them as appropriate for the usage. Instead, we have [Seats](https://godoc.org/github.com/mandykoh/scrubble#Seat), which represent a player’s presence at a game (and all things relevant to that, such as the score and the rack of tiles). We can add seats as follows:
+Once a game is created, it is in the Setup phase, and players can be added. `scrubble` doesn’t model players directly, preferring to let different usages model them as appropriate for the usage. Instead, we have [Seats](https://godoc.org/github.com/mandykoh/scrubble/game#Seat), which represent a player’s presence at a game (and all things relevant to that, such as the score and the rack of tiles). We can add seats as follows:
 
 ```go
-seat, err := game.AddPlayer()
+seat, err := g.AddPlayer()
 ```
 
 When some players have been added to the game, the game can be started, which begins the Main game phase:
@@ -85,7 +85,7 @@ When some players have been added to the game, the game can be started, which be
 ```go
 var rng *rand.Rand
 ...
-err := game.Start(rng)
+err := g.Start(rng)
 ```
 
 All game operations which use randomness take a random number generator. This allows you to control the random generation as appropriate for your use case.
@@ -144,8 +144,8 @@ If a tile is given a point value of zero, it is treated as a wildcard tile (a ti
 Once started, a game begins at a random player’s turn, and proceeds around to each player in sequence. The current player can be determined from the game itself:
 
 ```go
-seat := game.CurrentSeat()          // Points to seat of player whose turn it is
-seatIndex := game.CurrentSeatIndex  // Allows indexing game.Seats to the current seat
+seat := g.CurrentSeat()          // Points to seat of player whose turn it is
+seatIndex := g.CurrentSeatIndex  // Allows indexing game.Seats to the current seat
 ```
 
 The current player may play some tiles from their rack, exchange any tiles on their rack with the bag, or pass.
@@ -153,7 +153,7 @@ The current player may play some tiles from their rack, exchange any tiles on th
 Tiles can be played as follows:
 
 ```go
-playedWords, err := game.Play(play.Tiles{
+playedWords, err := g.Play(play.Tiles{
 	{tile.Make('B', 3), coord.Make(5, 6)},
 	{tile.Make('G', 2), coord.Make(5, 8)},
 })
@@ -165,7 +165,7 @@ Tiles with different point values are treated as different tiles, with the excep
 those are treated as wildcards, which can take on any letter when played. To play a wildcard, specify a tile of any letter but with a zero point value:
 
 ```go
-playedWords, err := game.Play(play.Tiles{
+playedWords, err := g.Play(play.Tiles{
 	{tile.Make('B', 3), coord.Make(5, 6)},
 	{tile.Make('G', 0), coord.Make(5, 8)},
 })
@@ -184,7 +184,7 @@ boardCoordinateRangeOfFirstWord := playedWords[0].Range
 A player may also exchange any tiles from their rack with random tiles from the bag:
 
 ```go
-err := game.ExchangeTiles([]tile.Tile{
+err := g.ExchangeTiles([]tile.Tile{
 	{'B', 3},
 	{'G', 2},
 }, rng)
@@ -195,7 +195,7 @@ Here, if the player possesses a 'B' and a 'G' tile, they will be removed from th
 And finally, a player may simply pass, forfeiting their turn to the next player:
 
 ```go
-err := game.Pass()
+err := g.Pass()
 ```
 
 After each turn, the player’s rack is replenished from the bag and their total score is updated. These can be determined from the player’s seat:
@@ -210,7 +210,7 @@ tilesInRack := seat.Rack
 After each turn, according to the game rules in play, the game may end. This can be determined from the game’s current phase:
 
 ```go
-hasGameEnded := game.Phase == scrubble.EndPhase
+hasGameEnded := g.Phase == game.EndPhase
 ```
 
 When the game ends, scoring is finalised and no further turn actions may be made.
@@ -221,7 +221,7 @@ When the game ends, scoring is finalised and no further turn actions may be made
 Games can be run either using player-initiated challenges (the default) or automatic word validation. This is controlled via the `Rules`:
 
 ```go
-game.Rules = game.Rules.WithDictionaryForScoring(trueOrFalse)
+g.Rules = g.Rules.WithDictionaryForScoring(trueOrFalse)
 ```
 
 When `WithDictionaryForScoring` is set to true, all words formed on every play are automatically validated against the current dictionary, and only valid words are allowed to be played.
@@ -229,7 +229,7 @@ When `WithDictionaryForScoring` is set to true, all words formed on every play a
 When set to false, any words may be played and it is up to players to initiate a challenge (via [`Game.Challenge`](https://godoc.org/github.com/mandykoh/scrubble#Game.Challenge)) if they believe some words formed may be illegal, at which point words from the last play will then be validated against the dictionary:
 
 ```go
-err := game.Challenge(challengerSeatNum, rng)
+err := g.Challenge(challengerSeatNum, rng)
 ```
 
 A challenge can be made immediately after any successful play, and only affects that play. A play may only be challenged once. If the challenge succeeds, the last play is withdrawn and the challenged player effectively loses their turn. Otherwise, the challenger suffers a score penalty.
@@ -239,10 +239,10 @@ If the last, game-ending play of a game can be challenged, it is possible for a 
 
 ### Custom rules
 
-Each game has a [`Rules`](https://godoc.org/github.com/mandykoh/scrubble#Rules) struct that it uses to run the core logic of the game, like how to determine what words were formed and how to score those words. This can be overridden to extend or completely replace game rules:
+Each game has a [`Rules`](https://godoc.org/github.com/mandykoh/scrubble/game#Rules) struct that it uses to run the core logic of the game, like how to determine what words were formed and how to score those words. This can be overridden to extend or completely replace game rules:
 
 ```go
-game.Rules = game.Rules.
+g.Rules = g.Rules.
 	WithChallengeValidator(overridingChallengeValidator).
 	WithDictionary(overridingDictionary).
 	WithGamePhaseController(overridingGamePhaseController).

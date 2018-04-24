@@ -1,4 +1,4 @@
-package scrubble
+package game
 
 import "github.com/mandykoh/scrubble/history"
 
@@ -6,13 +6,13 @@ import "github.com/mandykoh/scrubble/history"
 // turns for the game to end.
 const MaxScorelessTurns = 6
 
-// GamePhaseController represents a function which determines the next game
-// phase after a turn is played. This is called by Game at the end of each turn.
-type GamePhaseController func(game *Game) (next GamePhase)
+// PhaseController represents a function which determines the next game phase
+// after a turn is played. This is called by Game at the end of each turn.
+type PhaseController func(game *Game) (next Phase)
 
-// NextGamePhase implements a GamePhaseController with the default game
-// progression and ending conditions.
-func NextGamePhase(game *Game) GamePhase {
+// NextPhase implements a PhaseController with the default game progression
+// and ending conditions.
+func NextPhase(game *Game) Phase {
 	lastTurn := game.History.Last()
 
 	// Last player's rack was empty, which means they played out

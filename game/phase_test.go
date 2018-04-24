@@ -1,4 +1,4 @@
-package scrubble
+package game
 
 import "testing"
 
@@ -8,7 +8,7 @@ func TestGamePhase(t *testing.T) {
 
 		t.Run("returns Go syntax for valid game phases", func(t *testing.T) {
 			cases := []struct {
-				Phase        GamePhase
+				Phase        Phase
 				ExpectedName string
 			}{
 				{SetupPhase, "SetupPhase"},
@@ -25,7 +25,7 @@ func TestGamePhase(t *testing.T) {
 		})
 
 		t.Run("returns UnknownPhase for invalid game phases", func(t *testing.T) {
-			cases := []GamePhase{999, -1}
+			cases := []Phase{999, -1}
 
 			for _, c := range cases {
 				if actual, expected := c.GoString(), "UnknownPhase"; actual != expected {
@@ -39,7 +39,7 @@ func TestGamePhase(t *testing.T) {
 
 		t.Run("returns name of valid game phases", func(t *testing.T) {
 			cases := []struct {
-				Phase        GamePhase
+				Phase        Phase
 				ExpectedName string
 			}{
 				{SetupPhase, "Setup"},
@@ -55,7 +55,7 @@ func TestGamePhase(t *testing.T) {
 		})
 
 		t.Run("returns 'Unknown' for invalid game phases", func(t *testing.T) {
-			cases := []GamePhase{999, -1}
+			cases := []Phase{999, -1}
 
 			for _, c := range cases {
 				if actual, expected := c.String(), "Unknown"; actual != expected {

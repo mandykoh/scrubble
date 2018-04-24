@@ -1,4 +1,4 @@
-package scrubble
+package game
 
 import (
 	"testing"
@@ -216,7 +216,7 @@ func TestRules(t *testing.T) {
 
 	t.Run(".WithGamePhaseController()", func(t *testing.T) {
 		controllerCalled := 0
-		controller := func(*Game) GamePhase {
+		controller := func(*Game) Phase {
 			controllerCalled++
 			return MainPhase
 		}

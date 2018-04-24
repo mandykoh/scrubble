@@ -1,4 +1,4 @@
-package scrubble
+package game
 
 import "fmt"
 

@@ -1,4 +1,4 @@
-package scrubble
+package game
 
 import (
 	"errors"
@@ -71,7 +71,7 @@ func TestGame(t *testing.T) {
 
 			_, err := game.AddPlayer()
 
-			if actual, expected := err, (GameOutOfPhaseError{SetupPhase, MainPhase}); actual != expected {
+			if actual, expected := err, (OutOfPhaseError{SetupPhase, MainPhase}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
 		})
@@ -317,7 +317,7 @@ func TestGame(t *testing.T) {
 				game.CurrentSeat().Rack[0],
 			}, nil)
 
-			if actual, expected := err, (GameOutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
+			if actual, expected := err, (OutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
 		})
@@ -457,7 +457,7 @@ func TestGame(t *testing.T) {
 
 		t.Run("with a game-ending play (eg final consecutive scoreless turn)", func(t *testing.T) {
 			game := setupGame()
-			game.Rules = game.Rules.WithGamePhaseController(func(*Game) GamePhase {
+			game.Rules = game.Rules.WithGamePhaseController(func(*Game) Phase {
 				return EndPhase
 			}).WithEndGameScorer(func(lastPlay *history.Entry, seats []seat.Seat) (finalScores []int) {
 				for i := range seats {
@@ -528,7 +528,7 @@ func TestGame(t *testing.T) {
 
 			err := game.Pass()
 
-			if actual, expected := err, (GameOutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
+			if actual, expected := err, (OutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
 		})
@@ -571,7 +571,7 @@ func TestGame(t *testing.T) {
 
 		t.Run("with a game-ending play (eg final consecutive scoreless turn)", func(t *testing.T) {
 			game := setupGame()
-			game.Rules = game.Rules.WithGamePhaseController(func(*Game) GamePhase {
+			game.Rules = game.Rules.WithGamePhaseController(func(*Game) Phase {
 				return EndPhase
 			}).WithEndGameScorer(func(lastPlay *history.Entry, seats []seat.Seat) (finalScores []int) {
 				for i := range seats {
@@ -662,7 +662,7 @@ func TestGame(t *testing.T) {
 				{tile.Make('A', 1), coord.Make(7, 7)},
 			})
 
-			if actual, expected := err, (GameOutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
+			if actual, expected := err, (OutOfPhaseError{MainPhase, SetupPhase}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
 		})
@@ -829,7 +829,7 @@ func TestGame(t *testing.T) {
 
 		t.Run("with a game-ending play", func(t *testing.T) {
 			game := setupGame()
-			game.Rules = game.Rules.WithGamePhaseController(func(*Game) GamePhase {
+			game.Rules = game.Rules.WithGamePhaseController(func(*Game) Phase {
 				return EndPhase
 			}).WithEndGameScorer(func(lastPlay *history.Entry, seats []seat.Seat) (finalScores []int) {
 				for _, s := range game.Seats {
@@ -947,7 +947,7 @@ func TestGame(t *testing.T) {
 			game.AddPlayer()
 			err := game.RemovePlayer(0)
 
-			if actual, expected := err, (GameOutOfPhaseError{SetupPhase, MainPhase}); actual != expected {
+			if actual, expected := err, (OutOfPhaseError{SetupPhase, MainPhase}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
 		})
@@ -1017,7 +1017,7 @@ func TestGame(t *testing.T) {
 
 			err := game.Start(rand.New(rand.NewSource(seed)))
 
-			if actual, expected := err, (GameOutOfPhaseError{SetupPhase, MainPhase}); actual != expected {
+			if actual, expected := err, (OutOfPhaseError{SetupPhase, MainPhase}); actual != expected {
 				t.Errorf("Expected %v but got %v", expected, actual)
 			}
 
@@ -1031,7 +1031,7 @@ func TestGame(t *testing.T) {
 
 			err := game.Start(rand.New(rand.NewSource(seed)))
 
-			if actual, expected := err, (NotEnoughPlayersError{GameMinPlayers, 0}); actual != expected {
+			if actual, expected := err, (NotEnoughPlayersError{MinPlayers, 0}); actual != expected {
 				t.Errorf("Expected %v but got %v", expected, actual)
 			}
 			if actual, expected := game.Phase, SetupPhase; actual != expected {

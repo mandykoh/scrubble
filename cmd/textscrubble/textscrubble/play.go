@@ -8,9 +8,9 @@ import (
 	"math/rand"
 
 	gt "github.com/buger/goterm"
-	"github.com/mandykoh/scrubble"
 	"github.com/mandykoh/scrubble/board"
 	"github.com/mandykoh/scrubble/coord"
+	"github.com/mandykoh/scrubble/game"
 	"github.com/mandykoh/scrubble/play"
 	"github.com/mandykoh/scrubble/tile"
 )
@@ -19,10 +19,10 @@ type Player struct {
 	Name string
 }
 
-func Challenge(game *scrubble.Game, rng *rand.Rand) {
-	challengerIndex := game.CurrentSeatIndex
+func Challenge(g *game.Game, rng *rand.Rand) {
+	challengerIndex := g.CurrentSeatIndex
 
-	success, err := game.Challenge(challengerIndex, rng)
+	success, err := g.Challenge(challengerIndex, rng)
 	if err != nil {
 		gt.Println(gt.Color(err.Error(), gt.RED))
 	} else if success {
@@ -32,11 +32,11 @@ func Challenge(game *scrubble.Game, rng *rand.Rand) {
 	}
 }
 
-func ExchangeTiles(letters string, game *scrubble.Game, rng *rand.Rand) {
-	seat := game.CurrentSeat()
+func ExchangeTiles(letters string, g *game.Game, rng *rand.Rand) {
+	seat := g.CurrentSeat()
 	tiles := LettersToRackTiles(letters, seat.Rack)
 
-	err := game.ExchangeTiles(tiles, rng)
+	err := g.ExchangeTiles(tiles, rng)
 	if err != nil {
 		gt.Println(gt.Color(err.Error(), gt.RED))
 	} else {
@@ -88,14 +88,14 @@ LetterSearch:
 	return
 }
 
-func Pass(game *scrubble.Game) {
-	err := game.Pass()
+func Pass(g *game.Game) {
+	err := g.Pass()
 	if err != nil {
 		gt.Println(gt.Color(err.Error(), gt.RED))
 	}
 }
 
-func PlayTiles(dir, row, col, letters string, game *scrubble.Game) {
+func PlayTiles(dir, row, col, letters string, g *game.Game) {
 	rowDir, colDir := 1, 0
 	if dir == "across" {
 		rowDir, colDir = 0, 1
@@ -104,22 +104,22 @@ func PlayTiles(dir, row, col, letters string, game *scrubble.Game) {
 	rowNum, _ := strconv.Atoi(row)
 	colNum, _ := strconv.Atoi(col)
 
-	seat := game.CurrentSeat()
-	placements := LettersToPlacements(rowDir, colDir, rowNum, colNum, letters, seat.Rack, &game.Board)
+	seat := g.CurrentSeat()
+	placements := LettersToPlacements(rowDir, colDir, rowNum, colNum, letters, seat.Rack, &g.Board)
 
-	_, err := game.Play(placements)
+	_, err := g.Play(placements)
 	if err != nil {
 		gt.Println(gt.Color(err.Error(), gt.RED))
 	} else {
 		DrawRack(seat.Rack)
-		if len(game.History.Last().TilesDrawn) > 0 {
+		if len(g.History.Last().TilesDrawn) > 0 {
 			gt.Printf("\n\nTiles replenished from bag")
 		}
 	}
 }
 
-func ShuffleRack(game *scrubble.Game, rng *rand.Rand) {
-	seat := game.CurrentSeat()
+func ShuffleRack(g *game.Game, rng *rand.Rand) {
+	seat := g.CurrentSeat()
 
 	rng.Shuffle(len(seat.Rack), func(i, j int) {
 		seat.Rack[i], seat.Rack[j] = seat.Rack[j], seat.Rack[i]

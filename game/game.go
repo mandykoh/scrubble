@@ -1,4 +1,4 @@
-package scrubble
+package game
 
 import (
 	"math/rand"
@@ -11,13 +11,18 @@ import (
 	"github.com/mandykoh/scrubble/tile"
 )
 
-const GameMinPlayers = 1
+// MinPlayers is the minimum number of players required before a game can be
+// started.
+const MinPlayers = 1
+
+// ChallengeFailPenaltyPoints is the number of points deducted for a failed
+// challenge.
 const ChallengeFailPenaltyPoints = 5
 
 // Game represents the rules and simulation for a single game. The zero-value of
 // a Game is a game in the SetupPhase with no players.
 type Game struct {
-	Phase            GamePhase
+	Phase            Phase
 	Seats            []seat.Seat
 	Bag              tile.Bag
 	Board            board.Board
@@ -26,18 +31,18 @@ type Game struct {
 	History          history.History
 }
 
-// NewGame returns an initialised game in the SetupPhase with no players.
-func NewGame(bag tile.Bag, board board.Board) *Game {
+// New returns an initialised game in the SetupPhase with no players.
+func New(bag tile.Bag, board board.Board) *Game {
 	return &Game{
 		Bag:   bag,
 		Board: board,
 	}
 }
 
-// NewGameWithDefaults returns an initialised game in the SetupPhase with no
+// NewWithDefaults returns an initialised game in the SetupPhase with no
 // players, with a default bag and board layout.
-func NewGameWithDefaults() *Game {
-	return NewGame(tile.BagWithStandardEnglishTiles(), board.WithStandardLayout())
+func NewWithDefaults() *Game {
+	return New(tile.BagWithStandardEnglishTiles(), board.WithStandardLayout())
 }
 
 // AddPlayer adds a seat for a new player to the game.
@@ -228,8 +233,8 @@ func (g *Game) RemovePlayer(seatIndex int) error {
 func (g *Game) Start(r *rand.Rand) error {
 	return g.requirePhase(SetupPhase, func() error {
 
-		if len(g.Seats) < GameMinPlayers {
-			return NotEnoughPlayersError{GameMinPlayers, len(g.Seats)}
+		if len(g.Seats) < MinPlayers {
+			return NotEnoughPlayersError{MinPlayers, len(g.Seats)}
 		}
 
 		g.CurrentSeatIndex = r.Intn(len(g.Seats))
@@ -284,9 +289,9 @@ func (g *Game) prevSeatIndex() int {
 	return (g.CurrentSeatIndex + (len(g.Seats) - 1)) % len(g.Seats)
 }
 
-func (g *Game) requirePhase(phase GamePhase, action func() error) error {
+func (g *Game) requirePhase(phase Phase, action func() error) error {
 	if g.Phase != phase {
-		return GameOutOfPhaseError{phase, g.Phase}
+		return OutOfPhaseError{phase, g.Phase}
 	}
 
 	return action()

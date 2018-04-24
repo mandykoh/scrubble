@@ -1,4 +1,4 @@
-package scrubble
+package game
 
 import (
 	"github.com/mandykoh/scrubble/board"
@@ -18,7 +18,7 @@ import (
 // when a play is challenged, rather than automatically upon word scoring).
 type Rules struct {
 	dictionary          dict.Dictionary
-	gamePhaseController GamePhaseController
+	gamePhaseController PhaseController
 	placementValidator  play.PlacementValidator
 	rackValidator       tile.RackValidator
 	challengeValidator  challenge.Validator
@@ -45,15 +45,15 @@ func (r *Rules) ValidateChallenge(lastPlay *history.Entry) (success bool, err er
 
 // NextGamePhase determines the next game phase given the game's current state.
 // Unless overridden by WithGamePhaseController, this uses the default
-// implementation provided by the NextGamePhase function.
+// implementation provided by the game.NextPhase function.
 //
 // This is called at the end of each turn to determine the phase of the game.
-func (r *Rules) NextGamePhase(game *Game) GamePhase {
+func (r *Rules) NextGamePhase(g *Game) Phase {
 	nextGamePhase := r.gamePhaseController
 	if nextGamePhase == nil {
-		nextGamePhase = NextGamePhase
+		nextGamePhase = NextPhase
 	}
-	return nextGamePhase(game)
+	return nextGamePhase(g)
 }
 
 // ScoreEndGame determines the final scores to be added to each player's total
@@ -162,7 +162,7 @@ func (r Rules) WithEndGameScorer(scorer scoring.EndGameScorer) Rules {
 // WithGamePhaseController returns a copy of these Rules which uses the
 // specified function for determining the progression of the game, and the
 // conditions under which the game ends.
-func (r Rules) WithGamePhaseController(controller GamePhaseController) Rules {
+func (r Rules) WithGamePhaseController(controller PhaseController) Rules {
 	r.gamePhaseController = controller
 	return r
 }

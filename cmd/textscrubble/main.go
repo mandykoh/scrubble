@@ -13,8 +13,8 @@ import (
 	"regexp"
 
 	gt "github.com/buger/goterm"
-	"github.com/mandykoh/scrubble"
 	"github.com/mandykoh/scrubble/cmd/textscrubble/textscrubble"
+	"github.com/mandykoh/scrubble/game"
 )
 
 func main() {
@@ -33,17 +33,17 @@ func main() {
 
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	game := scrubble.NewGameWithDefaults()
-	game.Rules = game.Rules.WithDictionaryForScoring(!challengeEnabled)
+	g := game.NewWithDefaults()
+	g.Rules = g.Rules.WithDictionaryForScoring(!challengeEnabled)
 
 	var players []textscrubble.Player
 
 	for i := 2; i < len(os.Args); i++ {
 		players = append(players, textscrubble.Player{Name: os.Args[i]})
-		game.AddPlayer()
+		g.AddPlayer()
 	}
 
-	err := game.Start(rng)
+	err := g.Start(rng)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error starting game: %v\n", err)
 		os.Exit(1)
@@ -52,8 +52,8 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
-		seat := game.CurrentSeat()
-		textscrubble.DrawGame(game, players)
+		s := g.CurrentSeat()
+		textscrubble.DrawGame(g, players)
 
 		gt.Println()
 
@@ -61,22 +61,22 @@ func main() {
 		line := scanner.Text()
 
 		if line == "rack" {
-			textscrubble.DrawRack(seat.Rack)
+			textscrubble.DrawRack(s.Rack)
 
 		} else if line == "pass" {
-			textscrubble.Pass(game)
+			textscrubble.Pass(g)
 
 		} else if line == "shuffle" {
-			textscrubble.ShuffleRack(game, rng)
+			textscrubble.ShuffleRack(g, rng)
 
 		} else if challengeEnabled && line == "challenge" {
-			textscrubble.Challenge(game, rng)
+			textscrubble.Challenge(g, rng)
 
 		} else if matches := cmdExchangePattern.FindStringSubmatch(line); matches != nil {
-			textscrubble.ExchangeTiles(matches[1], game, rng)
+			textscrubble.ExchangeTiles(matches[1], g, rng)
 
 		} else if matches := cmdPlayPattern.FindStringSubmatch(line); matches != nil {
-			textscrubble.PlayTiles(matches[1], matches[2], matches[3], matches[4], game)
+			textscrubble.PlayTiles(matches[1], matches[2], matches[3], matches[4], g)
 
 		} else if line == "?" {
 			gt.Println("      rack - show rack")
