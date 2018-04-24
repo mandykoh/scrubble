@@ -1,4 +1,4 @@
-package positiontype
+package board
 
 type start struct {
 }

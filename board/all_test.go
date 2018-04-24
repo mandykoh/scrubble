@@ -1,16 +1,16 @@
-package positiontype
+package board
 
 import (
 	"testing"
 )
 
-func TestAll(t *testing.T) {
+func TestAllPositionTypes(t *testing.T) {
 
-	__, st, dl, dw, tl, tw := All()
+	__, st, dl, dw, tl, tw := AllPositionTypes()
 
 	t.Run("returns the correct set of board position types", func(t *testing.T) {
 		cases := []struct {
-			actual, expected Interface
+			actual, expected PositionType
 		}{
 			{__, normalInstance},
 			{st, startInstance},

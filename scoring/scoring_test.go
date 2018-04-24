@@ -1,17 +1,89 @@
-package scrubble
+package scoring
 
 import (
 	"testing"
 
+	"github.com/mandykoh/scrubble/board"
 	"github.com/mandykoh/scrubble/coord"
+	"github.com/mandykoh/scrubble/history"
 	"github.com/mandykoh/scrubble/play"
+	"github.com/mandykoh/scrubble/seat"
 	"github.com/mandykoh/scrubble/tile"
 )
 
+func TestScoreEndGame(t *testing.T) {
+
+	t.Run("when last turn was a play (someone played out)", func(t *testing.T) {
+
+		t.Run("awards bonus of double the sum of all opponent's tiles", func(t *testing.T) {
+			finalScores := ScoreEndGame(&history.Entry{SeatIndex: 0, Type: history.PlayEntryType}, []seat.Seat{
+				{
+					Rack: tile.Rack{},
+				},
+				{
+					Rack: tile.Rack{
+						{'C', 4},
+						{'D', 5},
+					},
+				},
+				{
+					Rack: tile.Rack{
+						{'E', 6},
+						{'F', 7},
+					},
+				},
+			})
+
+			if actual, expected := finalScores[0], 44; actual != expected {
+				t.Errorf("Expected playing out player's score after final play to be %d but was %d", expected, actual)
+			}
+			if actual, expected := finalScores[1], 0; actual != expected {
+				t.Errorf("Expected opponent's score after final play to be %d but was %d", expected, actual)
+			}
+			if actual, expected := finalScores[2], 0; actual != expected {
+				t.Errorf("Expected opponent's score after final play to be %d but was %d", expected, actual)
+			}
+		})
+	})
+
+	t.Run("when the game ended without playing out (too many scoreless turns)", func(t *testing.T) {
+
+		t.Run("penalises all players by their unplayed tiles", func(t *testing.T) {
+			finalScores := ScoreEndGame(&history.Entry{SeatIndex: 0, Type: history.PassEntryType}, []seat.Seat{
+				{
+					Rack: tile.Rack{},
+				},
+				{
+					Rack: tile.Rack{
+						{'C', 4},
+						{'D', 5},
+					},
+				},
+				{
+					Rack: tile.Rack{
+						{'E', 6},
+						{'F', 7},
+					},
+				},
+			})
+
+			if actual, expected := finalScores[0], 0; actual != expected {
+				t.Errorf("Expected player's end game scoring to be %d but was %d", expected, actual)
+			}
+			if actual, expected := finalScores[1], -9; actual != expected {
+				t.Errorf("Expected player's end game scoring to be %d but was %d", expected, actual)
+			}
+			if actual, expected := finalScores[2], -13; actual != expected {
+				t.Errorf("Expected player's end game scoring to be %d but was %d", expected, actual)
+			}
+		})
+	})
+}
+
 func TestScoreWords(t *testing.T) {
-	setupBoard := func() *Board {
-		board := BoardWithStandardLayout()
-		return &board
+	setupBoard := func() *board.Board {
+		b := board.WithStandardLayout()
+		return &b
 	}
 
 	dictionary := func(word string) (valid bool) {
@@ -31,11 +103,11 @@ func TestScoreWords(t *testing.T) {
 	}
 
 	t.Run("returns an error for single-letter words", func(t *testing.T) {
-		board := setupBoard()
+		b := setupBoard()
 
 		_, _, err := ScoreWords(play.Tiles{
 			{tile.Make('A', 2), coord.Make(7, 7)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err == nil {
 			t.Errorf("Expected an error for single-letter word but got nil")
@@ -51,9 +123,9 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("checks each word against dictionary for validity", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(0, 3)).Tile = &tile.Tile{Letter: 'G', Points: 2}
-		board.Position(coord.Make(2, 3)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(0, 3)).Tile = &tile.Tile{Letter: 'G', Points: 2}
+		b.Position(coord.Make(2, 3)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
 		var wordsLookedUp []string
 
@@ -66,7 +138,7 @@ func TestScoreWords(t *testing.T) {
 			{tile.Make('D', 2), coord.Make(1, 2)},
 			{tile.Make('O', 1), coord.Make(1, 3)},
 			{tile.Make('G', 2), coord.Make(1, 4)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err == nil {
 			t.Errorf("Expected an error but succeeded")
@@ -94,13 +166,13 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("counts entire horizontal word", func(t *testing.T) {
-		board := setupBoard()
+		b := setupBoard()
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('D', 2), coord.Make(1, 2)},
 			{tile.Make('O', 1), coord.Make(1, 3)},
 			{tile.Make('G', 2), coord.Make(1, 4)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -113,13 +185,13 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("counts entire horizontal word connected to existing tile", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(2, 3)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(2, 3)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(2, 4)},
 			{tile.Make('G', 2), coord.Make(2, 5)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -132,13 +204,13 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("counts entire vertical word", func(t *testing.T) {
-		board := setupBoard()
+		b := setupBoard()
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('D', 2), coord.Make(2, 1)},
 			{tile.Make('O', 1), coord.Make(3, 1)},
 			{tile.Make('G', 2), coord.Make(4, 1)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -151,13 +223,13 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("counts entire vertical word connected to existing tile", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(1, 4)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(1, 4)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(2, 4)},
 			{tile.Make('G', 2), coord.Make(3, 4)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -170,15 +242,15 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("counts hooked words connected to the main word", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(5, 4)).Tile = &tile.Tile{Letter: 'D', Points: 2}
-		board.Position(coord.Make(6, 4)).Tile = &tile.Tile{Letter: 'O', Points: 1}
-		board.Position(coord.Make(7, 4)).Tile = &tile.Tile{Letter: 'G', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(5, 4)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b.Position(coord.Make(6, 4)).Tile = &tile.Tile{Letter: 'O', Points: 1}
+		b.Position(coord.Make(7, 4)).Tile = &tile.Tile{Letter: 'G', Points: 2}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('S', 2), coord.Make(8, 4)},
 			{tile.Make('O', 2), coord.Make(8, 5)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -193,15 +265,15 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("does not count connected words which were unmodified by the play", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(5, 4)).Tile = &tile.Tile{Letter: 'D', Points: 2}
-		board.Position(coord.Make(6, 4)).Tile = &tile.Tile{Letter: 'O', Points: 1}
-		board.Position(coord.Make(7, 4)).Tile = &tile.Tile{Letter: 'G', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(5, 4)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b.Position(coord.Make(6, 4)).Tile = &tile.Tile{Letter: 'O', Points: 1}
+		b.Position(coord.Make(7, 4)).Tile = &tile.Tile{Letter: 'G', Points: 2}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('G', 2), coord.Make(6, 3)},
 			{tile.Make('D', 2), coord.Make(6, 5)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -214,13 +286,13 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("awards double-letter score under a newly placed tile", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(2, 4)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(2, 4)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(2, 5)},
 			{tile.Make('G', 2), coord.Make(2, 6)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -233,15 +305,15 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("awards double-letter score for each word formed", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(2, 4)).Tile = &tile.Tile{Letter: 'D', Points: 2}
-		board.Position(coord.Make(3, 6)).Tile = &tile.Tile{Letter: 'O', Points: 1}
-		board.Position(coord.Make(4, 6)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(2, 4)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b.Position(coord.Make(3, 6)).Tile = &tile.Tile{Letter: 'O', Points: 1}
+		b.Position(coord.Make(4, 6)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(2, 5)},
 			{tile.Make('G', 2), coord.Make(2, 6)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -256,13 +328,13 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("does not award double-letter score under an existing tile", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(2, 8)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(2, 8)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(2, 9)},
 			{tile.Make('G', 2), coord.Make(2, 10)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -275,13 +347,13 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("awards triple-letter score under a newly placed tile", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(1, 3)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(1, 3)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(1, 4)},
 			{tile.Make('G', 2), coord.Make(1, 5)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -294,15 +366,15 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("awards triple-letter score for each word formed", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(1, 3)).Tile = &tile.Tile{Letter: 'D', Points: 2}
-		board.Position(coord.Make(2, 5)).Tile = &tile.Tile{Letter: 'O', Points: 1}
-		board.Position(coord.Make(3, 5)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(1, 3)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b.Position(coord.Make(2, 5)).Tile = &tile.Tile{Letter: 'O', Points: 1}
+		b.Position(coord.Make(3, 5)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(1, 4)},
 			{tile.Make('G', 2), coord.Make(1, 5)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -317,13 +389,13 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("does not award triple-letter score under an existing tile", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(1, 9)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(1, 9)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(1, 10)},
 			{tile.Make('G', 2), coord.Make(1, 11)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -336,13 +408,13 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("awards double-word score under a newly placed tile", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(3, 1)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(3, 1)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(3, 2)},
 			{tile.Make('G', 2), coord.Make(3, 3)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -355,13 +427,13 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("awards double-word score for the start position", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(7, 5)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(7, 5)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(7, 6)},
 			{tile.Make('G', 2), coord.Make(7, 7)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -374,15 +446,15 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("awards double-word score for each word formed", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(3, 1)).Tile = &tile.Tile{Letter: 'D', Points: 2}
-		board.Position(coord.Make(4, 3)).Tile = &tile.Tile{Letter: 'O', Points: 1}
-		board.Position(coord.Make(5, 3)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(3, 1)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b.Position(coord.Make(4, 3)).Tile = &tile.Tile{Letter: 'O', Points: 1}
+		b.Position(coord.Make(5, 3)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(3, 2)},
 			{tile.Make('G', 2), coord.Make(3, 3)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -397,13 +469,13 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("does not award double-word score under an existing tile", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(1, 1)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(1, 1)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(1, 2)},
 			{tile.Make('G', 2), coord.Make(1, 3)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -416,15 +488,15 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("awards double-word score only for the word its under", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(1, 1)).Tile = &tile.Tile{Letter: 'D', Points: 2}
-		board.Position(coord.Make(1, 2)).Tile = &tile.Tile{Letter: 'O', Points: 1}
+		b := setupBoard()
+		b.Position(coord.Make(1, 1)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b.Position(coord.Make(1, 2)).Tile = &tile.Tile{Letter: 'O', Points: 1}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('G', 2), coord.Make(1, 3)},
 			{tile.Make('O', 1), coord.Make(2, 3)},
 			{tile.Make('D', 2), coord.Make(3, 3)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -439,13 +511,13 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("awards triple-word score under a newly placed tile", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(0, 12)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(0, 12)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(0, 13)},
 			{tile.Make('G', 2), coord.Make(0, 14)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -458,15 +530,15 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("awards triple-word score for each word formed", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(0, 12)).Tile = &tile.Tile{Letter: 'D', Points: 2}
-		board.Position(coord.Make(1, 14)).Tile = &tile.Tile{Letter: 'O', Points: 1}
-		board.Position(coord.Make(2, 14)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(0, 12)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b.Position(coord.Make(1, 14)).Tile = &tile.Tile{Letter: 'O', Points: 1}
+		b.Position(coord.Make(2, 14)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(0, 13)},
 			{tile.Make('G', 2), coord.Make(0, 14)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -481,13 +553,13 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("does not award triple-word score under an existing tile", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(0, 0)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(0, 0)).Tile = &tile.Tile{Letter: 'D', Points: 2}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('O', 1), coord.Make(0, 1)},
 			{tile.Make('G', 2), coord.Make(0, 2)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -500,15 +572,15 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("awards triple-word score only for the word its under", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(13, 6)).Tile = &tile.Tile{Letter: 'D', Points: 2}
-		board.Position(coord.Make(13, 8)).Tile = &tile.Tile{Letter: 'G', Points: 2}
+		b := setupBoard()
+		b.Position(coord.Make(13, 6)).Tile = &tile.Tile{Letter: 'D', Points: 2}
+		b.Position(coord.Make(13, 8)).Tile = &tile.Tile{Letter: 'G', Points: 2}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('G', 2), coord.Make(12, 7)},
 			{tile.Make('O', 1), coord.Make(13, 7)},
 			{tile.Make('D', 2), coord.Make(14, 7)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -523,11 +595,11 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("awards an extra point bonus if a full rack's worth of tiles is played", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(2, 6)).Tile = &tile.Tile{Letter: 'P', Points: 3}
-		board.Position(coord.Make(2, 8)).Tile = &tile.Tile{Letter: 'A', Points: 1}
-		board.Position(coord.Make(3, 3)).Tile = &tile.Tile{Letter: 'E', Points: 1}
-		board.Position(coord.Make(4, 3)).Tile = &tile.Tile{Letter: 'L', Points: 1}
+		b := setupBoard()
+		b.Position(coord.Make(2, 6)).Tile = &tile.Tile{Letter: 'P', Points: 3}
+		b.Position(coord.Make(2, 8)).Tile = &tile.Tile{Letter: 'A', Points: 1}
+		b.Position(coord.Make(3, 3)).Tile = &tile.Tile{Letter: 'E', Points: 1}
+		b.Position(coord.Make(4, 3)).Tile = &tile.Tile{Letter: 'L', Points: 1}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('E', 1), coord.Make(2, 3)},
@@ -537,7 +609,7 @@ func TestScoreWords(t *testing.T) {
 			{tile.Make('N', 1), coord.Make(2, 9)},
 			{tile.Make('T', 1), coord.Make(2, 10)},
 			{tile.Make('S', 1), coord.Make(2, 11)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		if err != nil {
 			t.Errorf("Expected success but got error %v", err)
@@ -552,8 +624,8 @@ func TestScoreWords(t *testing.T) {
 	})
 
 	t.Run("awards stacked word score bonuses", func(t *testing.T) {
-		board := setupBoard()
-		board.Position(coord.Make(0, 8)).Tile = &tile.Tile{Letter: 'S', Points: 1}
+		b := setupBoard()
+		b.Position(coord.Make(0, 8)).Tile = &tile.Tile{Letter: 'S', Points: 1}
 
 		score, words, err := ScoreWords(play.Tiles{
 			{tile.Make('E', 1), coord.Make(0, 0)},
@@ -564,7 +636,7 @@ func TestScoreWords(t *testing.T) {
 			{tile.Make('A', 1), coord.Make(0, 5)},
 			{tile.Make('N', 1), coord.Make(0, 6)},
 			{tile.Make('T', 1), coord.Make(0, 7)},
-		}, board, dictionary)
+		}, b, dictionary)
 
 		expectedWordScore := 3 * 3 * (1 + 1 + 1 + 2*3 + 4 + 1 + 1 + 1 + 1)
 		expectedTotalScore := expectedWordScore + MaxRackTilesBonus

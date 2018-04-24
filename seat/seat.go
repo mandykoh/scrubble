@@ -1,4 +1,4 @@
-package scrubble
+package seat
 
 import "github.com/mandykoh/scrubble/tile"
 

@@ -64,7 +64,7 @@ A Game first needs to be created and started to begin play. At minimum, a [Bag](
 
 ```go
 bag := tile.BagWithStandardEnglishTiles()
-board := scrubble.BoardWithStandardLayout()
+board := board.WithStandardLayout()
 game := scrubble.NewGame(bag, board)
 ```
 
@@ -93,12 +93,12 @@ All game operations which use randomness take a random number generator. This al
 
 ### Custom boards
 
-Apart from using the standard board layout provided by [`BoardWithStandardLayout`](https://godoc.org/github.com/mandykoh/scrubble#BoardWithStandardLayout), custom board layouts are supported. A custom layout can be easily created as follows:
+Apart from using the standard board layout provided by [`board.WithStandardLayout`](https://godoc.org/github.com/mandykoh/scrubble/board#WithStandardLayout), custom board layouts are supported. A custom layout can be easily created as follows:
 
 ```go
-__, st, dl, dw, tl, tw := positiontype.All()
+__, st, dl, dw, tl, tw := board.AllPositionTypes()
 
-board := scrubble.BoardWithLayout(positiontype.Layout{
+b := board.WithLayout(board.Layout{
     {tw, __, __, dl, __, __, __, tw, __, __, __, dl, __, __, tw},
     {__, dw, __, __, __, tl, __, __, __, tl, __, __, __, dw, __},
     {__, __, dw, __, __, __, dl, __, dl, __, __, __, dw, __, __},
@@ -122,7 +122,7 @@ with `__`, `st`, `dl`, `dw`, `tl`, and `tw` representing positions where regular
 
 ### Custom tile bags
 
-Bags can also be created with tiles different to those provided by [`BagWithStandardEnglishTiles`](https://godoc.org/github.com/mandykoh/scrubble/tile#BagWithStandardEnglishTiles) by specifying what tiles and how many of each tile a bag should contain:
+Bags can also be created with tiles different to those provided by [`tile.BagWithStandardEnglishTiles`](https://godoc.org/github.com/mandykoh/scrubble/tile#BagWithStandardEnglishTiles) by specifying what tiles and how many of each tile a bag should contain:
 
 ```go
 // Creates a Bag with 9 x A tiles, 2 x B tiles, 2 x C tiles, 4 x D tiles, and

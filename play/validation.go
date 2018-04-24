@@ -1,8 +1,8 @@
-package scrubble
+package play
 
 import (
+	"github.com/mandykoh/scrubble/board"
 	"github.com/mandykoh/scrubble/coord"
-	"github.com/mandykoh/scrubble/play"
 )
 
 // ValidatePlacements checks the intended placement of tiles on a board for
@@ -17,35 +17,35 @@ import (
 //
 // Otherwise, nil is returned, indicating that it would be safe to place the
 // given tiles on the board (word validity not withstanding).
-func ValidatePlacements(placements play.Tiles, board *Board) error {
+func ValidatePlacements(placements Tiles, b *board.Board) error {
 	placementsLeft := len(placements)
 	if placementsLeft == 0 {
-		return play.InvalidTilePlacementError{Reason: play.NoTilesPlacedReason}
+		return InvalidTilePlacementError{Reason: NoTilesPlacedReason}
 	}
 
 	bounds := placements.Bounds()
 	if !bounds.IsLinear() {
-		return play.InvalidTilePlacementError{Reason: play.PlacementNotLinearReason}
+		return InvalidTilePlacementError{Reason: PlacementNotLinearReason}
 	}
 
 	connected := false
 
 	err := bounds.Each(func(c coord.Coord) error {
-		position := board.Position(c)
+		position := b.Position(c)
 		if position == nil {
-			return play.InvalidTilePlacementError{Reason: play.PlacementOutOfBoundsReason}
+			return InvalidTilePlacementError{Reason: PlacementOutOfBoundsReason}
 		}
 
 		if placement := placements.Find(c); placement != nil {
 			if position.Tile != nil {
-				return play.InvalidTilePlacementError{Reason: play.PositionOccupiedReason}
+				return InvalidTilePlacementError{Reason: PositionOccupiedReason}
 			}
 
-			connected = connected || position.Type.CountsAsConnected() || board.neighbourHasTile(c)
+			connected = connected || position.Type.CountsAsConnected() || b.NeighbourHasTile(c)
 			placementsLeft--
 
 		} else if position.Tile == nil {
-			return play.InvalidTilePlacementError{Reason: play.PlacementNotContiguousReason}
+			return InvalidTilePlacementError{Reason: PlacementNotContiguousReason}
 		}
 
 		return nil
@@ -55,10 +55,10 @@ func ValidatePlacements(placements play.Tiles, board *Board) error {
 	}
 
 	if placementsLeft != 0 {
-		return play.InvalidTilePlacementError{Reason: play.PlacementOverlapReason}
+		return InvalidTilePlacementError{Reason: PlacementOverlapReason}
 	}
 	if !connected {
-		return play.InvalidTilePlacementError{Reason: play.PlacementNotConnectedReason}
+		return InvalidTilePlacementError{Reason: PlacementNotConnectedReason}
 	}
 
 	return nil

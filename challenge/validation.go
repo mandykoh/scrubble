@@ -2,17 +2,32 @@ package challenge
 
 import (
 	"github.com/mandykoh/scrubble/dict"
-	"github.com/mandykoh/scrubble/play"
+	"github.com/mandykoh/scrubble/history"
 )
 
-// IsSuccessful determines whether the challenge to a play is successful. A
-// challenge succeeds if any of the words formed by the play are invalid
-// according to the dictionary.
-func IsSuccessful(formedWords []play.Word, isWordValid dict.Dictionary) bool {
-	for _, w := range formedWords {
+// Validate determines whether the challenge to a play is legal, and whether it
+// would then be successful. A challenge succeeds if any of the words formed by
+// the play are invalid according to the dictionary.
+func Validate(lastPlay *history.Entry, isWordValid dict.Dictionary) (success bool, err error) {
+	if lastPlay == nil {
+		return false, InvalidChallengeError{NoPlayToChallengeReason}
+	}
+
+	switch lastPlay.Type {
+	case history.ChallengeFailEntryType, history.ChallengeSuccessEntryType:
+		return false, InvalidChallengeError{PlayAlreadyChallengedReason}
+
+	case history.PlayEntryType:
+		break
+
+	default:
+		return false, InvalidChallengeError{NoPlayToChallengeReason}
+	}
+
+	for _, w := range lastPlay.WordsFormed {
 		if !isWordValid(w.Word) {
-			return true
+			return true, nil
 		}
 	}
-	return false
+	return false, nil
 }

@@ -1,8 +1,8 @@
-package positiontype
+package board
 
 // Layout represents a layout for creating a Board. Layouts are specified
 // from the top row down, from the leftmost column to  the rightmost.
-type Layout [][]Interface
+type Layout [][]PositionType
 
 // WidestRow returns the number of columns in the widest row of the layout.
 func (l Layout) WidestRow() int {

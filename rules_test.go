@@ -3,16 +3,18 @@ package scrubble
 import (
 	"testing"
 
+	"github.com/mandykoh/scrubble/board"
 	"github.com/mandykoh/scrubble/coord"
 	"github.com/mandykoh/scrubble/dict"
 	"github.com/mandykoh/scrubble/history"
 	"github.com/mandykoh/scrubble/play"
+	"github.com/mandykoh/scrubble/seat"
 	"github.com/mandykoh/scrubble/tile"
 )
 
 func TestRules(t *testing.T) {
 	rules := Rules{}
-	board := BoardWithStandardLayout()
+	testBoard := board.WithStandardLayout()
 
 	t.Run("zero-value", func(t *testing.T) {
 
@@ -26,7 +28,7 @@ func TestRules(t *testing.T) {
 				{tile.Make('A', 1), coord.Make(5, 0)},
 				{tile.Make('R', 1), coord.Make(6, 0)},
 				{tile.Make('K', 1), coord.Make(7, 0)},
-			}, &board)
+			}, &testBoard)
 
 			if err != nil {
 				t.Errorf("Expected success but got error %v", err)
@@ -39,7 +41,7 @@ func TestRules(t *testing.T) {
 				{tile.Make('Q', 1), coord.Make(3, 0)},
 				{tile.Make('R', 1), coord.Make(4, 0)},
 				{tile.Make('P', 1), coord.Make(5, 0)},
-			}, &board)
+			}, &testBoard)
 
 			if err != nil {
 				t.Errorf("Expected success but got error %v", err)
@@ -54,13 +56,23 @@ func TestRules(t *testing.T) {
 			}()
 
 			rules.NextGamePhase(&Game{
-				Seats: []Seat{
+				Seats: []seat.Seat{
 					{},
 				},
 				History: history.History{
 					{Type: history.UnknownEntryType, Score: 123},
 				},
 			})
+		})
+
+		t.Run("can score the end game", func(t *testing.T) {
+			defer func() {
+				if r := recover(); r != nil {
+					t.Errorf("Expected ScoreEndGame to succeed without panic but got %v", r)
+				}
+			}()
+
+			rules.ScoreEndGame(&history.Entry{}, nil)
 		})
 
 		t.Run("can score words", func(t *testing.T) {
@@ -70,7 +82,7 @@ func TestRules(t *testing.T) {
 				}
 			}()
 
-			rules.ScoreWords(play.Tiles{}, &board)
+			rules.ScoreWords(play.Tiles{}, &testBoard)
 		})
 
 		t.Run("can validate challenges", func(t *testing.T) {
@@ -80,7 +92,7 @@ func TestRules(t *testing.T) {
 				}
 			}()
 
-			rules.IsChallengeSuccessful([]play.Word{})
+			rules.ValidateChallenge(&history.Entry{})
 		})
 
 		t.Run("can validate placements", func(t *testing.T) {
@@ -90,7 +102,7 @@ func TestRules(t *testing.T) {
 				}
 			}()
 
-			rules.ValidatePlacements(play.Tiles{}, &board)
+			rules.ValidatePlacements(play.Tiles{}, &testBoard)
 		})
 
 		t.Run("can validate rack", func(t *testing.T) {
@@ -106,15 +118,15 @@ func TestRules(t *testing.T) {
 
 	t.Run(".WithChallengeValidator()", func(t *testing.T) {
 		validatorCalled := 0
-		validator := func([]play.Word, dict.Dictionary) bool {
+		validator := func(*history.Entry, dict.Dictionary) (bool, error) {
 			validatorCalled++
-			return false
+			return false, nil
 		}
 
 		overriddenRules := Rules{}.WithChallengeValidator(validator)
 
 		t.Run("sets the validator to use for challenge validation", func(t *testing.T) {
-			overriddenRules.IsChallengeSuccessful([]play.Word{})
+			overriddenRules.ValidateChallenge(&history.Entry{})
 
 			if actual, expected := validatorCalled, 1; actual != expected {
 				t.Errorf("Expected overridden validator to be called once but got %d invocations", actual)
@@ -145,7 +157,7 @@ func TestRules(t *testing.T) {
 				{tile.Make('C', 1), coord.Make(0, 0)},
 				{tile.Make('A', 1), coord.Make(1, 0)},
 				{tile.Make('T', 1), coord.Make(2, 0)},
-			}, &board)
+			}, &testBoard)
 
 			if actual, expected := dictionaryCalled, 1; actual != expected {
 				t.Errorf("Expected overridden dictionary to be called once but got %d invocations", actual)
@@ -160,7 +172,7 @@ func TestRules(t *testing.T) {
 				{tile.Make('D', 1), coord.Make(0, 0)},
 				{tile.Make('J', 1), coord.Make(1, 0)},
 				{tile.Make('K', 1), coord.Make(2, 0)},
-			}, &board)
+			}, &testBoard)
 
 			if err != nil {
 				t.Errorf("Expected success but got error %v", err)
@@ -174,6 +186,30 @@ func TestRules(t *testing.T) {
 		t.Run("leaves the original rules unmodified", func(t *testing.T) {
 			if actual := rules.dictionary; actual != nil {
 				t.Errorf("Expected original dictionary to be unmodified but wasn't")
+			}
+		})
+	})
+
+	t.Run(".WithEndGameScorer()", func(t *testing.T) {
+		scorerCalled := 0
+		scorer := func(*history.Entry, []seat.Seat) []int {
+			scorerCalled++
+			return nil
+		}
+
+		overriddenRules := Rules{}.WithEndGameScorer(scorer)
+
+		t.Run("sets the end game scorer to use", func(t *testing.T) {
+			overriddenRules.ScoreEndGame(&history.Entry{}, nil)
+
+			if actual, expected := scorerCalled, 1; actual != expected {
+				t.Errorf("Expected overridden end game scorer to be called once but got %d invocations", actual)
+			}
+		})
+
+		t.Run("leaves the original rules unmodified", func(t *testing.T) {
+			if actual := rules.endGameScorer; actual != nil {
+				t.Errorf("Expected original end game scorer to be unmodified but wasn't")
 			}
 		})
 	})
@@ -204,7 +240,7 @@ func TestRules(t *testing.T) {
 
 	t.Run(".WithPlacementValidator()", func(t *testing.T) {
 		validatorCalled := 0
-		validator := func(play.Tiles, *Board) error {
+		validator := func(play.Tiles, *board.Board) error {
 			validatorCalled++
 			return nil
 		}
@@ -212,7 +248,7 @@ func TestRules(t *testing.T) {
 		overriddenRules := Rules{}.WithPlacementValidator(validator)
 
 		t.Run("sets the validator to use for placement validation", func(t *testing.T) {
-			overriddenRules.ValidatePlacements(play.Tiles{}, &board)
+			overriddenRules.ValidatePlacements(play.Tiles{}, &testBoard)
 
 			if actual, expected := validatorCalled, 1; actual != expected {
 				t.Errorf("Expected overridden validator to be called once but got %d invocations", actual)
@@ -252,7 +288,7 @@ func TestRules(t *testing.T) {
 
 	t.Run(".WithWordScorer()", func(t *testing.T) {
 		scorerCalled := 0
-		scorer := func(play.Tiles, *Board, dict.Dictionary) (int, []play.Word, error) {
+		scorer := func(play.Tiles, *board.Board, dict.Dictionary) (int, []play.Word, error) {
 			scorerCalled++
 			return 0, nil, nil
 		}
@@ -260,7 +296,7 @@ func TestRules(t *testing.T) {
 		overriddenRules := Rules{}.WithWordScorer(scorer)
 
 		t.Run("sets the word scorer to use", func(t *testing.T) {
-			overriddenRules.ScoreWords(play.Tiles{}, &board)
+			overriddenRules.ScoreWords(play.Tiles{}, &testBoard)
 
 			if actual, expected := scorerCalled, 1; actual != expected {
 				t.Errorf("Expected overridden word scorer to be called once but got %d invocations", actual)

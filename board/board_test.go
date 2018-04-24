@@ -1,18 +1,17 @@
-package scrubble
+package board
 
 import (
 	"fmt"
 	"testing"
 
 	"github.com/mandykoh/scrubble/coord"
-	"github.com/mandykoh/scrubble/positiontype"
 	"github.com/mandykoh/scrubble/tile"
 )
 
-func ExampleBoardWithLayout() {
-	__, st, dl, dw, tl, tw := positiontype.All()
+func ExampleWithLayout() {
+	__, st, dl, dw, tl, tw := AllPositionTypes()
 
-	board := BoardWithLayout(positiontype.Layout{
+	board := WithLayout(Layout{
 		{tw, __, __, dl, __, __, __, tw, __, __, __, dl, __, __, tw},
 		{__, dw, __, __, __, tl, __, __, __, tl, __, __, __, dw, __},
 		{__, __, dw, __, __, __, dl, __, dl, __, __, __, dw, __, __},
@@ -35,9 +34,9 @@ func ExampleBoardWithLayout() {
 
 func TestBoard(t *testing.T) {
 
-	__, st, dl, dw, tl, tw := positiontype.All()
+	__, st, dl, dw, tl, tw := AllPositionTypes()
 
-	expectEmptyBoardWithLayout := func(t *testing.T, b Board, layout positiontype.Layout) {
+	expectEmptyBoardWithLayout := func(t *testing.T, b Board, layout Layout) {
 		rows := len(layout)
 		columns := layout.WidestRow()
 
@@ -53,7 +52,7 @@ func TestBoard(t *testing.T) {
 		}
 
 		for row, lRow := range layout {
-			var posType positiontype.Interface
+			var posType PositionType
 
 			for col := 0; col < columns; col++ {
 				if col < len(lRow) {
@@ -62,8 +61,8 @@ func TestBoard(t *testing.T) {
 
 				pos := b.Position(coord.Make(row, col))
 
-				if tile := pos.Tile; tile != nil {
-					t.Errorf("Expected position %d,%d to be empty but found tile %v", row, col, tile)
+				if posTile := pos.Tile; posTile != nil {
+					t.Errorf("Expected position %d,%d to be empty but found tile %v", row, col, posTile)
 				}
 
 				if actual, expected := pos.Type, posType; actual != expected {
@@ -73,28 +72,28 @@ func TestBoard(t *testing.T) {
 		}
 	}
 
-	t.Run("BoardWithLayout()", func(t *testing.T) {
+	t.Run("WithLayout()", func(t *testing.T) {
 
 		t.Run("creates an empty board with the specified layout", func(t *testing.T) {
-			layout := positiontype.Layout{
+			layout := Layout{
 				{__, __, __, __, __, __, __},
 				{__, __, __, st, __, __, __},
 				{__, __, __, __, __, __, __},
 			}
 
-			board := BoardWithLayout(layout)
+			board := WithLayout(layout)
 
 			expectEmptyBoardWithLayout(t, board, layout)
 		})
 
 		t.Run("always creates a rectangular board by filling out with empties to match the longest column", func(t *testing.T) {
-			board := BoardWithLayout(positiontype.Layout{
+			board := WithLayout(Layout{
 				{__, __, __, __, __, __, __},
 				{__, __, __, st},
 				{},
 			})
 
-			expectEmptyBoardWithLayout(t, board, positiontype.Layout{
+			expectEmptyBoardWithLayout(t, board, Layout{
 				{__, __, __, __, __, __, __},
 				{__, __, __, st, __, __, __},
 				{__, __, __, __, __, __, __},
@@ -102,12 +101,12 @@ func TestBoard(t *testing.T) {
 		})
 	})
 
-	t.Run("BoardWithStandardLayout()", func(t *testing.T) {
+	t.Run("WithStandardLayout()", func(t *testing.T) {
 
 		t.Run("creates an empty board with a standardised layout", func(t *testing.T) {
-			board := BoardWithStandardLayout()
+			board := WithStandardLayout()
 
-			expectEmptyBoardWithLayout(t, board, positiontype.Layout{
+			expectEmptyBoardWithLayout(t, board, Layout{
 				{tw, __, __, dl, __, __, __, tw, __, __, __, dl, __, __, tw},
 				{__, dw, __, __, __, tl, __, __, __, tl, __, __, __, dw, __},
 				{__, __, dw, __, __, __, dl, __, dl, __, __, __, dw, __, __},
@@ -132,7 +131,7 @@ func TestBoard(t *testing.T) {
 		b := Board{
 			Rows:    3,
 			Columns: 3,
-			Positions: []BoardPosition{
+			Positions: []Position{
 				{__, &tile.Tile{'A', 1}}, {__, &tile.Tile{'B', 1}}, {__, &tile.Tile{'C', 1}},
 				{__, &tile.Tile{'D', 1}}, {__, &tile.Tile{'E', 1}}, {__, &tile.Tile{'F', 1}},
 				{__, &tile.Tile{'G', 1}}, {__, &tile.Tile{'H', 1}}, {__, &tile.Tile{'I', 1}},
@@ -206,7 +205,7 @@ func TestBoard(t *testing.T) {
 		b := Board{
 			Rows:    2,
 			Columns: 2,
-			Positions: []BoardPosition{
+			Positions: []Position{
 				{__, nil}, {st, nil},
 				{dl, nil}, {tw, nil},
 			},
@@ -231,16 +230,16 @@ func TestBoard(t *testing.T) {
 		})
 
 		t.Run("returns nil when out of bounds", func(t *testing.T) {
-			if actual, expected := b.Position(coord.Make(-1, 0)), (*BoardPosition)(nil); actual != expected {
+			if actual, expected := b.Position(coord.Make(-1, 0)), (*Position)(nil); actual != expected {
 				t.Errorf("Expected -1,0 to be out of bounds but got position %+v", actual)
 			}
-			if actual, expected := b.Position(coord.Make(0, -1)), (*BoardPosition)(nil); actual != expected {
+			if actual, expected := b.Position(coord.Make(0, -1)), (*Position)(nil); actual != expected {
 				t.Errorf("Expected 0,-1 to be out of bounds but got position %+v", actual)
 			}
-			if actual, expected := b.Position(coord.Make(2, 0)), (*BoardPosition)(nil); actual != expected {
+			if actual, expected := b.Position(coord.Make(2, 0)), (*Position)(nil); actual != expected {
 				t.Errorf("Expected 2,0 to be out of bounds but got position %+v", actual)
 			}
-			if actual, expected := b.Position(coord.Make(0, 2)), (*BoardPosition)(nil); actual != expected {
+			if actual, expected := b.Position(coord.Make(0, 2)), (*Position)(nil); actual != expected {
 				t.Errorf("Expected 0,2 to be out of bounds but got position %+v", actual)
 			}
 		})

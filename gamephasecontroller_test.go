@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/mandykoh/scrubble/history"
+	"github.com/mandykoh/scrubble/seat"
 	"github.com/mandykoh/scrubble/tile"
 )
 
@@ -11,7 +12,7 @@ func TestNextGamePhase(t *testing.T) {
 
 	t.Run("allows the game to continue when the rack could be replenished with at least one tile", func(t *testing.T) {
 		game := &Game{
-			Seats: []Seat{
+			Seats: []seat.Seat{
 				{
 					Rack: tile.Rack{
 						{'A', 1},
@@ -30,7 +31,7 @@ func TestNextGamePhase(t *testing.T) {
 
 	t.Run("ends the game when the rack was emptied and couldn't be replenished from the bag", func(t *testing.T) {
 		game := &Game{
-			Seats: []Seat{
+			Seats: []seat.Seat{
 				{Rack: tile.Rack{}},
 			},
 			History: history.History{{Type: history.UnknownEntryType, Score: 123}},
@@ -45,7 +46,7 @@ func TestNextGamePhase(t *testing.T) {
 
 	t.Run("ends the game after six consecutive scoreless turns", func(t *testing.T) {
 		game := &Game{
-			Seats: []Seat{
+			Seats: []seat.Seat{
 				{Rack: tile.Rack{{'A', 1}}},
 				{Rack: tile.Rack{{'B', 2}}},
 			},
@@ -74,7 +75,7 @@ func TestNextGamePhase(t *testing.T) {
 
 	t.Run("treats successfully challenged plays as scoreless turns", func(t *testing.T) {
 		game := &Game{
-			Seats: []Seat{
+			Seats: []seat.Seat{
 				{Rack: tile.Rack{{'A', 1}}},
 				{Rack: tile.Rack{{'B', 2}}},
 			},

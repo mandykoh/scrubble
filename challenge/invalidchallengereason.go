@@ -11,10 +11,6 @@ const (
 	// PlayAlreadyChallengedReason indicates that a play has already been
 	// challenged.
 	PlayAlreadyChallengedReason
-
-	// InvalidChallengerReason indicates that a challenge was attempted by a
-	// challenger which is invalid/nonexistent.
-	InvalidChallengerReason
 )
 
 // InvalidChallengeReason indicates the reason for an InvalidChallengeError.
@@ -28,8 +24,6 @@ func (r InvalidChallengeReason) GoString() string {
 		return "NoPlayToChallengeReason"
 	case PlayAlreadyChallengedReason:
 		return "PlayAlreadyChallengedReason"
-	case InvalidChallengerReason:
-		return "InvalidChallengerReason"
 	default:
 		return "UnknownInvalidChallengeReason"
 	}
@@ -43,8 +37,6 @@ func (r InvalidChallengeReason) String() string {
 		return "NoPlayToChallenge"
 	case PlayAlreadyChallengedReason:
 		return "PlayAlreadyChallenged"
-	case InvalidChallengerReason:
-		return "InvalidChallenger"
 	default:
 		return "Unknown"
 	}

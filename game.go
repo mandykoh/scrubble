@@ -3,9 +3,11 @@ package scrubble
 import (
 	"math/rand"
 
-	"github.com/mandykoh/scrubble/challenge"
+	"github.com/mandykoh/scrubble/board"
+	"github.com/mandykoh/scrubble/exchange"
 	"github.com/mandykoh/scrubble/history"
 	"github.com/mandykoh/scrubble/play"
+	"github.com/mandykoh/scrubble/seat"
 	"github.com/mandykoh/scrubble/tile"
 )
 
@@ -16,16 +18,16 @@ const ChallengeFailPenaltyPoints = 5
 // a Game is a game in the SetupPhase with no players.
 type Game struct {
 	Phase            GamePhase
-	Seats            []Seat
+	Seats            []seat.Seat
 	Bag              tile.Bag
-	Board            Board
+	Board            board.Board
 	CurrentSeatIndex int
 	Rules            Rules
 	History          history.History
 }
 
 // NewGame returns an initialised game in the SetupPhase with no players.
-func NewGame(bag tile.Bag, board Board) *Game {
+func NewGame(bag tile.Bag, board board.Board) *Game {
 	return &Game{
 		Bag:   bag,
 		Board: board,
@@ -35,16 +37,16 @@ func NewGame(bag tile.Bag, board Board) *Game {
 // NewGameWithDefaults returns an initialised game in the SetupPhase with no
 // players, with a default bag and board layout.
 func NewGameWithDefaults() *Game {
-	return NewGame(tile.BagWithStandardEnglishTiles(), BoardWithStandardLayout())
+	return NewGame(tile.BagWithStandardEnglishTiles(), board.WithStandardLayout())
 }
 
 // AddPlayer adds a seat for a new player to the game.
 //
 // If the game is not in the Setup phase, GameOutOfPhaseError is returned.
-func (g *Game) AddPlayer() (seat *Seat, err error) {
-	return seat, g.requirePhase(SetupPhase, func() error {
-		g.Seats = append(g.Seats, Seat{})
-		seat = &g.Seats[len(g.Seats)-1]
+func (g *Game) AddPlayer() (s *seat.Seat, err error) {
+	return s, g.requirePhase(SetupPhase, func() error {
+		g.Seats = append(g.Seats, seat.Seat{})
+		s = &g.Seats[len(g.Seats)-1]
 		return nil
 	})
 }
@@ -61,26 +63,16 @@ func (g *Game) AddPlayer() (seat *Seat, err error) {
 // If a challenge is not allowed, an InvalidChallengeError is returned with the
 // reason. Otherwise, whether the challenge succeeded or failed is returned.
 func (g *Game) Challenge(challengerSeatIndex int, r *rand.Rand) (success bool, err error) {
-	if len(g.History) == 0 {
-		return false, challenge.InvalidChallengeError{Reason: challenge.NoPlayToChallengeReason}
-	}
-	if challengerSeatIndex < 0 || challengerSeatIndex >= len(g.Seats) {
-		return false, challenge.InvalidChallengeError{Reason: challenge.InvalidChallengerReason}
+	var lastPlay *history.Entry
+	if len(g.History) > 0 {
+		lastPlay = g.History.Last()
 	}
 
-	lastPlay := g.History.Last()
-	switch lastPlay.Type {
-	case history.ChallengeFailEntryType, history.ChallengeSuccessEntryType:
-		return false, challenge.InvalidChallengeError{Reason: challenge.PlayAlreadyChallengedReason}
-
-	case history.PlayEntryType:
-		break
-
-	default:
-		return false, challenge.InvalidChallengeError{Reason: challenge.NoPlayToChallengeReason}
+	success, err = g.Rules.ValidateChallenge(lastPlay)
+	if err != nil {
+		return
 	}
 
-	success = g.Rules.IsChallengeSuccessful(lastPlay.WordsFormed)
 	if success {
 		challenged := g.prevSeat()
 		challenged.Rack.Remove(lastPlay.TilesDrawn...)
@@ -103,11 +95,11 @@ func (g *Game) Challenge(challengerSeatIndex int, r *rand.Rand) (success bool, e
 		g.History.AppendChallengeFail(challengerSeatIndex)
 	}
 
-	return success, nil
+	return
 }
 
 // CurrentSeat returns the seat for the player whose turn it currently is.
-func (g *Game) CurrentSeat() *Seat {
+func (g *Game) CurrentSeat() *seat.Seat {
 	return &g.Seats[g.CurrentSeatIndex]
 }
 
@@ -128,22 +120,22 @@ func (g *Game) CurrentSeat() *Seat {
 func (g *Game) ExchangeTiles(tiles []tile.Tile, r *rand.Rand) error {
 	return g.requirePhase(MainPhase, func() error {
 		if len(tiles) == 0 {
-			return InvalidTileExchangeError{NoTilesExchangedReason}
+			return exchange.InvalidTileExchangeError{Reason: exchange.NoTilesExchangedReason}
 		}
 		if len(g.Bag) < tile.MaxRackTiles {
-			return InvalidTileExchangeError{InsufficientTilesInBagReason}
+			return exchange.InvalidTileExchangeError{Reason: exchange.InsufficientTilesInBagReason}
 		}
 
-		seat := g.CurrentSeat()
+		s := g.CurrentSeat()
 
-		used, remaining, err := g.Rules.ValidateTilesFromRack(seat.Rack, tiles)
+		used, remaining, err := g.Rules.ValidateTilesFromRack(s.Rack, tiles)
 		if err != nil {
 			return err
 		}
 
-		seat.Rack = remaining
+		s.Rack = remaining
 		for i := 0; i < len(used); i++ {
-			seat.Rack = append(seat.Rack, g.Bag.DrawTile())
+			s.Rack = append(s.Rack, g.Bag.DrawTile())
 		}
 
 		g.Bag = append(g.Bag, used...)
@@ -184,9 +176,9 @@ func (g *Game) Pass() error {
 // If any formed words are invalid, an InvalidWordError is returned.
 func (g *Game) Play(placements play.Tiles) (playedWords []play.Word, err error) {
 	return playedWords, g.requirePhase(MainPhase, func() error {
-		seat := g.CurrentSeat()
+		s := g.CurrentSeat()
 
-		used, remaining, err := g.Rules.ValidateTilesFromRack(seat.Rack, placements.Tiles())
+		used, remaining, err := g.Rules.ValidateTilesFromRack(s.Rack, placements.Tiles())
 		if err != nil {
 			return err
 		}
@@ -202,8 +194,8 @@ func (g *Game) Play(placements play.Tiles) (playedWords []play.Word, err error) 
 			return err
 		}
 
-		seat.Rack = remaining
-		g.Board.placeTiles(placements)
+		s.Rack = remaining
+		placements.Place(&g.Board)
 		g.endTurn(score, used, placements, playedWords)
 
 		return nil
@@ -253,9 +245,9 @@ func (g *Game) Start(r *rand.Rand) error {
 }
 
 func (g *Game) endTurn(score int, tilesSpent []tile.Tile, tilesPlayed play.Tiles, wordsFormed []play.Word) {
-	seat := g.CurrentSeat()
-	seat.Score += score
-	tilesDrawn := seat.Rack.FillFromBag(&g.Bag)
+	s := g.CurrentSeat()
+	s.Score += score
+	tilesDrawn := s.Rack.FillFromBag(&g.Bag)
 
 	if len(tilesPlayed) > 0 {
 		g.History.AppendPlay(g.CurrentSeatIndex, score, tilesSpent, tilesPlayed, tilesDrawn, wordsFormed)
@@ -269,29 +261,12 @@ func (g *Game) endTurn(score int, tilesSpent []tile.Tile, tilesPlayed play.Tiles
 	g.Phase = g.Rules.NextGamePhase(g)
 
 	if g.Phase == EndPhase {
-		if len(tilesPlayed) > 0 {
-			playOutBonus := 0
-			for i, s := range g.Seats {
-				if i == g.prevSeatIndex() {
-					continue
-				}
-				for _, t := range s.Rack {
-					playOutBonus += t.Points
-				}
-			}
-			playOutBonus *= 2
-
-			seat.Score += playOutBonus
-			g.History.Last().Score += playOutBonus
-
-		} else {
-			for i := range g.Seats {
-				s := &g.Seats[i]
-				gameEndPenalty := 0
-				for _, t := range s.Rack {
-					gameEndPenalty += t.Points
-				}
-				s.Score -= gameEndPenalty
+		endGameScores := g.Rules.ScoreEndGame(g.History.Last(), g.Seats)
+		for i, score := range endGameScores {
+			s := &g.Seats[i]
+			s.Score += score
+			if i == g.prevSeatIndex() {
+				g.History.Last().Score += score
 			}
 		}
 	}
@@ -301,7 +276,7 @@ func (g *Game) nextSeatIndex() int {
 	return (g.CurrentSeatIndex + 1) % len(g.Seats)
 }
 
-func (g *Game) prevSeat() *Seat {
+func (g *Game) prevSeat() *seat.Seat {
 	return &g.Seats[g.prevSeatIndex()]
 }
 

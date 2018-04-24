@@ -1,4 +1,4 @@
-package scrubble
+package exchange
 
 const (
 	// UnknownInvalidTileExchangeReason indicates that a reason was undefined.

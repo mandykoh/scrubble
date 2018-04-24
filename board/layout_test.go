@@ -1,4 +1,4 @@
-package positiontype
+package board
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 
 func TestLayout(t *testing.T) {
 
-	__, st, _, _, _, _ := All()
+	__, st, _, _, _, _ := AllPositionTypes()
 
 	t.Run(".WidestRow()", func(t *testing.T) {
 

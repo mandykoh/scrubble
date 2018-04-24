@@ -7,11 +7,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mandykoh/scrubble/challenge"
+	"github.com/mandykoh/scrubble/board"
 	"github.com/mandykoh/scrubble/coord"
 	"github.com/mandykoh/scrubble/dict"
+	"github.com/mandykoh/scrubble/exchange"
 	"github.com/mandykoh/scrubble/history"
 	"github.com/mandykoh/scrubble/play"
+	"github.com/mandykoh/scrubble/seat"
 	"github.com/mandykoh/scrubble/tile"
 )
 
@@ -81,8 +83,8 @@ func TestGame(t *testing.T) {
 			game := Game{
 				Phase: MainPhase,
 				Bag:   tile.BagWithStandardEnglishTiles(),
-				Board: BoardWithStandardLayout(),
-				Seats: []Seat{
+				Board: board.WithStandardLayout(),
+				Seats: []seat.Seat{
 					{
 						Rack: tile.Rack{
 							{'K', 1},
@@ -129,55 +131,12 @@ func TestGame(t *testing.T) {
 			return game
 		}
 
-		t.Run("returns an error when the specified challenger is invalid", func(t *testing.T) {
-			game := setupGame()
-
-			_, err := game.Challenge(5, nil)
-			if actual, expected := err, (challenge.InvalidChallengeError{Reason: challenge.InvalidChallengerReason}); actual != expected {
-				t.Fatalf("Expected error %v but was %v", expected, err)
-			}
-		})
-
-		t.Run("returns an error when there is no play to challenge", func(t *testing.T) {
-			game := setupGame()
-			game.History = nil
-
-			_, err := game.Challenge(game.CurrentSeatIndex, nil)
-			if actual, expected := err, (challenge.InvalidChallengeError{Reason: challenge.NoPlayToChallengeReason}); actual != expected {
-				t.Fatalf("Expected error %v but was %v", expected, err)
-			}
-
-			game.History.AppendPass(game.prevSeatIndex())
-
-			_, err = game.Challenge(game.CurrentSeatIndex, nil)
-			if actual, expected := err, (challenge.InvalidChallengeError{Reason: challenge.NoPlayToChallengeReason}); actual != expected {
-				t.Fatalf("Expected error %v but was %v", expected, err)
-			}
-		})
-
-		t.Run("returns an error when the last play was already challenged", func(t *testing.T) {
-			game := setupGame()
-			game.History.AppendChallengeSuccess(game.CurrentSeatIndex)
-
-			_, err := game.Challenge(game.CurrentSeatIndex, nil)
-			if actual, expected := err, (challenge.InvalidChallengeError{Reason: challenge.PlayAlreadyChallengedReason}); actual != expected {
-				t.Fatalf("Expected error %v but was %v", expected, err)
-			}
-
-			game.History.AppendChallengeFail(game.CurrentSeatIndex)
-
-			_, err = game.Challenge(game.CurrentSeatIndex, nil)
-			if actual, expected := err, (challenge.InvalidChallengeError{Reason: challenge.PlayAlreadyChallengedReason}); actual != expected {
-				t.Fatalf("Expected error %v but was %v", expected, err)
-			}
-		})
-
 		t.Run("when unsuccessful", func(t *testing.T) {
 			seed := time.Now().UnixNano()
 
 			game := setupGame()
 			game.Phase = EndPhase
-			game.Rules = game.Rules.WithChallengeValidator(func([]play.Word, dict.Dictionary) bool { return false })
+			game.Rules = game.Rules.WithChallengeValidator(func(*history.Entry, dict.Dictionary) (bool, error) { return false, nil })
 
 			lastTurn := game.History.Last()
 
@@ -242,7 +201,7 @@ func TestGame(t *testing.T) {
 
 			game := setupGame()
 			game.Phase = EndPhase
-			game.Rules = game.Rules.WithChallengeValidator(func([]play.Word, dict.Dictionary) bool { return true })
+			game.Rules = game.Rules.WithChallengeValidator(func(*history.Entry, dict.Dictionary) (bool, error) { return true, nil })
 
 			lastTurn := game.History.Last()
 
@@ -320,8 +279,8 @@ func TestGame(t *testing.T) {
 			game := Game{
 				Phase: MainPhase,
 				Bag:   tile.BagWithStandardEnglishTiles(),
-				Board: BoardWithStandardLayout(),
-				Seats: []Seat{
+				Board: board.WithStandardLayout(),
+				Seats: []seat.Seat{
 					{
 						Rack: tile.Rack{
 							{'Z', 10},
@@ -368,7 +327,7 @@ func TestGame(t *testing.T) {
 
 			err := game.ExchangeTiles(nil, nil)
 
-			if actual, expected := err, (InvalidTileExchangeError{NoTilesExchangedReason}); actual != expected {
+			if actual, expected := err, (exchange.InvalidTileExchangeError{Reason: exchange.NoTilesExchangedReason}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
 		})
@@ -381,7 +340,7 @@ func TestGame(t *testing.T) {
 				game.CurrentSeat().Rack[0],
 			}, nil)
 
-			if actual, expected := err, (InvalidTileExchangeError{InsufficientTilesInBagReason}); actual != expected {
+			if actual, expected := err, (exchange.InvalidTileExchangeError{Reason: exchange.InsufficientTilesInBagReason}); actual != expected {
 				t.Fatalf("Expected error %v but was %v", expected, err)
 			}
 		})
@@ -500,6 +459,11 @@ func TestGame(t *testing.T) {
 			game := setupGame()
 			game.Rules = game.Rules.WithGamePhaseController(func(*Game) GamePhase {
 				return EndPhase
+			}).WithEndGameScorer(func(lastPlay *history.Entry, seats []seat.Seat) (finalScores []int) {
+				for i := range seats {
+					finalScores = append(finalScores, (i+1)*10)
+				}
+				return
 			})
 
 			err := game.ExchangeTiles([]tile.Tile{
@@ -518,18 +482,12 @@ func TestGame(t *testing.T) {
 				}
 			})
 
-			t.Run("penalises all players by their unplayed tiles", func(t *testing.T) {
-				if actual, expected := game.Seats[0].Score, -10; actual != expected {
-					t.Errorf("Expected first player to have score of %d after unplayed tile penalty but was %d", expected, actual)
+			t.Run("applies end game scoring", func(t *testing.T) {
+				if actual, expected := game.Seats[0].Score, 10; actual != expected {
+					t.Errorf("Expected first player to have score of %d after end game scoring but was %d", expected, actual)
 				}
-
-				rackPoints := 0
-				for _, t := range game.Seats[1].Rack {
-					rackPoints += t.Points
-				}
-
-				if actual, expected := game.Seats[1].Score, -rackPoints; actual != expected {
-					t.Errorf("Expected second player to have score of %d after unplayed tile penalty but was %d", expected, actual)
+				if actual, expected := game.Seats[1].Score, 20; actual != expected {
+					t.Errorf("Expected second player to have score of %d after end game scoring but was %d", expected, actual)
 				}
 			})
 		})
@@ -540,8 +498,8 @@ func TestGame(t *testing.T) {
 		setupGame := func() Game {
 			game := Game{
 				Phase: MainPhase,
-				Board: BoardWithStandardLayout(),
-				Seats: []Seat{
+				Board: board.WithStandardLayout(),
+				Seats: []seat.Seat{
 					{
 						Rack: tile.Rack{
 							{'A', 1},
@@ -615,6 +573,11 @@ func TestGame(t *testing.T) {
 			game := setupGame()
 			game.Rules = game.Rules.WithGamePhaseController(func(*Game) GamePhase {
 				return EndPhase
+			}).WithEndGameScorer(func(lastPlay *history.Entry, seats []seat.Seat) (finalScores []int) {
+				for i := range seats {
+					finalScores = append(finalScores, (i+1)*-2)
+				}
+				return
 			})
 
 			err := game.Pass()
@@ -631,12 +594,12 @@ func TestGame(t *testing.T) {
 				}
 			})
 
-			t.Run("penalises all players by their unplayed tiles", func(t *testing.T) {
-				if actual, expected := game.Seats[0].Score, -3; actual != expected {
-					t.Errorf("Expected first player to have score of %d after unplayed tile penalty but was %d", expected, actual)
+			t.Run("applies end game scoring", func(t *testing.T) {
+				if actual, expected := game.Seats[0].Score, -2; actual != expected {
+					t.Errorf("Expected first player to have score of %d after end game scoring but was %d", expected, actual)
 				}
-				if actual, expected := game.Seats[1].Score, -6; actual != expected {
-					t.Errorf("Expected second player to have score of %d after unplayed tile penalty but was %d", expected, actual)
+				if actual, expected := game.Seats[1].Score, -4; actual != expected {
+					t.Errorf("Expected second player to have score of %d after end game scoring but was %d", expected, actual)
 				}
 			})
 		})
@@ -664,14 +627,14 @@ func TestGame(t *testing.T) {
 			game := Game{
 				Phase: MainPhase,
 				Bag:   tile.BagWithStandardEnglishTiles(),
-				Board: BoardWithStandardLayout(),
-				Seats: []Seat{
+				Board: board.WithStandardLayout(),
+				Seats: []seat.Seat{
 					{Rack: append(tile.Rack{}, rackTiles...)},
 					{Rack: append(tile.Rack{}, rackTiles...)},
 				},
 				CurrentSeatIndex: 1,
 				Rules: Rules{
-					placementValidator: func(placements play.Tiles, board *Board) error {
+					placementValidator: func(placements play.Tiles, board *board.Board) error {
 						placementsValidated++
 						return nil
 					},
@@ -679,7 +642,7 @@ func TestGame(t *testing.T) {
 						tilesFromRackValidated++
 						return tile.ValidateFromRack(rack, toPlay)
 					},
-					wordScorer: func(placements play.Tiles, board *Board, dictionary dict.Dictionary) (score int, words []play.Word, err error) {
+					wordScorer: func(placements play.Tiles, board *board.Board, dictionary dict.Dictionary) (score int, words []play.Word, err error) {
 						wordsScored++
 						words = append(words, play.Word{Word: "SOMEWORD", Score: 123, Range: placements.Bounds()})
 						return 123, words, nil
@@ -751,7 +714,7 @@ func TestGame(t *testing.T) {
 		t.Run("with invalid tile placement", func(t *testing.T) {
 			game := setupGame()
 
-			game.Rules.placementValidator = func(placements play.Tiles, board *Board) error {
+			game.Rules.placementValidator = func(placements play.Tiles, board *board.Board) error {
 				return errors.New("some error")
 			}
 
@@ -868,6 +831,11 @@ func TestGame(t *testing.T) {
 			game := setupGame()
 			game.Rules = game.Rules.WithGamePhaseController(func(*Game) GamePhase {
 				return EndPhase
+			}).WithEndGameScorer(func(lastPlay *history.Entry, seats []seat.Seat) (finalScores []int) {
+				for _, s := range game.Seats {
+					finalScores = append(finalScores, s.Score)
+				}
+				return
 			})
 
 			game.Board.Position(coord.Make(0, 1)).Tile = &tile.Tile{Letter: 'A', Points: 1}
@@ -884,17 +852,12 @@ func TestGame(t *testing.T) {
 				}
 			})
 
-			t.Run("awards bonus of double the sum of all opponent's tiles", func(t *testing.T) {
-				totalOpponentTiles := 0
-				for _, t := range game.CurrentSeat().Rack {
-					totalOpponentTiles += t.Points
-				}
-
-				if actual, expected := game.prevSeat().Score, 123+totalOpponentTiles*2; actual != expected {
+			t.Run("awards end game bonus", func(t *testing.T) {
+				if actual, expected := game.prevSeat().Score, 246; actual != expected {
 					t.Errorf("Expected player's score after final play to be %d but was %d", expected, actual)
 				}
-				if actual, expected := game.History.Last().Score, 123+totalOpponentTiles*2; actual != expected {
-					t.Errorf("Expected history to record total score with bonus for playing out as %d but was %d", expected, actual)
+				if actual, expected := game.History.Last().Score, 246; actual != expected {
+					t.Errorf("Expected history to record total score with end game scoring out as %d but was %d", expected, actual)
 				}
 			})
 		})
@@ -1010,7 +973,7 @@ func TestGame(t *testing.T) {
 
 		game := Game{
 			Bag:   tile.BagWithStandardEnglishTiles(),
-			Board: BoardWithStandardLayout(),
+			Board: board.WithStandardLayout(),
 		}
 		game.AddPlayer()
 		game.AddPlayer()

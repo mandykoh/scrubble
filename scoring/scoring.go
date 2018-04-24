@@ -1,18 +1,52 @@
-package scrubble
+package scoring
 
 import (
 	"strings"
 
+	"github.com/mandykoh/scrubble/board"
 	"github.com/mandykoh/scrubble/coord"
 	"github.com/mandykoh/scrubble/dict"
+	"github.com/mandykoh/scrubble/history"
 	"github.com/mandykoh/scrubble/play"
-	"github.com/mandykoh/scrubble/positiontype"
+	"github.com/mandykoh/scrubble/seat"
 	"github.com/mandykoh/scrubble/tile"
 )
 
 // MaxRackTilesBonus is the number of bonus points awarded for playing all the
 // tiles on a full rack in one turn.
 const MaxRackTilesBonus = 50
+
+// ScoreEndGame determines the final scores to be added to each player's total
+// after the last play of the game is made.
+func ScoreEndGame(lastPlay *history.Entry, seats []seat.Seat) (finalScores []int) {
+	finalScores = make([]int, len(seats))
+
+	if lastPlay.Type == history.PlayEntryType {
+		playOutBonus := 0
+		for i, s := range seats {
+			if i == lastPlay.SeatIndex {
+				continue
+			}
+			for _, t := range s.Rack {
+				playOutBonus += t.Points
+			}
+		}
+		playOutBonus *= 2
+		finalScores[lastPlay.SeatIndex] = playOutBonus
+
+	} else {
+		for i := range seats {
+			s := &seats[i]
+			gameEndPenalty := 0
+			for _, t := range s.Rack {
+				gameEndPenalty += t.Points
+			}
+			finalScores[i] = -gameEndPenalty
+		}
+	}
+
+	return
+}
 
 // ScoreWords determines the scoring from a set of proposed tile placements.
 // This assumes that the tiles are being placed in valid positions according to
@@ -23,7 +57,7 @@ const MaxRackTilesBonus = 50
 //
 // Otherwise, the total score is returned along with the words that would be
 // formed on the board should the tiles be placed.
-func ScoreWords(placements play.Tiles, board *Board, isWordValid dict.Dictionary) (score int, words []play.Word, err error) {
+func ScoreWords(placements play.Tiles, board *board.Board, isWordValid dict.Dictionary) (score int, words []play.Word, err error) {
 	var wordSpans []coord.Range
 	findSpans(coord.Coord.West, coord.Coord.East, placements, &wordSpans, board)
 	findSpans(coord.Coord.North, coord.Coord.South, placements, &wordSpans, board)
@@ -51,7 +85,7 @@ func ScoreWords(placements play.Tiles, board *Board, isWordValid dict.Dictionary
 	return
 }
 
-func findSpans(growMinDir, growMaxDir func(coord.Coord) coord.Coord, placements play.Tiles, results *[]coord.Range, board *Board) {
+func findSpans(growMinDir, growMaxDir func(coord.Coord) coord.Coord, placements play.Tiles, results *[]coord.Range, board *board.Board) {
 	unspanned := append(play.Tiles{}, placements...)
 
 	for p := unspanned.TakeLast(); p != nil; p = unspanned.TakeLast() {
@@ -82,7 +116,7 @@ func findUnspanned(placements play.Tiles, wordSpans []coord.Range, result *[]coo
 	}
 }
 
-func growSpan(growCoord *coord.Coord, growDir func(coord.Coord) coord.Coord, unspanned *play.Tiles, board *Board) {
+func growSpan(growCoord *coord.Coord, growDir func(coord.Coord) coord.Coord, unspanned *play.Tiles, board *board.Board) {
 	for {
 		c := growDir(*growCoord)
 		pos := board.Position(c)
@@ -100,16 +134,16 @@ func growSpan(growCoord *coord.Coord, growDir func(coord.Coord) coord.Coord, uns
 	}
 }
 
-func spansToPlayedWords(wordSpans []coord.Range, placements play.Tiles, board *Board) (totalScore int, words []play.Word) {
+func spansToPlayedWords(wordSpans []coord.Range, placements play.Tiles, b *board.Board) (totalScore int, words []play.Word) {
 	for _, s := range wordSpans {
 		var playedWord = play.Word{Range: s}
 		var word strings.Builder
-		var wordScoreModifiers []positiontype.Interface
+		var wordScoreModifiers []board.PositionType
 
 		s.Each(func(c coord.Coord) error {
 			var t *tile.Tile
 
-			position := board.Position(c)
+			position := b.Position(c)
 			if position.Tile != nil {
 				t = position.Tile
 				playedWord.Score += t.Points

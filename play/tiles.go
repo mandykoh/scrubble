@@ -3,6 +3,7 @@ package play
 import (
 	"math"
 
+	"github.com/mandykoh/scrubble/board"
 	"github.com/mandykoh/scrubble/coord"
 	"github.com/mandykoh/scrubble/tile"
 )
@@ -33,6 +34,14 @@ func (tp Tiles) Find(c coord.Coord) *TilePlacement {
 		}
 	}
 	return nil
+}
+
+// Place sets the specified board positions to the specified tiles.
+func (tp *Tiles) Place(b *board.Board) {
+	for _, p := range *tp {
+		t := p.Tile
+		b.Position(p.Coord).Tile = &t
+	}
 }
 
 // Take removes and returns a placement for the specified coordinate, returning
