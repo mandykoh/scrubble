@@ -17,49 +17,46 @@ import (
 //
 // Otherwise, nil is returned, indicating that it would be safe to place the
 // given tiles on the board (word validity not withstanding).
-func ValidatePlacements(placements Tiles, b *board.Board) error {
+func ValidatePlacements(placements Tiles, b *board.Board) (err error) {
 	placementsLeft := len(placements)
 	if placementsLeft == 0 {
-		return InvalidTilePlacementError{Reason: NoTilesPlacedReason}
+		return InvalidTilePlacementError{NoTilesPlacedReason}
 	}
 
 	bounds := placements.Bounds()
 	if !bounds.IsLinear() {
-		return InvalidTilePlacementError{Reason: PlacementNotLinearReason}
+		return InvalidTilePlacementError{PlacementNotLinearReason}
 	}
 
 	connected := false
 
-	err := bounds.Each(func(c coord.Coord) error {
+	if err = bounds.Each(func(c coord.Coord) error {
 		position := b.Position(c)
 		if position == nil {
-			return InvalidTilePlacementError{Reason: PlacementOutOfBoundsReason}
+			return InvalidTilePlacementError{PlacementOutOfBoundsReason}
 		}
 
 		if placement := placements.Find(c); placement != nil {
 			if position.Tile != nil {
-				return InvalidTilePlacementError{Reason: PositionOccupiedReason}
+				return InvalidTilePlacementError{PositionOccupiedReason}
 			}
 
 			connected = connected || position.Type.CountsAsConnected() || b.NeighbourHasTile(c)
 			placementsLeft--
 
 		} else if position.Tile == nil {
-			return InvalidTilePlacementError{Reason: PlacementNotContiguousReason}
+			return InvalidTilePlacementError{PlacementNotContiguousReason}
 		}
 
 		return nil
-	})
-	if err != nil {
-		return err
+
+	}); err == nil {
+		if placementsLeft != 0 {
+			err = InvalidTilePlacementError{PlacementOverlapReason}
+		} else if !connected {
+			err = InvalidTilePlacementError{PlacementNotConnectedReason}
+		}
 	}
 
-	if placementsLeft != 0 {
-		return InvalidTilePlacementError{Reason: PlacementOverlapReason}
-	}
-	if !connected {
-		return InvalidTilePlacementError{Reason: PlacementNotConnectedReason}
-	}
-
-	return nil
+	return
 }
