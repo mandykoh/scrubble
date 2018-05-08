@@ -9,6 +9,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/mandykoh/go-version"
+  packages = ["."]
+  revision = "c8f1dcd250288a5250400b5471f047049d98ba9a"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
   revision = "79b0c6888797020a994db17c8510466c72fe75d9"
@@ -16,6 +22,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7dceda09ad6ade943240c212ad921d4acb6072936f095325aed42c9bcae750b6"
+  inputs-digest = "06e747bdb18519565b3204fcc3fa384d8ab19d6d43a60052fbbc02e857bc9208"
   solver-name = "gps-cdcl"
   solver-version = 1

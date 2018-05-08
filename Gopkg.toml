@@ -25,6 +25,10 @@
 #   unused-packages = true
 
 
+required = [
+  "github.com/mandykoh/go-version"
+]
+
 [prune]
   go-tests = true
   unused-packages = true
