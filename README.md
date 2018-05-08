@@ -154,8 +154,8 @@ Tiles can be played as follows:
 
 ```go
 playedWords, err := g.Play(play.Tiles{
-	{tile.Make('B', 3), coord.Make(5, 6)},
-	{tile.Make('G', 2), coord.Make(5, 8)},
+    {tile.Make('B', 3), coord.Make(5, 6)},
+    {tile.Make('G', 2), coord.Make(5, 8)},
 })
 ```
 
@@ -166,8 +166,8 @@ those are treated as wildcards, which can take on any letter when played. To pla
 
 ```go
 playedWords, err := g.Play(play.Tiles{
-	{tile.Make('B', 3), coord.Make(5, 6)},
-	{tile.Make('G', 0), coord.Make(5, 8)},
+    {tile.Make('B', 3), coord.Make(5, 6)},
+    {tile.Make('G', 0), coord.Make(5, 8)},
 })
 ```
 
@@ -185,8 +185,8 @@ A player may also exchange any tiles from their rack with random tiles from the 
 
 ```go
 err := g.ExchangeTiles([]tile.Tile{
-	{'B', 3},
-	{'G', 2},
+    {'B', 3},
+    {'G', 2},
 }, rng)
 ```
 
@@ -243,12 +243,12 @@ Each game has a [`Rules`](https://godoc.org/github.com/mandykoh/scrubble/game#Ru
 
 ```go
 g.Rules = g.Rules.
-	WithChallengeValidator(overridingChallengeValidator).
-	WithDictionary(overridingDictionary).
-	WithGamePhaseController(overridingGamePhaseController).
-	WithPlacementValidator(overridingPlacementValidator).
-	WithRackValidator(overridingRackValidator).
-	WithWordScorer(overridingWordScorer)
+    WithChallengeValidator(overridingChallengeValidator).
+    WithDictionary(overridingDictionary).
+    WithGamePhaseController(overridingGamePhaseController).
+    WithPlacementValidator(overridingPlacementValidator).
+    WithRackValidator(overridingRackValidator).
+    WithWordScorer(overridingWordScorer)
 ```
 
 
