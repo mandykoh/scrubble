@@ -56,6 +56,20 @@ $ go test -v ./...
 ```
 
 
+## Versioning
+
+The version of the library is available programmatically through the following constants:
+
+```go
+scrubble.VersionMajor     // Major version number
+scrubble.VersionMinor     // Minor version number
+scrubble.VersionRevision  // Revision number
+scrubble.Version          // Full version string
+```
+
+The version can be updated relative to the latest Git tag by running `go generate` from the project root.
+
+
 ## Example usage
 
 ### Setting up a game
