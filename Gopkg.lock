@@ -8,10 +8,10 @@
   revision = "c9def0117b24a53e86f6c4c942e4042090a4fe8c"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/mandykoh/go-version"
+  name = "github.com/mandykoh/go-bump"
   packages = ["."]
-  revision = "c8f1dcd250288a5250400b5471f047049d98ba9a"
+  revision = "5f33b5db0d353e42812778209e13b824f1e6cf65"
+  version = "0.1.0"
 
 [[projects]]
   branch = "master"
@@ -22,6 +22,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "06e747bdb18519565b3204fcc3fa384d8ab19d6d43a60052fbbc02e857bc9208"
+  inputs-digest = "57dcaa344fc210dd07c94726cb517008b7e4c92c9a1bd37e9a3b9aa955dcdb84"
   solver-name = "gps-cdcl"
   solver-version = 1
