@@ -5,4 +5,6 @@ go:
 install:
   - go get github.com/redbubble/go-passe
   - go install github.com/redbubble/go-passe
-script: go test -v -json -cover ./... | go-passe
+script:
+  - go build ./...
+  - go test -v -json -cover ./... | go-passe
