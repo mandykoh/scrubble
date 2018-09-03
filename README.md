@@ -25,7 +25,7 @@ This software is made available under an [MIT license](LICENSE).
 
 ## Getting started
 
-This library uses [dep](https://github.com/golang/dep) for dependency management. After cloning/downloading, first update the dependencies:
+This library uses [Go modules](https://github.com/golang/go/wiki/Modules) for dependency management. After cloning/downloading, first update the dependencies:
 
 ```
 $ dep ensure
