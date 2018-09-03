@@ -4,5 +4,5 @@ package scrubble
 
 const VersionMajor = "1"
 const VersionMinor = "1"
-const VersionRevision = "4"
-const Version = "1.1.4"
+const VersionRevision = "5"
+const Version = "1.1.5"
