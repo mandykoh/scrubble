@@ -25,10 +25,16 @@ This software is made available under an [MIT license](LICENSE).
 
 ## Getting started
 
-This library uses [Go modules](https://github.com/golang/go/wiki/Modules) for dependency management. After cloning/downloading, first update the dependencies:
+This library uses [Go modules](https://github.com/golang/go/wiki/Modules) for dependency management. After cloning/downloading, update the dependencies by building:
 
 ```
-$ dep ensure
+$ go build ./...
+```
+
+To run the tests:
+
+```
+$ go test ./...
 ```
 
 
